@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Test</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-cubes"></i>
+                    <h1>Theme Test</h1>
+                </div>
+                <nav class="nav">
+                    <button class="theme-toggle" data-theme-toggle title="Switch theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="content-section">
+                <h2>Theme Test Components</h2>
+                <p>This page tests the dark/light theme switching functionality.</p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 2rem 0;">
+                    <!-- Button Tests -->
+                    <div class="component-demo">
+                        <h3>Buttons</h3>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button class="btn btn-primary">Primary</button>
+                            <button class="btn btn-secondary">Secondary</button>
+                            <button class="btn btn-outline">Outline</button>
+                            <button class="btn btn-danger">Danger</button>
+                        </div>
+                    </div>
+
+                    <!-- Input Tests -->
+                    <div class="component-demo">
+                        <h3>Inputs</h3>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" placeholder="test@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-input" placeholder="Enter password">
+                        </div>
+                    </div>
+
+                    <!-- Card Tests -->
+                    <div class="component-demo">
+                        <h3>Cards</h3>
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Sample Card</h4>
+                            </div>
+                            <div class="card-body">
+                                <p>This is a sample card to test theme switching.</p>
+                                <button class="btn btn-primary btn-sm">Action</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alert Tests -->
+                    <div class="component-demo">
+                        <h3>Alerts</h3>
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            Success alert message
+                        </div>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Warning alert message
+                        </div>
+                        <div class="alert alert-error">
+                            <i class="fas fa-times-circle"></i>
+                            Error alert message
+                        </div>
+                    </div>
+                </div>
+
+                <div class="test-instructions">
+                    <h3>Test Instructions</h3>
+                    <ol>
+                        <li>Click the theme toggle button in the header (moon/sun icon)</li>
+                        <li>Verify that all components switch between light and dark themes</li>
+                        <li>Check that text remains readable in both themes</li>
+                        <li>Ensure buttons and inputs have appropriate contrast</li>
+                        <li>Verify that the theme preference is saved (refresh page to test)</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>

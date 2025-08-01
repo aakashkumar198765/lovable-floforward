@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Component Showcase - Reusable Components Library</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: var(--space-8);
+            margin: var(--space-8) 0;
+        }
+
+        .showcase-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--surface);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .showcase-card:hover {
+            border-color: var(--primary-300);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .showcase-header {
+            padding: var(--space-6);
+            border-bottom: 1px solid var(--border);
+            background: var(--background-secondary);
+        }
+
+        .showcase-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .showcase-description {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .showcase-demo {
+            padding: var(--space-6);
+            background: var(--background);
+        }
+
+        .showcase-code {
+            padding: var(--space-6);
+            background: var(--code-background);
+            color: var(--code-text);
+        }
+
+        .showcase-code pre {
+            margin: 0;
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: var(--space-3);
+            flex-wrap: wrap;
+            margin-bottom: var(--space-4);
+        }
+
+        .demo-button {
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .demo-button.primary {
+            background: var(--primary-600);
+            color: white;
+        }
+
+        .demo-button.primary:hover {
+            background: var(--primary-700);
+        }
+
+        .demo-button.secondary {
+            background: var(--button-secondary-bg);
+            color: var(--button-secondary-text);
+        }
+
+        .demo-button.secondary:hover {
+            background: var(--button-secondary-hover-bg);
+        }
+
+        .demo-button.outline {
+            background: transparent;
+            color: var(--primary-600);
+            border: 1px solid var(--primary-600);
+        }
+
+        .demo-button.outline:hover {
+            background: var(--primary-50);
+        }
+
+        .demo-button.danger {
+            background: var(--error-500);
+            color: white;
+        }
+
+        .demo-button.success {
+            background: var(--success-500);
+            color: white;
+        }
+
+        .demo-inputs {
+            display: grid;
+            gap: var(--space-4);
+            margin-bottom: var(--space-4);
+        }
+
+        .demo-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .demo-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        .demo-input {
+            padding: var(--space-3);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .demo-input:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px var(--primary-100);
+        }
+
+        .demo-input.error {
+            border-color: var(--error-500);
+        }
+
+        .demo-input.success {
+            border-color: var(--success-500);
+        }
+
+        .demo-select {
+            padding: var(--space-3);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            background: white;
+        }
+
+        .demo-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .demo-modal.active {
+            display: flex;
+        }
+
+        .demo-modal-content {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .demo-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-4);
+        }
+
+        .demo-modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .demo-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray-500);
+            cursor: pointer;
+        }
+
+        .demo-alert {
+            padding: var(--space-4);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .demo-alert.success {
+            background: var(--success-500);
+            color: white;
+        }
+
+        .demo-alert.warning {
+            background: var(--warning-500);
+            color: white;
+        }
+
+        .demo-alert.error {
+            background: var(--error-500);
+            color: white;
+        }
+
+        .demo-alert.info {
+            background: var(--primary-100);
+            color: var(--primary-700);
+        }
+
+        .demo-card {
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            background: white;
+            margin-bottom: var(--space-4);
+        }
+
+        .demo-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-4);
+        }
+
+        .demo-card-title {
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .demo-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-600);
+            font-weight: 600;
+        }
+
+        .demo-badge {
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .demo-badge.active {
+            background: var(--success-500);
+            color: white;
+        }
+
+        .demo-badge.inactive {
+            background: var(--gray-400);
+            color: white;
+        }
+
+        .demo-badge.pending {
+            background: var(--warning-500);
+            color: white;
+        }
+
+        .demo-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .demo-table th,
+        .demo-table td {
+            padding: var(--space-3);
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+            font-size: 0.875rem;
+        }
+
+        .demo-table th {
+            background: var(--gray-50);
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+
+        .navigation-showcase {
+            margin: var(--space-4) 0;
+        }
+
+        .demo-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: var(--space-4);
+        }
+
+        .demo-tab {
+            padding: var(--space-3) var(--space-4);
+            background: none;
+            border: none;
+            color: var(--gray-600);
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .demo-tab.active {
+            color: var(--primary-600);
+            border-bottom-color: var(--primary-600);
+        }
+
+        .demo-tab:hover {
+            color: var(--primary-600);
+        }
+
+        .demo-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-bottom: var(--space-4);
+            font-size: 0.875rem;
+        }
+
+        .demo-breadcrumb a {
+            color: var(--primary-600);
+            text-decoration: none;
+        }
+
+        .demo-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .demo-breadcrumb .separator {
+            color: var(--gray-400);
+        }
+
+        .demo-pagination {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            justify-content: center;
+            margin: var(--space-4) 0;
+        }
+
+        .demo-page-btn {
+            padding: var(--space-2) var(--space-3);
+            border: 1px solid var(--gray-300);
+            background: white;
+            color: var(--gray-600);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .demo-page-btn:hover {
+            background: var(--gray-50);
+        }
+
+        .demo-page-btn.active {
+            background: var(--primary-600);
+            color: white;
+            border-color: var(--primary-600);
+        }
+
+        .demo-page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-cubes"></i>
+                    <h1>Component Showcase</h1>
+                </div>
+                <nav class="nav">
+                    <button class="theme-toggle" data-theme-toggle title="Switch theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <ul class="nav-links">
+                        <li><a href="../index.html" class="nav-link">← Back to Documentation</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="main-content" style="grid-template-columns: 1fr;">
+                <div class="content">
+                    <section class="section">
+                        <div class="section-header">
+                            <h1>Interactive Component Showcase</h1>
+                            <p class="section-subtitle">Live demonstrations of all components with working examples</p>
+                        </div>
+
+                        <div class="showcase-grid">
+                            <!-- Button Showcase -->
+                            <div class="showcase-card">
+                                <div class="showcase-header">
+                                    <div class="showcase-title">
+                                        <i class="fas fa-hand-pointer"></i>
+                                        Button Component
+                                    </div>
+                                    <div class="showcase-description">
+                                        Versatile button component with multiple variants, sizes, and states
+                                    </div>
+                                </div>
+                                <div class="showcase-demo">
+                                    <h4>Variants</h4>
+                                    <div class="demo-buttons">
+                                        <button class="demo-button primary">Primary</button>
+                                        <button class="demo-button secondary">Secondary</button>
+                                        <button class="demo-button outline">Outline</button>
+                                        <button class="demo-button danger">Danger</button>
+                                        <button class="demo-button success">Success</button>
+                                    </div>
+                                    
+                                    <h4>Sizes</h4>
+                                    <div class="demo-buttons">
+                                        <button class="demo-button primary" style="padding: 4px 8px; font-size: 0.75rem;">XS</button>
+                                        <button class="demo-button primary" style="padding: 6px 12px; font-size: 0.8rem;">SM</button>
+                                        <button class="demo-button primary">MD</button>
+                                        <button class="demo-button primary" style="padding: 12px 24px; font-size: 1rem;">LG</button>
+                                        <button class="demo-button primary" style="padding: 16px 32px; font-size: 1.1rem;">XL</button>
+                                    </div>
+
+                                    <h4>With Icons</h4>
+                                    <div class="demo-buttons">
+                                        <button class="demo-button primary">
+                                            <i class="fas fa-save" style="margin-right: 8px;"></i>
+                                            Save
+                                        </button>
+                                        <button class="demo-button secondary">
+                                            Delete
+                                            <i class="fas fa-trash" style="margin-left: 8px;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="showcase-code">
+                                    <pre><code>&lt;Button variant="primary"&gt;Primary&lt;/Button&gt;
+&lt;Button variant="secondary"&gt;Secondary&lt;/Button&gt;
+&lt;Button variant="outline"&gt;Outline&lt;/Button&gt;
+&lt;Button variant="danger"&gt;Danger&lt;/Button&gt;
+&lt;Button size="lg" iconLeft={&lt;SaveIcon /&gt;}&gt;
+  Save Document
+&lt;/Button&gt;</code></pre>
+                                </div>
+                            </div>
+
+                            <!-- Input Showcase -->
+                            <div class="showcase-card">
+                                <div class="showcase-header">
+                                    <div class="showcase-title">
+                                        <i class="fas fa-edit"></i>
+                                        Input Component
+                                    </div>
+                                    <div class="showcase-description">
+                                        Comprehensive input component with validation and accessibility
+                                    </div>
+                                </div>
+                                <div class="showcase-demo">
+                                    <div class="demo-inputs">
+                                        <div class="demo-input-group">
+                                            <label class="demo-label">Default Input</label>
+                                            <input type="text" class="demo-input" placeholder="Enter text here...">
+                                        </div>
+                                        
+                                        <div class="demo-input-group">
+                                            <label class="demo-label">Email Input</label>
+                                            <input type="email" class="demo-input" placeholder="you@example.com">
+                                        </div>
+                                        
+                                        <div class="demo-input-group">
+                                            <label class="demo-label">Error State</label>
+                                            <input type="text" class="demo-input error" placeholder="Invalid input" value="invalid@">
+                                            <small style="color: var(--error-500); font-size: 0.75rem;">Please enter a valid email address</small>
+                                        </div>
+                                        
+                                        <div class="demo-input-group">
+                                            <label class="demo-label">Success State</label>
+                                            <input type="text" class="demo-input success" placeholder="Valid input" value="user@example.com">
+                                            <small style="color: var(--success-500); font-size: 0.75rem;">Email address is valid</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="showcase-code">
+                                    <pre><code>&lt;Input 
+  label="Email Address"
+  type="email"
+  placeholder="you@example.com"
+  status="error"
+  errorMessage="Please enter a valid email"
+  required
+/&gt;
+
+&lt;Input
+  label="Password"
+  type="password"
+  leftIcon={&lt;LockIcon /&gt;}
+  status="success"
+  helperText="Password is strong"
+/&gt;</code></pre>
+                                </div>
+                            </div>
+
+                            <!-- Select Showcase -->
+                            <div class="showcase-card">
+                                <div class="showcase-header">
+                                    <div class="showcase-title">
+                                        <i class="fas fa-list"></i>
+                                        Select Component
+                                    </div>
+                                    <div class="showcase-description">
+                                        Feature-rich select with search, multiple selection, and grouping
+                                    </div>
+                                </div>
+                                <div class="showcase-demo">
+                                    <div class="demo-inputs">
+                                        <div class="demo-input-group">
+                                            <label class="demo-label">Country</label>
+                                            <select class="demo-select">
+                                                <option>Select a country...</option>
+                                                <option>United States</option>
+                                                <option>Canada</option>
+                                                <option>United Kingdom</option>
+                                                <option>Germany</option>
+                                                <option>France</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="demo-input-group">
+                                            <label class="demo-label">Role</label>
+                                            <select class="demo-select">
+                                                <option>Choose role...</option>
+                                                <optgroup label="Administration">
+                                                    <option>Super Admin</option>
+                                                    <option>Admin</option>
+                                                </optgroup>
+                                                <optgroup label="Users">
+                                                    <option>Manager</option>
+                                                    <option>Employee</option>
+                                                    <option>Guest</option>
+                                                </optgroup>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="showcase-code">
+                                    <pre><code>&lt;Select
+  label="Country"
+  placeholder="Select a country..."
+  options={[
+    { value: 'us', label: 'United States' },
+    { value: 'ca', label: 'Canada' },
+    { value: 'uk', label: 'United Kingdom' }
+  ]}
+  searchable
+  clearable
+/&gt;
+
+&lt;Select
+  label="Skills"
+  multiple
+  showBadges
+  maxSelections={5}
+  options={skillOptions}
+/&gt;</code></pre>
+                                </div>
+                            </div>
+
+                            <!-- Modal Showcase -->
+                            <div class="showcase-card">
+                                <div class="showcase-header">
+                                    <div class="showcase-title">
+                                        <i class="fas fa-window-maximize"></i>
+                                        Modal Component
+                                    </div>
+                                    <div class="showcase-description">
+                                        Accessible modal dialog with multiple sizes and configurations
+                                    </div>
+                                </div>
+                                <div class="showcase-demo">
+                                    <div class="demo-buttons">
+                                        <button class="demo-button primary" onclick="showDemoModal('basic')">
+                                            Basic Modal
+                                        </button>
+                                        <button class="demo-button secondary" onclick="showDemoModal('large')">
+                                            Large Modal
+                                        </button>
+                                        <button class="demo-button outline" onclick="showDemoModal('form')">
+                                            Form Modal
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="showcase-code">
+                                    <pre><code>&lt;Modal
+  isOpen={isModalOpen}
+  onClose={() =&gt; setIsModalOpen(false)}
+  title="Confirm Action"
+  size="md"
+&gt;
+  &lt;p&gt;Are you sure you want to proceed?&lt;/p&gt;
+  &lt;div className="modal-actions"&gt;
+    &lt;Button variant="danger"&gt;Delete&lt;/Button&gt;
+    &lt;Button variant="secondary"&gt;Cancel&lt;/Button&gt;
+  &lt;/div&gt;
+&lt;/Modal&gt;</code></pre>
+                                </div>
+                            </div>
+
+                            <!-- Alert Showcase -->
+                            <div class="showcase-card">
+                                <div class="showcase-header">
+                                    <div class="showcase-title">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Alert Component
+                                    </div>
+                                    <div class="showcase-description">
+                                        Contextual feedback messages with multiple variants and actions
+                                    </div>
+                                </div>
+                                <div class="showcase-demo">
+                                    <div class="demo-alert success">
+                                        <i class="fas fa-check-circle"></i>
+                                        <div>
+                                            <strong>Success!</strong> Your changes have been saved successfully.
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="demo-alert warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <div>
+                                            <strong>Warning!</strong> This action cannot be undone.
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="demo-alert error">
+                                        <i class="fas fa-times-circle"></i>
+                                        <div>
+                                            <strong>Error!</strong> Unable to save changes. Please try again.
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="demo-alert info">
+                                        <i class="fas fa-info-circle"></i>
+                                        <div>
+                                            <strong>Info:</strong> New features are available in this update.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="showcase-code">
+                                    <pre><code>&lt;Alert 
+  variant="success"
+  title="Success!"
+  description="Your changes have been saved."
+  dismissible
+  onDismiss={() =&gt; setShowAlert(false)}
+/&gt;
+
+&lt;Alert
+  variant="error"
+  title="Error"
+  description="Unable to process request."
+  actions={
+    &lt;Button size="sm"&gt;Retry&lt;/Button&gt;
+  }
+/&gt;</code></pre>
+                                </div>
+                            </div>
+
+                            <!-- Card Showcase -->
+                            <div class="showcase-card">
+                                <div class="showcase-header">
+                                    <div class="showcase-title">
+                                        <i class="fas fa-id-card"></i>
+                                        Card Components
+                                    </div>
+                                    <div class="showcase-description">
+                                        Various card layouts for displaying information and metrics
+                                    </div>
+                                </div>
+                                <div class="showcase-demo">
+                                    <div class="demo-card">
+                                        <div class="demo-card-header">
+                                            <div style="display: flex; align-items: center; gap: 12px;">
+                                                <div class="demo-avatar">JD</div>
+                                                <div>
+                                                    <div class="demo-card-title">John Doe</div>
+                                                    <div style="font-size: 0.875rem; color: var(--gray-600);">Senior Developer</div>
+                                                </div>
+                                            </div>
+                                            <div class="demo-badge active">Active</div>
+                                        </div>
+                                        <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0;">
+                                            Full-stack developer with 5+ years of experience in React and Node.js
+                                        </p>
+                                    </div>
+
+                                    <div class="demo-card">
+                                        <div class="demo-card-header">
+                                            <div class="demo-card-title">Project Statistics</div>
+                                            <i class="fas fa-chart-bar" style="color: var(--primary-500);"></i>
+                                        </div>
+                                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                                            <div style="text-align: center;">
+                                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-600);">24</div>
+                                                <div style="font-size: 0.75rem; color: var(--gray-600);">Total Projects</div>
+                                            </div>
+                                            <div style="text-align: center;">
+                                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--success-500);">18</div>
+                                                <div style="font-size: 0.75rem; color: var(--gray-600);">Completed</div>
+                                            </div>
+                                            <div style="text-align: center;">
+                                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--warning-500);">6</div>
+                                                <div style="font-size: 0.75rem; color: var(--gray-600);">In Progress</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="showcase-code">
+                                    <pre><code>&lt;StatusCard
+  title="John Doe"
+  subtitle="Senior Developer"
+  status="active"
+  description="Full-stack developer with 5+ years..."
+  actions={[
+    { key: 'edit', label: 'Edit', icon: EditIcon },
+    { key: 'delete', label: 'Delete', variant: 'danger' }
+  ]}
+/&gt;
+
+&lt;MetricCard
+  title="Project Statistics"
+  metric={{ value: 24, label: 'Total Projects' }}
+  trend={{ value: 15, direction: 'up' }}
+  showTrend
+/&gt;</code></pre>
+                                </div>
+                            </div>
+
+                            <!-- Table Showcase -->
+                            <div class="showcase-card">
+                                <div class="showcase-header">
+                                    <div class="showcase-title">
+                                        <i class="fas fa-table"></i>
+                                        Data Table
+                                    </div>
+                                    <div class="showcase-description">
+                                        Sortable, filterable table with selection and actions
+                                    </div>
+                                </div>
+                                <div class="showcase-demo">
+                                    <table class="demo-table">
+                                        <thead>
+                                            <tr>
+                                                <th><input type="checkbox"></th>
+                                                <th>Name <i class="fas fa-sort" style="margin-left: 4px; color: var(--gray-400);"></i></th>
+                                                <th>Email <i class="fas fa-sort" style="margin-left: 4px; color: var(--gray-400);"></i></th>
+                                                <th>Role</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><input type="checkbox"></td>
+                                                <td>John Doe</td>
+                                                <td>john@example.com</td>
+                                                <td>Admin</td>
+                                                <td><span class="demo-badge active">Active</span></td>
+                                                <td>
+                                                    <button class="demo-button" style="padding: 4px 8px; font-size: 0.75rem; margin-right: 4px;">Edit</button>
+                                                    <button class="demo-button danger" style="padding: 4px 8px; font-size: 0.75rem;">Delete</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="checkbox"></td>
+                                                <td>Jane Smith</td>
+                                                <td>jane@example.com</td>
+                                                <td>User</td>
+                                                <td><span class="demo-badge inactive">Inactive</span></td>
+                                                <td>
+                                                    <button class="demo-button" style="padding: 4px 8px; font-size: 0.75rem; margin-right: 4px;">Edit</button>
+                                                    <button class="demo-button danger" style="padding: 4px 8px; font-size: 0.75rem;">Delete</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="checkbox"></td>
+                                                <td>Mike Johnson</td>
+                                                <td>mike@example.com</td>
+                                                <td>Manager</td>
+                                                <td><span class="demo-badge pending">Pending</span></td>
+                                                <td>
+                                                    <button class="demo-button" style="padding: 4px 8px; font-size: 0.75rem; margin-right: 4px;">Edit</button>
+                                                    <button class="demo-button danger" style="padding: 4px 8px; font-size: 0.75rem;">Delete</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="showcase-code">
+                                    <pre><code>&lt;EditableDataGrid
+  columns={[
+    { key: 'name', title: 'Name', sortable: true },
+    { key: 'email', title: 'Email', sortable: true },
+    { key: 'role', title: 'Role', filterable: true },
+    { key: 'status', title: 'Status', editable: true }
+  ]}
+  data={users}
+  selection={{
+    type: 'checkbox',
+    onSelectionChange: handleSelection
+  }}
+  onSort={handleSort}
+  onFilter={handleFilter}
+  editable
+/&gt;</code></pre>
+                                </div>
+                            </div>
+
+                            <!-- Navigation Showcase -->
+                            <div class="showcase-card">
+                                <div class="showcase-header">
+                                    <div class="showcase-title">
+                                        <i class="fas fa-compass"></i>
+                                        Navigation Components
+                                    </div>
+                                    <div class="showcase-description">
+                                        Breadcrumbs, tabs, pagination and other navigation elements
+                                    </div>
+                                </div>
+                                <div class="showcase-demo">
+                                    <div class="navigation-showcase">
+                                        <h4>Breadcrumb</h4>
+                                        <div class="demo-breadcrumb">
+                                            <a href="#">Home</a>
+                                            <span class="separator">/</span>
+                                            <a href="#">Users</a>
+                                            <span class="separator">/</span>
+                                            <span>John Doe</span>
+                                        </div>
+
+                                        <h4>Tabs</h4>
+                                        <div class="demo-tabs">
+                                            <button class="demo-tab active">Profile</button>
+                                            <button class="demo-tab">Settings</button>
+                                            <button class="demo-tab">Permissions</button>
+                                            <button class="demo-tab">Activity</button>
+                                        </div>
+
+                                        <h4>Pagination</h4>
+                                        <div class="demo-pagination">
+                                            <button class="demo-page-btn" disabled>
+                                                <i class="fas fa-chevron-left"></i>
+                                            </button>
+                                            <button class="demo-page-btn active">1</button>
+                                            <button class="demo-page-btn">2</button>
+                                            <button class="demo-page-btn">3</button>
+                                            <span style="color: var(--gray-500);">...</span>
+                                            <button class="demo-page-btn">10</button>
+                                            <button class="demo-page-btn">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="showcase-code">
+                                    <pre><code>&lt;Breadcrumb
+  items={[
+    { label: 'Home', href: '/' },
+    { label: 'Users', href: '/users' },
+    { label: 'John Doe', current: true }
+  ]}
+  showHome
+/&gt;
+
+&lt;Tab
+  items={[
+    { id: 'profile', label: 'Profile', content: ProfileContent },
+    { id: 'settings', label: 'Settings', content: SettingsContent }
+  ]}
+  activeTab="profile"
+  onChange={handleTabChange}
+/&gt;
+
+&lt;Pagination
+  current={1}
+  total={100}
+  pageSize={10}
+  onChange={handlePageChange}
+  showSizeChanger
+/&gt;</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Demo Modals -->
+    <div id="demoModal" class="demo-modal">
+        <div class="demo-modal-content">
+            <div class="demo-modal-header">
+                <div class="demo-modal-title">Demo Modal</div>
+                <button class="demo-modal-close" onclick="closeDemoModal()">&times;</button>
+            </div>
+            <div id="demoModalBody">
+                <p>This is a demonstration modal. It shows how modals work in the component library.</p>
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="demo-button secondary" onclick="closeDemoModal()" style="margin-right: 8px;">Cancel</button>
+                <button class="demo-button primary" onclick="closeDemoModal()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDemoModal(type) {
+            const modal = document.getElementById('demoModal');
+            const modalBody = document.getElementById('demoModalBody');
+            const modalTitle = document.querySelector('.demo-modal-title');
+            
+            switch(type) {
+                case 'basic':
+                    modalTitle.textContent = 'Basic Modal';
+                    modalBody.innerHTML = '<p>This is a basic modal example with simple content and actions.</p>';
+                    break;
+                case 'large':
+                    modalTitle.textContent = 'Large Modal';
+                    modalBody.innerHTML = `
+                        <p>This is a large modal with more content:</p>
+                        <ul>
+                            <li>Can contain more complex layouts</li>
+                            <li>Supports scrolling for long content</li>
+                            <li>Responsive design adapts to screen size</li>
+                            <li>Maintains accessibility features</li>
+                        </ul>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    `;
+                    break;
+                case 'form':
+                    modalTitle.textContent = 'Form Modal';
+                    modalBody.innerHTML = `
+                        <div class="demo-inputs">
+                            <div class="demo-input-group">
+                                <label class="demo-label">Name</label>
+                                <input type="text" class="demo-input" placeholder="Enter your name">
+                            </div>
+                            <div class="demo-input-group">
+                                <label class="demo-label">Email</label>
+                                <input type="email" class="demo-input" placeholder="Enter your email">
+                            </div>
+                            <div class="demo-input-group">
+                                <label class="demo-label">Message</label>
+                                <textarea class="demo-input" rows="4" placeholder="Enter your message"></textarea>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            modal.classList.add('active');
+        }
+        
+        function closeDemoModal() {
+            const modal = document.getElementById('demoModal');
+            modal.classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('demoModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDemoModal();
+            }
+        });
+
+        // Tab functionality
+        document.querySelectorAll('.demo-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.demo-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Pagination functionality
+        document.querySelectorAll('.demo-page-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (!this.disabled && !this.querySelector('i')) {
+                    document.querySelectorAll('.demo-page-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+    </script>
+    
+    <!-- Include main JavaScript for theme functionality -->
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>

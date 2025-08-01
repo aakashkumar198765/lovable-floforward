@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reusable Components Library - Documentation</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-cubes"></i>
+                    <h1>Reusable Components</h1>
+                    <span class="version">v0.1.0</span>
+                </div>
+                <nav class="nav">
+                    <button class="theme-toggle" data-theme-toggle title="Switch theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="nav-toggle" id="navToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <ul class="nav-links" id="navLinks">
+                        <li><a href="#overview" class="nav-link active">Overview</a></li>
+                        <li><a href="#getting-started" class="nav-link">Getting Started</a></li>
+                        <li><a href="#components" class="nav-link">Components</a></li>
+                        <li><a href="#examples" class="nav-link">Examples</a></li>
+                        <li><a href="#api" class="nav-link">API Reference</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <div class="main-content">
+                <!-- Sidebar -->
+                <aside class="sidebar" id="sidebar">
+                    <div class="search-box">
+                        <input type="text" placeholder="Search components..." id="searchInput">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    
+                    <nav class="sidebar-nav">
+                        <div class="nav-section">
+                            <h3>Getting Started</h3>
+                            <ul>
+                                <li><a href="#overview">Overview</a></li>
+                                <li><a href="#installation">Installation</a></li>
+                                <li><a href="#quick-start">Quick Start</a></li>
+                                <li><a href="#architecture">Architecture</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="nav-section">
+                            <h3>Atomic Components</h3>
+                            <ul>
+                                <li><a href="#form-components">Form Components</a></li>
+                                <li><a href="#display-components">Display Components</a></li>
+                                <li><a href="#feedback-components">Feedback Components</a></li>
+                                <li><a href="#navigation-components">Navigation Components</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="nav-section">
+                            <h3>Molecular Components</h3>
+                            <ul>
+                                <li><a href="#data-components">Data Components</a></li>
+                                <li><a href="#form-compositions">Form Compositions</a></li>
+                                <li><a href="#display-compositions">Display Compositions</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="nav-section">
+                            <h3>Organism Components</h3>
+                            <ul>
+                                <li><a href="#data-grids">Data Grids</a></li>
+                                <li><a href="#workflow-components">Workflow Components</a></li>
+                                <li><a href="#management-components">Management Components</a></li>
+                                <li><a href="#integration-components">Integration Components</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="nav-section">
+                            <h3>Template Components</h3>
+                            <ul>
+                                <li><a href="#layout-templates">Layout Templates</a></li>
+                                <li><a href="#page-templates">Page Templates</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="nav-section">
+                            <h3>Enterprise Features</h3>
+                            <ul>
+                                <li><a href="#commerce-states">Commerce States</a></li>
+                                <li><a href="#audit-trail">Audit Trail</a></li>
+                                <li><a href="#rbac">Role-Based Access</a></li>
+                                <li><a href="#ai-config">AI Configuration</a></li>
+                            </ul>
+                        </div>
+                    </nav>
+                </aside>
+
+                <!-- Content Area -->
+                <div class="content" id="content">
+                    <!-- Overview Section -->
+                    <section id="overview" class="section">
+                        <div class="section-header">
+                            <h1>Reusable Components Library</h1>
+                            <p class="section-subtitle">Enterprise-grade React components built with TypeScript and Tailwind CSS</p>
+                        </div>
+
+                        <div class="hero-stats">
+                            <div class="stat-card">
+                                <div class="stat-number">65+</div>
+                                <div class="stat-label">Components</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">100%</div>
+                                <div class="stat-label">TypeScript</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">4</div>
+                                <div class="stat-label">Tiers</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">A11y</div>
+                                <div class="stat-label">Accessible</div>
+                            </div>
+                        </div>
+
+                        <div class="feature-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-rocket"></i>
+                                </div>
+                                <h3>Enterprise Ready</h3>
+                                <p>Built for complex business applications with commerce state awareness, audit trails, and role-based access control.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-code"></i>
+                                </div>
+                                <h3>Developer Friendly</h3>
+                                <p>Full TypeScript support, comprehensive documentation, and intuitive API design for great developer experience.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-palette"></i>
+                                </div>
+                                <h3>Highly Customizable</h3>
+                                <p>Flexible theming system, dark mode support, and extensive customization options to match your brand.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="fas fa-universal-access"></i>
+                                </div>
+                                <h3>Accessibility First</h3>
+                                <p>WCAG 2.1 compliant components with built-in keyboard navigation, screen reader support, and focus management.</p>
+                            </div>
+                        </div>
+
+                        <div class="architecture-overview">
+                            <h2>Architecture Overview</h2>
+                            <div class="architecture-diagram">
+                                <div class="tier-level">
+                                    <div class="tier-header">
+                                        <h3>Templates</h3>
+                                        <span class="tier-badge">Tier 4</span>
+                                    </div>
+                                    <div class="tier-description">Complete page layouts and templates</div>
+                                    <div class="component-examples">
+                                        <span>DashboardLayout</span>
+                                        <span>FormLayout</span>
+                                        <span>ListDetailLayout</span>
+                                    </div>
+                                </div>
+                                <div class="tier-level">
+                                    <div class="tier-header">
+                                        <h3>Organisms</h3>
+                                        <span class="tier-badge">Tier 3</span>
+                                    </div>
+                                    <div class="tier-description">Complex features and enterprise components</div>
+                                    <div class="component-examples">
+                                        <span>EditableDataGrid</span>
+                                        <span>ApprovalWorkflow</span>
+                                        <span>UserManager</span>
+                                    </div>
+                                </div>
+                                <div class="tier-level">
+                                    <div class="tier-header">
+                                        <h3>Molecules</h3>
+                                        <span class="tier-badge">Tier 2</span>
+                                    </div>
+                                    <div class="tier-description">Component combinations and compositions</div>
+                                    <div class="component-examples">
+                                        <span>SearchBox</span>
+                                        <span>FilterPanel</span>
+                                        <span>StatusCard</span>
+                                    </div>
+                                </div>
+                                <div class="tier-level">
+                                    <div class="tier-header">
+                                        <h3>Atoms</h3>
+                                        <span class="tier-badge">Tier 1</span>
+                                    </div>
+                                    <div class="tier-description">Basic building blocks and elements</div>
+                                    <div class="component-examples">
+                                        <span>Button</span>
+                                        <span>Input</span>
+                                        <span>Select</span>
+                                        <span>Modal</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Installation Section -->
+                    <section id="installation" class="section">
+                        <div class="section-header">
+                            <h2>Installation</h2>
+                            <p>Get started with the Reusable Components Library in your React project</p>
+                        </div>
+
+                        <div class="installation-steps">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h3>Install the Package</h3>
+                                    <div class="code-block">
+                                        <pre><code class="language-bash">npm install reusable-components
+# or
+yarn add reusable-components</code></pre>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h3>Import Styles</h3>
+                                    <div class="code-block">
+                                        <pre><code class="language-css">/* In your main CSS file */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';</code></pre>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h3>Configure Tailwind (if not already done)</h3>
+                                    <div class="code-block">
+                                        <pre><code class="language-javascript">// tailwind.config.js
+module.exports = {
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+    "./node_modules/reusable-components/**/*.{js,jsx,ts,tsx}"
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}</code></pre>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="step">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h3>Start Using Components</h3>
+                                    <div class="code-block">
+                                        <pre><code class="language-jsx">import React from 'react';
+import { Button, Input, Modal } from 'reusable-components';
+
+function App() {
+  return (
+    &lt;div&gt;
+      &lt;Button variant="primary"&gt;
+        Click me!
+      &lt;/Button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Quick Start Section -->
+                    <section id="quick-start" class="section">
+                        <div class="section-header">
+                            <h2>Quick Start</h2>
+                            <p>Build your first form with our components in minutes</p>
+                        </div>
+
+                        <div class="quick-start-example">
+                            <div class="example-tabs">
+                                <button class="tab-btn active" onclick="showTab('basic-form', this)">Basic Form</button>
+                                <button class="tab-btn" onclick="showTab('enterprise-features', this)">Enterprise Features</button>
+                                <button class="tab-btn" onclick="showTab('data-display', this)">Data Display</button>
+                            </div>
+
+                            <div id="basic-form" class="tab-content active">
+                                <div class="example-preview">
+                                    <div class="preview-container">
+                                        <h4>Live Preview</h4>
+                                        <div class="component-preview">
+                                            <!-- This would be populated by JavaScript -->
+                                            <div class="form-preview">
+                                                <div class="input-group">
+                                                    <label>Full Name</label>
+                                                    <input type="text" placeholder="Enter your name" class="preview-input">
+                                                </div>
+                                                <div class="input-group">
+                                                    <label>Email</label>
+                                                    <input type="email" placeholder="you@example.com" class="preview-input">
+                                                </div>
+                                                <div class="input-group">
+                                                    <label>Role</label>
+                                                    <select class="preview-select">
+                                                        <option>Select role...</option>
+                                                        <option>Admin</option>
+                                                        <option>User</option>
+                                                    </select>
+                                                </div>
+                                                <button class="preview-btn">Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="example-code">
+                                    <div class="code-block">
+                                        <pre><code class="language-jsx">import React, { useState } from 'react';
+import { Input, Select, Button, FormLayout } from 'reusable-components';
+
+function UserForm() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    role: ''
+  });
+
+  return (
+    &lt;FormLayout title="User Registration"&gt;
+      &lt;Input
+        label="Full Name"
+        placeholder="Enter your name"
+        value={formData.name}
+        onChange={(e) =&gt; setFormData({...formData, name: e.target.value})}
+        required
+      /&gt;
+      
+      &lt;Input
+        type="email"
+        label="Email"
+        placeholder="you@example.com"
+        value={formData.email}
+        onChange={(e) =&gt; setFormData({...formData, email: e.target.value})}
+        required
+      /&gt;
+      
+      &lt;Select
+        label="Role"
+        placeholder="Select role..."
+        options={[
+          { value: 'admin', label: 'Admin' },
+          { value: 'user', label: 'User' }
+        ]}
+        value={formData.role}
+        onChange={(value) =&gt; setFormData({...formData, role: value})}
+      /&gt;
+      
+      &lt;Button variant="primary" type="submit"&gt;
+        Submit
+      &lt;/Button&gt;
+    &lt;/FormLayout&gt;
+  );
+}</code></pre>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="enterprise-features" class="tab-content">
+                                <div class="example-preview">
+                                    <div class="preview-container">
+                                        <h4>Enterprise Features Preview</h4>
+                                        <div class="component-preview">
+                                            <div class="enterprise-preview">
+                                                <div class="status-indicator">
+                                                    <span class="status-dot execution"></span>
+                                                    <span>Order Execution Phase</span>
+                                                </div>
+                                                <div class="input-group">
+                                                    <label>Order Amount</label>
+                                                    <input type="number" value="15000" class="preview-input execution" readonly>
+                                                </div>
+                                                <div class="approval-section">
+                                                    <div class="approver-info">
+                                                        <i class="fas fa-user-check"></i>
+                                                        <span>Requires Manager Approval</span>
+                                                    </div>
+                                                    <button class="preview-btn success">Approve</button>
+                                                    <button class="preview-btn danger">Reject</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="example-code">
+                                    <div class="code-block">
+                                        <pre><code class="language-jsx">import React from 'react';
+import { Input, Button } from 'reusable-components';
+
+function PurchaseOrderForm() {
+  return (
+    &lt;div&gt;
+      &lt;Input
+        label="Order Amount"
+        type="number"
+        value="15000"
+        commerceState="execution"
+        workflowContext={{
+          workflowId: 'po-001',
+          currentStep: 2,
+          totalSteps: 4
+        }}
+        auditTrail={{
+          enabled: true,
+          trackChanges: true,
+          logUserActions: true
+        }}
+        readonly
+      /&gt;
+      
+      &lt;Button
+        variant="success"
+        commerceState="execution"
+        allowedActions={['approve']}
+        userRole={{
+          name: 'manager',
+          permissions: ['po.approve']
+        }}
+        onClick={handleApprove}
+      &gt;
+        Approve Order
+      &lt;/Button&gt;
+      
+      &lt;Button
+        variant="danger"
+        commerceState="execution"
+        allowedActions={['reject']}
+        userRole={{
+          name: 'manager',
+          permissions: ['po.reject']
+        }}
+        onClick={handleReject}
+      &gt;
+        Reject Order
+      &lt;/Button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="data-display" class="tab-content">
+                                <div class="example-preview">
+                                    <div class="preview-container">
+                                        <h4>Data Display Preview</h4>
+                                        <div class="component-preview">
+                                            <div class="data-preview">
+                                                <div class="search-filter-bar">
+                                                    <input type="text" placeholder="Search users..." class="preview-search">
+                                                    <select class="preview-filter">
+                                                        <option>All Roles</option>
+                                                        <option>Admin</option>
+                                                        <option>User</option>
+                                                    </select>
+                                                </div>
+                                                <div class="data-table">
+                                                    <table>
+                                                        <thead>
+                                                            <tr>
+                                                                <th><input type="checkbox"></th>
+                                                                <th>Name</th>
+                                                                <th>Email</th>
+                                                                <th>Role</th>
+                                                                <th>Status</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td><input type="checkbox"></td>
+                                                                <td>John Doe</td>
+                                                                <td>john@example.com</td>
+                                                                <td>Admin</td>
+                                                                <td><span class="status-badge active">Active</span></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><input type="checkbox"></td>
+                                                                <td>Jane Smith</td>
+                                                                <td>jane@example.com</td>
+                                                                <td>User</td>
+                                                                <td><span class="status-badge inactive">Inactive</span></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="example-code">
+                                    <div class="code-block">
+                                        <pre><code class="language-jsx">import React, { useState } from 'react';
+import { 
+  SearchBox, 
+  FilterPanel, 
+  EditableDataGrid,
+  BulkActions 
+} from 'reusable-components';
+
+function UserManagement() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedRows, setSelectedRows] = useState([]);
+
+  const columns = [
+    { key: 'name', title: 'Name', sortable: true },
+    { key: 'email', title: 'Email', sortable: true },
+    { key: 'role', title: 'Role', filterable: true },
+    { key: 'status', title: 'Status', editable: true }
+  ];
+
+  const data = [
+    { 
+      id: '1', 
+      name: 'John Doe', 
+      email: 'john@example.com', 
+      role: 'Admin', 
+      status: 'Active' 
+    },
+    // ... more data
+  ];
+
+  return (
+    &lt;div&gt;
+      &lt;SearchBox
+        placeholder="Search users..."
+        onSearch={setSearchTerm}
+      /&gt;
+      
+      &lt;FilterPanel
+        filters={[
+          {
+            key: 'role',
+            label: 'Role',
+            type: 'select',
+            options: [
+              { value: 'admin', label: 'Admin' },
+              { value: 'user', label: 'User' }
+            ]
+          }
+        ]}
+      /&gt;
+      
+      &lt;BulkActions
+        selectedItems={selectedRows}
+        actions={[
+          { key: 'activate', label: 'Activate' },
+          { key: 'deactivate', label: 'Deactivate' },
+          { key: 'delete', label: 'Delete', variant: 'danger' }
+        ]}
+      /&gt;
+      
+      &lt;EditableDataGrid
+        columns={columns}
+        data={data}
+        selection={{
+          type: 'checkbox',
+          selectedRowKeys: selectedRows,
+          onSelectionChange: setSelectedRows
+        }}
+        sortable
+        filterable
+        editable
+      /&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+                                        <button class="copy-btn" onclick="copyCode(this)">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Components Overview -->
+                    <section id="components" class="section">
+                        <div class="section-header">
+                            <h2>Components Overview</h2>
+                            <p>Explore our comprehensive collection of components organized by atomic design principles</p>
+                        </div>
+
+                        <div class="component-categories">
+                            <div class="category-card" onclick="showComponents('atoms')">
+                                <div class="category-icon">
+                                    <i class="fas fa-cube"></i>
+                                </div>
+                                <h3>Atomic Components</h3>
+                                <p class="category-count">32+ Components</p>
+                                <p>Basic building blocks like buttons, inputs, and icons that form the foundation of your UI.</p>
+                                <div class="category-examples">
+                                    <span class="example-tag">Button</span>
+                                    <span class="example-tag">Input</span>
+                                    <span class="example-tag">Select</span>
+                                    <span class="example-tag">Modal</span>
+                                </div>
+                            </div>
+
+                            <div class="category-card" onclick="showComponents('molecules')">
+                                <div class="category-icon">
+                                    <i class="fas fa-cubes"></i>
+                                </div>
+                                <h3>Molecular Components</h3>
+                                <p class="category-count">15+ Components</p>
+                                <p>Component combinations that work together to create more complex UI patterns.</p>
+                                <div class="category-examples">
+                                    <span class="example-tag">SearchBox</span>
+                                    <span class="example-tag">FilterPanel</span>
+                                    <span class="example-tag">StatusCard</span>
+                                    <span class="example-tag">MetricCard</span>
+                                </div>
+                            </div>
+
+                            <div class="category-card" onclick="showComponents('organisms')">
+                                <div class="category-icon">
+                                    <i class="fas fa-layer-group"></i>
+                                </div>
+                                <h3>Organism Components</h3>
+                                <p class="category-count">12+ Components</p>
+                                <p>Complex, feature-rich components for enterprise applications and advanced functionality.</p>
+                                <div class="category-examples">
+                                    <span class="example-tag">DataGrid</span>
+                                    <span class="example-tag">WorkflowTracker</span>
+                                    <span class="example-tag">UserManager</span>
+                                    <span class="example-tag">APIConnector</span>
+                                </div>
+                            </div>
+
+                            <div class="category-card" onclick="showComponents('templates')">
+                                <div class="category-icon">
+                                    <i class="fas fa-th-large"></i>
+                                </div>
+                                <h3>Template Components</h3>
+                                <p class="category-count">6+ Components</p>
+                                <p>Complete page layouts and templates for rapid application development.</p>
+                                <div class="category-examples">
+                                    <span class="example-tag">DashboardLayout</span>
+                                    <span class="example-tag">FormLayout</span>
+                                    <span class="example-tag">ListDetailLayout</span>
+                                    <span class="example-tag">SettingsPage</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Form Components Section -->
+                    <section id="form-components" class="section">
+                        <div class="section-header">
+                            <h2>Form Components</h2>
+                            <p>Essential form elements with validation, accessibility, and enterprise features</p>
+                        </div>
+
+                        <div class="component-grid">
+                            <div class="component-card">
+                                <div class="component-header">
+                                    <h3>Button</h3>
+                                    <div class="component-badges">
+                                        <span class="badge primary">Essential</span>
+                                        <span class="badge">TypeScript</span>
+                                    </div>
+                                </div>
+                                <p>Versatile button component supporting multiple variants, loading states, icons, and enterprise features like commerce state awareness.</p>
+                                
+                                <div class="component-preview-small">
+                                    <button class="btn-preview primary">Primary</button>
+                                    <button class="btn-preview secondary">Secondary</button>
+                                    <button class="btn-preview outline">Outline</button>
+                                </div>
+
+                                <div class="component-features">
+                                    <div class="feature-item">
+                                        <i class="fas fa-palette"></i>
+                                        <span>10 Variants</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-expand-alt"></i>
+                                        <span>5 Sizes</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-icons"></i>
+                                        <span>Icon Support</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-shield-alt"></i>
+                                        <span>Enterprise Ready</span>
+                                    </div>
+                                </div>
+
+                                <div class="component-actions">
+                                    <button class="action-btn" onclick="showComponentDetails('button')">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </button>
+                                    <button class="action-btn" onclick="showComponentAPI('button')">
+                                        <i class="fas fa-code"></i> API Reference
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="component-card">
+                                <div class="component-header">
+                                    <h3>Input</h3>
+                                    <div class="component-badges">
+                                        <span class="badge primary">Essential</span>
+                                        <span class="badge">Validation</span>
+                                    </div>
+                                </div>
+                                <p>Comprehensive input component with built-in validation, accessibility features, and support for various input types.</p>
+                                
+                                <div class="component-preview-small">
+                                    <input type="text" placeholder="Default input" class="input-preview">
+                                    <input type="email" placeholder="Email input" class="input-preview">
+                                </div>
+
+                                <div class="component-features">
+                                    <div class="feature-item">
+                                        <i class="fas fa-keyboard"></i>
+                                        <span>8 Input Types</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Built-in Validation</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-icons"></i>
+                                        <span>Icon Support</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-universal-access"></i>
+                                        <span>Accessible</span>
+                                    </div>
+                                </div>
+
+                                <div class="component-actions">
+                                    <button class="action-btn" onclick="showComponentDetails('input')">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </button>
+                                    <button class="action-btn" onclick="showComponentAPI('input')">
+                                        <i class="fas fa-code"></i> API Reference
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="component-card">
+                                <div class="component-header">
+                                    <h3>Select</h3>
+                                    <div class="component-badges">
+                                        <span class="badge">Multi-select</span>
+                                        <span class="badge">Searchable</span>
+                                    </div>
+                                </div>
+                                <p>Feature-rich select component with search, multiple selection, grouping, and custom option rendering.</p>
+                                
+                                <div class="component-preview-small">
+                                    <select class="select-preview">
+                                        <option>Choose option...</option>
+                                        <option>Option 1</option>
+                                        <option>Option 2</option>
+                                    </select>
+                                </div>
+
+                                <div class="component-features">
+                                    <div class="feature-item">
+                                        <i class="fas fa-search"></i>
+                                        <span>Searchable</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-list"></i>
+                                        <span>Multi-select</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-layer-group"></i>
+                                        <span>Option Groups</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-tags"></i>
+                                        <span>Badge Display</span>
+                                    </div>
+                                </div>
+
+                                <div class="component-actions">
+                                    <button class="action-btn" onclick="showComponentDetails('select')">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </button>
+                                    <button class="action-btn" onclick="showComponentAPI('select')">
+                                        <i class="fas fa-code"></i> API Reference
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-footer">
+                            <a href="#" class="view-all-btn">
+                                View All Form Components <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Documentation</h4>
+                    <ul>
+                        <li><a href="#getting-started">Getting Started</a></li>
+                        <li><a href="#components">Components</a></li>
+                        <li><a href="#examples">Examples</a></li>
+                        <li><a href="#api">API Reference</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Components</h4>
+                    <ul>
+                        <li><a href="#form-components">Form Components</a></li>
+                        <li><a href="#data-components">Data Components</a></li>
+                        <li><a href="#layout-components">Layout Components</a></li>
+                        <li><a href="#enterprise-components">Enterprise Components</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#changelog">Changelog</a></li>
+                        <li><a href="#migration">Migration Guide</a></li>
+                        <li><a href="#best-practices">Best Practices</a></li>
+                        <li><a href="#support">Support</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <i class="fas fa-cubes"></i>
+                        <span>Reusable Components</span>
+                    </div>
+                    <p>Enterprise-grade React components for modern applications.</p>
+                    <div class="version-info">
+                        <span>Version 0.1.0</span>
+                        <span>Last updated: January 2025</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>

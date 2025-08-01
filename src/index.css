@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import './styles/globals.css';
+
+/* Design token CSS custom properties */
+:root {
+  /* Colors - Primary */
+  --color-primary-50: 239 246 255;
+  --color-primary-100: 219 234 254;
+  --color-primary-200: 191 219 254;
+  --color-primary-300: 147 197 253;
+  --color-primary-400: 96 165 250;
+  --color-primary-500: 59 130 246;
+  --color-primary-600: 37 99 235;
+  --color-primary-700: 29 78 216;
+  --color-primary-800: 30 64 175;
+  --color-primary-900: 30 58 138;
+
+  /* Colors - Gray (Light theme) */
+  --color-gray-50: 249 250 251;
+  --color-gray-100: 243 244 246;
+  --color-gray-200: 229 231 235;
+  --color-gray-300: 209 213 219;
+  --color-gray-400: 156 163 175;
+  --color-gray-500: 107 114 128;
+  --color-gray-600: 75 85 99;
+  --color-gray-700: 55 65 81;
+  --color-gray-800: 31 41 55;
+  --color-gray-900: 17 24 39;
+
+  /* Semantic Colors - Light theme */
+  --color-background: 255 255 255;
+  --color-foreground: 17 24 39;
+  --color-card: 255 255 255;
+  --color-card-foreground: 17 24 39;
+  --color-popover: 255 255 255;
+  --color-popover-foreground: 17 24 39;
+  --color-muted: 243 244 246;
+  --color-muted-foreground: 107 114 128;
+  --color-accent: 243 244 246;
+  --color-accent-foreground: 17 24 39;
+  --color-border: 229 231 235;
+  --color-input: 229 231 235;
+  --color-ring: 147 197 253;
+}
+
+.dark {
+  /* Colors - Gray (Dark theme - inverted) */
+  --color-gray-50: 17 24 39;
+  --color-gray-100: 31 41 55;
+  --color-gray-200: 55 65 81;
+  --color-gray-300: 75 85 99;
+  --color-gray-400: 156 163 175;
+  --color-gray-500: 107 114 128;
+  --color-gray-600: 209 213 219;
+  --color-gray-700: 229 231 235;
+  --color-gray-800: 243 244 246;
+  --color-gray-900: 249 250 251;
+
+  /* Semantic Colors - Dark theme */
+  --color-background: 3 7 18;
+  --color-foreground: 249 250 251;
+  --color-card: 3 7 18;
+  --color-card-foreground: 249 250 251;
+  --color-popover: 3 7 18;
+  --color-popover-foreground: 249 250 251;
+  --color-muted: 31 41 55;
+  --color-muted-foreground: 156 163 175;
+  --color-accent: 31 41 55;
+  --color-accent-foreground: 249 250 251;
+  --color-border: 55 65 81;
+  --color-input: 55 65 81;
+  --color-ring: 147 197 253;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
