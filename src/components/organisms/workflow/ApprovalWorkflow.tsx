@@ -29,20 +29,11 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
   showComments = true,
   allowDelegate = true,
   allowSkip = false,
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
-  allowedActions = [],
-  userRole,
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
   className = '',
   style = {},
   onStepAction,
   onWorkflowComplete,
   onDelegate,
-  onUpdate = () => {},
 }) => {
   const [actionModalStep, setActionModalStep] = useState<string | null>(null);
   const [actionType, setActionType] = useState<string>('');
@@ -54,26 +45,6 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
     show: false, message: '', type: 'info'
   });
 
-  // Audit logging utility
-  const logAuditEvent = useCallback((action: string, details: any) => {
-    if (auditTrail.enabled) {
-      console.log(`[AUDIT] ${action}:`, {
-        timestamp: new Date().toISOString(),
-        user: userRole?.id || 'unknown',
-        component: 'ApprovalWorkflow',
-        action,
-        details,
-        commerceState,
-        workflowContext,
-      });
-      onUpdate?.({
-        type: 'audit',
-        action,
-        details,
-        timestamp: new Date().toISOString(),
-      });
-    }
-  }, [auditTrail, userRole, commerceState, workflowContext, onUpdate]);
 
   // Show toast notification
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
@@ -100,12 +71,8 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
   // Check if user can act on a step
   const canActOnStep = useCallback((step: WorkflowStep) => {
     if (step.status !== 'pending' && step.status !== 'in_progress') return false;
-    if (!step.assignees?.length) return true;
-    
-    return step.assignees.includes(userRole?.id || '') || 
-           userRole?.permissions?.includes('approve_all_steps') ||
-           allowedActions.includes('act_on_any_step');
-  }, [userRole, allowedActions]);
+    return true; // Simplified - parent component should control permissions
+  }, []);
 
   // Get step assignee info
   const getAssigneeInfo = useCallback((assigneeId: string) => {
@@ -124,12 +91,8 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
       stepId,
       action,
       comments: data?.comments || comments,
-      userId: userRole?.id,
       timestamp: new Date().toISOString(),
-      ...data,
     };
-
-    logAuditEvent('step_action', actionData);
 
     try {
       await onStepAction?.(stepId, action, actionData);
@@ -159,7 +122,7 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
       console.error('Step action failed:', error);
       showToast('Action failed. Please try again.', 'error');
     }
-  }, [steps, canActOnStep, comments, userRole, logAuditEvent, onStepAction, currentStepIndex, autoAdvance, onWorkflowComplete, showToast]);
+  }, [steps, canActOnStep, comments, onStepAction, currentStepIndex, autoAdvance, onWorkflowComplete, showToast]);
 
   // Handle delegation
   const handleDelegate = useCallback(async (stepId: string, newAssignee: string) => {
@@ -174,12 +137,6 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
       return;
     }
 
-    logAuditEvent('step_delegate', {
-      stepId,
-      fromUser: userRole?.id,
-      toUser: newAssignee,
-      assigneeName: assigneeInfo.name,
-    });
 
     try {
       await onDelegate?.(stepId, newAssignee);
@@ -193,7 +150,7 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
       console.error('Delegation failed:', error);
       showToast('Delegation failed. Please try again.', 'error');
     }
-  }, [allowDelegate, getAssigneeInfo, logAuditEvent, userRole, onDelegate, showToast]);
+  }, [allowDelegate, getAssigneeInfo, onDelegate, showToast]);
 
   // Render step status icon
   const renderStepStatusIcon = useCallback((status: string) => {
@@ -301,21 +258,6 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
     return date.toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }, []);
 
-  // Component styling based on commerce state
-  const getStateStyles = () => {
-    switch (commerceState) {
-      case 'completion':
-        return 'border-green-200';
-      case 'settlement':
-        return 'border-blue-200';
-      case 'execution':
-        return 'border-orange-200';
-      case 'agreement':
-        return 'border-yellow-200';
-      default:
-        return 'border-gray-200';
-    }
-  };
 
   const sizeClasses = {
     sm: 'text-xs',
@@ -339,7 +281,6 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
       timestamp: step.completedAt,
       assignee: step.assignees?.[0] ? getAssigneeInfo(step.assignees[0])?.name : undefined,
       duration: step.duration,
-      metadata: step.metadata,
       actions: canActOnStep(step) ? [
         { key: 'approve', label: 'Approve', variant: 'primary' as const },
         { key: 'reject', label: 'Reject', variant: 'danger' as const },
@@ -352,12 +293,10 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
       <div 
         className={cn(
           'bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm',
-          getStateStyles(),
           sizeClasses[size],
           className
         )}
         style={style}
-        data-commerce-state={commerceState}
       >
         {/* Improved Header */}
         <div className={cn('border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800', spacingClasses[size])}>
@@ -429,12 +368,10 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
     <div 
       className={cn(
         'bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm',
-        getStateStyles(),
         sizeClasses[size],
         className
       )}
       style={style}
-      data-commerce-state={commerceState}
     >
       {/* Enhanced Header */}
       <div className={cn('border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800', spacingClasses[size])}>

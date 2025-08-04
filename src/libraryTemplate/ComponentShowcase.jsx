@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Home, Package, ChevronRight } from 'lucide-react';
 
 // Import all components for showcasing
 import * as Atoms from '../components/atoms';
@@ -1436,10 +1437,7 @@ const ComponentShowcase = ({ category, subcategory }) => {
                     <Breadcrumb 
                         items={generateBreadcrumbItems(category, subcategory, selectedComponentName)} 
                         showHome={true}
-                        homeIcon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9h6v4H9V9z" />
-                        </svg>}
+                        homeIcon={<Home className="w-4 h-4" />}
                         className="text-sm"
                         commerceState=''
                     />
@@ -1474,9 +1472,7 @@ const ComponentShowcase = ({ category, subcategory }) => {
             {currentComponents.length === 0 && (
                 <div className="text-center py-12">
                     <div className="text-gray-400 mb-4">
-                        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
+                        <Package className="w-16 h-16 mx-auto" />
                     </div>
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Components Coming Soon</h3>
                     <p className="text-gray-600 dark:text-gray-300">
@@ -1705,9 +1701,7 @@ const ComponentCard = ({ component, category, subcategory, onCopyCode, copiedCod
                     className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 font-medium text-sm transition-colors duration-200"
                 >
                     View variations
-                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+                    <ChevronRight className="w-4 h-4 ml-1" />
                 </Link>
             </div>
         </div>
@@ -1864,10 +1858,7 @@ const ComponentDetailPage = ({ component, category, subcategory, copyToClipboard
                 <Breadcrumb 
                     items={generateBreadcrumbItems(category, subcategory, component.name)} 
                     showHome={true}
-                    homeIcon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 9h6v4H9V9z" />
-                    </svg>}
+                    homeIcon={<Home className="w-4 h-4" />}
                     className="text-sm"
                     commerceState=''
                 />

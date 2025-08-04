@@ -27,11 +27,7 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
   className = '',
   style = {},
   children,
-  commerceState = 'none',
   allowedActions = [],
-  userRole,
-  encryptionLevel = 'none',
-  auditTrail,
 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(currentStep);
   const [formData, setFormData] = useState<any>({});
@@ -355,16 +351,6 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Audit trail logging */}
-      {auditTrail?.enabled && commerceState && (
-        <div className="sr-only">
-          Form layout rendered - Commerce State: {commerceState}, 
-          Current Step: {currentStepIndex + 1} of {steps.length}, 
-          Form Dirty: {isDirty},
-          User: {userRole?.name || 'Unknown'}
-        </div>
-      )}
     </div>
   );
 };

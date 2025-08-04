@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { SettingsPageProps } from '../../../types';
+import { Search } from 'lucide-react';
 
 export const SettingsPage: React.FC<SettingsPageProps> = ({
   id,
@@ -23,11 +24,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   className = '',
   style = {},
   children,
-  commerceState = 'execution',
   allowedActions = [],
-  userRole,
-  encryptionLevel = 'none',
-  auditTrail,
 }) => {
   const [currentSection, setCurrentSection] = useState(activeSection);
   const [searchTerm, setSearchTerm] = useState('');
@@ -122,9 +119,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <Search className="h-5 w-5 text-gray-400" />
           </div>
         </div>
       </div>
@@ -491,16 +486,6 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Audit trail logging */}
-      {auditTrail?.enabled && commerceState && (
-        <div className="sr-only">
-          Settings page rendered - Commerce State: {commerceState}, 
-          Current Section: {sections[currentSection]?.title || 'Unknown'}, 
-          Changed Settings: {changedSettings.size},
-          User: {userRole?.name || 'Unknown'}
-        </div>
-      )}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { RoleManagerProps } from '../../../types';
+import { Search } from 'lucide-react';
 
 export const RoleManager: React.FC<RoleManagerProps> = ({
   id,
@@ -19,11 +20,8 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
   onPermissionChange,
   className = '',
   style = {},
-  commerceState = 'execution',
   allowedActions = [],
   userRole,
-  encryptionLevel = 'none',
-  auditTrail,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('');
@@ -170,9 +168,7 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <Search className="h-5 w-5 text-gray-400" />
           </div>
         </div>
 
@@ -627,16 +623,6 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
               </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Audit trail logging */}
-      {auditTrail?.enabled && commerceState && (
-        <div className="sr-only">
-          Role manager accessed - Commerce State: {commerceState}, 
-          Total Roles: {roles.length}, 
-          Filtered Roles: {sortedRoles.length},
-          User: {userRole?.name || 'Unknown'}
         </div>
       )}
     </div>

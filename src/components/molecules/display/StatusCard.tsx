@@ -4,6 +4,7 @@ import { cn } from '../../../utils/cn';
 import Badge from '../../atoms/display/Badge';
 import Button from '../../atoms/form/Button';
 import Tooltip from '../../atoms/display/Tooltip';
+import { ChevronDown } from 'lucide-react';
 
 const StatusCard: React.FC<StatusCardProps> = ({
   id = 'status-card',
@@ -31,16 +32,9 @@ const StatusCard: React.FC<StatusCardProps> = ({
   size = 'md',
   variant = 'default',
   layout = 'vertical',
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
   allowedActions = [],
-  userRole,
-  data,
-  onUpdate = () => {},
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
+  isDisabled = false,
+  isReadonly = false,
   className = '',
   style = {},
   onClick = () => {},
@@ -49,9 +43,6 @@ const StatusCard: React.FC<StatusCardProps> = ({
 }) => {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
 
-  // Handle commerce state based behavior
-  const isReadonly = commerceState === 'completion';
-  const isDisabled = commerceState === 'settlement' && !allowedActions.includes('status_actions');
 
   // Filter available actions based on permissions
   const availableActions = actions.filter(action => {
@@ -66,48 +57,15 @@ const StatusCard: React.FC<StatusCardProps> = ({
   const handleCardClick = useCallback(() => {
     if (clickable && !isDisabled) {
       onClick();
-      
-      // Audit trail logging
-      if (auditTrail.enabled && auditTrail.logUserActions) {
-        console.log('Status card clicked:', {
-          action: 'status_card_click',
-          cardId: id,
-          title,
-          status,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          userRole
-        });
-      }
     }
-  }, [clickable, isDisabled, onClick, auditTrail, id, title, status, commerceState, workflowContext, userRole]);
+  }, [clickable, isDisabled, onClick, id, title, status]);
 
   // Handle action click
   const handleActionClick = useCallback((actionKey: string, action: StatusAction) => {
     if (!isDisabled) {
       onAction(actionKey);
-      
-      // Audit trail logging
-      if (auditTrail.enabled && auditTrail.logUserActions) {
-        console.log('Status card action:', {
-          action: 'status_card_action',
-          actionKey,
-          cardId: id,
-          title,
-          status,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          userRole
-        });
-      }
-
-      if (onUpdate) {
-        onUpdate({ action: actionKey, cardData: { id, title, status } });
-      }
     }
-  }, [isDisabled, onAction, onUpdate, auditTrail, id, title, status, commerceState, workflowContext, userRole]);
+  }, [onAction, id, title, status]);
 
   // Handle toggle collapse
   const handleToggleCollapse = useCallback(() => {
@@ -150,7 +108,6 @@ const StatusCard: React.FC<StatusCardProps> = ({
     variant === 'minimal' && 'bg-transparent border-0 rounded-none',
     clickable && !isDisabled && 'cursor-pointer hover:shadow-md hover:border-primary-300',
     isDisabled && 'opacity-60 cursor-not-allowed',
-    commerceState === 'completion' && 'border-gray-300 bg-gray-50',
     className
   );
 
@@ -171,14 +128,7 @@ const StatusCard: React.FC<StatusCardProps> = ({
 
   // Collapse icon
   const CollapseIcon = () => (
-    <svg
-      className={cn('w-4 h-4 transition-transform', collapsed && 'rotate-180')}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-    </svg>
+    <ChevronDown className={cn('w-4 h-4 transition-transform', collapsed && 'rotate-180')} />
   );
 
   // Progress bar component
@@ -215,12 +165,6 @@ const StatusCard: React.FC<StatusCardProps> = ({
             {showPriority && priority && (
               <Badge variant={getPriorityVariant(priority)} size="sm">
                 {priority.charAt(0).toUpperCase() + priority.slice(1)}
-              </Badge>
-            )}
-
-            {commerceState && commerceState !== 'initiation' && (
-              <Badge variant="secondary" size="sm">
-                {commerceState}
               </Badge>
             )}
           </div>
@@ -335,13 +279,6 @@ const StatusCard: React.FC<StatusCardProps> = ({
           )}
         </div>
       </div>
-
-      {/* AI Config Display (development only) */}
-      {process.env.NODE_ENV === 'development' && aiConfig && (
-        <div className="absolute -top-6 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-          AI: {JSON.stringify(aiConfig.layout)}
-        </div>
-      )}
     </div>
   );
 };

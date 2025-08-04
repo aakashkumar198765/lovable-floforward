@@ -1,6 +1,7 @@
 import React, { forwardRef, useState, useEffect } from 'react';
 import { CascadingSelectProps, SelectOption, SelectGroup } from '../../../types';
 import { cn } from '../../../utils/cn';
+import { formInputSizeClasses } from '../../../utils/tailwindClassMaps';
 
 const CascadingSelect = forwardRef<HTMLDivElement, CascadingSelectProps>(
   (
@@ -20,16 +21,6 @@ const CascadingSelect = forwardRef<HTMLDivElement, CascadingSelectProps>(
       levels = [],
       value = [],
       defaultValue = [],
-      commerceState = 'none',
-      workflowContext,
-      aiConfig,
-      schema,
-      allowedActions = [],
-      userRole,
-      data,
-      onUpdate,
-      auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-      encryptionLevel = 'none',
       className = '',
       style = {},
       onChange,
@@ -45,8 +36,8 @@ const CascadingSelect = forwardRef<HTMLDivElement, CascadingSelectProps>(
     const [availableOptions, setAvailableOptions] = useState<Array<SelectOption[]>>([]);
 
     // Handle commerce state based behavior
-    const isReadonly = readonly || commerceState === 'completion';
-    const isDisabled = disabled || (commerceState === 'settlement' && allowedActions && Array.isArray(allowedActions) && !allowedActions.includes('edit'));
+    const isReadonly = readonly;
+    const isDisabled = disabled;
 
     // Update internal values when external value changes
     useEffect(() => {
@@ -139,27 +130,9 @@ const CascadingSelect = forwardRef<HTMLDivElement, CascadingSelectProps>(
       
       setInternalValues(newValues);
       
-      // Audit trail logging
-      if (auditTrail && typeof auditTrail === 'object' && auditTrail.enabled && auditTrail.trackChanges) {
-        console.log('CascadingSelect change tracked:', {
-          field: (name && name !== '') ? name : (id && id !== '') ? id : 'unnamed-cascading-select',
-          oldValue: internalValues,
-          newValue: newValues,
-          level: levelIndex,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext
-        });
-      }
-      
       // Call external onChange
       if (onChange && typeof onChange === 'function') {
         onChange(newValues, levelIndex);
-      }
-      
-      // Call update callback for enterprise integration
-      if (onUpdate && typeof onUpdate === 'function') {
-        onUpdate(newValues);
       }
     };
 
@@ -173,13 +146,6 @@ const CascadingSelect = forwardRef<HTMLDivElement, CascadingSelectProps>(
       if (onBlur && typeof onBlur === 'function') {
         onBlur(event, levelIndex);
       }
-    };
-
-    // Size classes
-    const sizeClasses = {
-      sm: 'px-3 py-2 text-sm',
-      md: 'px-4 py-3 text-base',
-      lg: 'px-5 py-4 text-lg'
     };
 
     // Variant classes
@@ -197,15 +163,6 @@ const CascadingSelect = forwardRef<HTMLDivElement, CascadingSelectProps>(
       success: 'border-success-500 focus:border-success-500 focus:ring-success-500'
     };
 
-    // Commerce state styling
-    const commerceStateClasses = {
-      initiation: 'border-primary-300',
-      agreement: 'border-warning-300',
-      execution: 'border-primary-500',
-      settlement: 'border-gray-400',
-      completion: 'border-gray-300 bg-gray-50',
-      none: 'ring-0'
-    };
 
     // Build select classes
     const selectClasses = cn(
@@ -214,17 +171,15 @@ const CascadingSelect = forwardRef<HTMLDivElement, CascadingSelectProps>(
       'focus:outline-none focus:ring-2 focus:ring-opacity-50',
       'disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500',
       'readonly:bg-gray-50 readonly:cursor-default',
-      sizeClasses[size] || sizeClasses.md,
+      formInputSizeClasses[size] || formInputSizeClasses.md,
       variantClasses[variant] || variantClasses.default,
       status && status !== 'default' && statusClasses[status] ? statusClasses[status] : statusClasses.default,
-      commerceState && commerceStateClasses[commerceState] ? commerceStateClasses[commerceState] : ''
     );
 
     // Label classes
     const labelClasses = cn(
       'block text-sm font-medium text-gray-700 mb-1',
       required && 'after:content-["*"] after:text-error-500 after:ml-1',
-      commerceState === 'completion' && 'text-gray-500'
     );
 
     // Helper text classes
@@ -254,11 +209,6 @@ const CascadingSelect = forwardRef<HTMLDivElement, CascadingSelectProps>(
         {label && label !== '' && (
           <label className={labelClasses}>
             {label}
-            {commerceState && (
-              <span className="ml-2 text-xs text-gray-500 uppercase">
-                {commerceState}
-              </span>
-            )}
           </label>
         )}
         

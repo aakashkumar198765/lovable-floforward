@@ -38,21 +38,6 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
       noOptionsMessage = "No options available",
       loadingMessage = "Loading...",
       isLoading = false,
-      commerceState = "none",
-      workflowContext,
-      aiConfig,
-      schema,
-      allowedActions = [],
-      userRole,
-      data,
-      onUpdate = () => {},
-      auditTrail = {
-        enabled: false,
-        level: "basic",
-        trackChanges: false,
-        logUserActions: false,
-      },
-      encryptionLevel = "none",
       className = "",
       style = {},
       onChange = () => {},
@@ -77,15 +62,6 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
     const dropdownRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
-
-    // Handle commerce state based behavior
-    const isReadonly = readonly || commerceState === "completion";
-    const isDisabled =
-      disabled ||
-      (commerceState === "settlement" &&
-        allowedActions &&
-        Array.isArray(allowedActions) &&
-        !allowedActions.includes("edit"));
 
     // Update internal value when external value changes
     useEffect(() => {
@@ -129,37 +105,9 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
       );
       setInternalValue(newValue);
 
-      // Audit trail logging
-      if (
-        auditTrail &&
-        typeof auditTrail === "object" &&
-        auditTrail.enabled &&
-        auditTrail.trackChanges
-      ) {
-        console.log("MultiSelect change tracked:", {
-          field:
-            name && name !== ""
-              ? name
-              : id && id !== ""
-              ? id
-              : "unnamed-multiselect",
-          oldValue: internalValue,
-          newValue: newValue,
-          options: newSelectedOptions,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-        });
-      }
-
       // Call external onChange
       if (onChange && typeof onChange === "function") {
         onChange(newValue, newSelectedOptions);
-      }
-
-      // Call update callback for enterprise integration
-      if (onUpdate && typeof onUpdate === "function") {
-        onUpdate(newValue);
       }
     };
 
@@ -172,7 +120,7 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
           event.stopPropagation();
         }
 
-        if (isDisabled || isReadonly) return;
+        if (disabled || readonly) return;
 
         const isCurrentlySelected = internalValue.includes(String(optionValue));
         let newValue: string[];
@@ -190,17 +138,17 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
 
         handleChange(newValue);
       },
-      [internalValue, isDisabled, isReadonly, maxSelections]
+      [internalValue, disabled, readonly, maxSelections]
     );
 
     const handleBadgeRemove = (optionValue: string) => {
-      if (isDisabled || isReadonly) return;
+      if (disabled || readonly) return;
       const newValue = internalValue.filter((val) => val !== String(optionValue));
       handleChange(newValue);
     };
 
     const handleTriggerClick = useCallback(() => {
-      if (!isDisabled && !isReadonly) {
+      if (!disabled && !readonly) {
         setIsOpen(!isOpen);
         // Focus search input when opening if searchable
         if (!isOpen && searchable) {
@@ -209,7 +157,7 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
           }, 100);
         }
       }
-    }, [isDisabled, isReadonly, isOpen, searchable]);
+    }, [disabled, readonly, isOpen, searchable]);
 
     const handleTriggerFocus = useCallback(() => {
       setIsFocused(true);
@@ -300,15 +248,6 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
         "border-success-500 focus-within:border-success-500 focus-within:ring-success-500",
     };
 
-    // Commerce state styling
-    const commerceStateClasses = {
-      initiation: "border-primary-300",
-      agreement: "border-warning-300",
-      execution: "border-primary-500",
-      settlement: "border-gray-400",
-      completion: "border-gray-300 bg-gray-50",
-      none: 'ring-0'
-    };
 
     // Build container classes
     const containerClasses = cn(
@@ -323,18 +262,14 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
       status && status !== "default" && statusClasses[status]
         ? statusClasses[status]
         : statusClasses.default,
-      commerceState && commerceStateClasses[commerceState]
-        ? commerceStateClasses[commerceState]
-        : "",
-      (isDisabled || isReadonly) && "cursor-not-allowed opacity-60",
+      (disabled || readonly) && "cursor-not-allowed opacity-60",
       className || ""
     );
 
     // Label classes
     const labelClasses = cn(
       "block text-sm font-medium text-gray-700 mb-1",
-      required && 'after:content-["*"] after:text-error-500 after:ml-1',
-      commerceState === "completion" && "text-gray-500"
+      required && 'after:content-["*"] after:text-error-500 after:ml-1'
     );
 
     // Helper text classes
@@ -356,7 +291,7 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
       if (!option.value) return null;
 
       const isSelected = internalValue.includes(option.value);
-      const isOptionDisabled = option.disabled || isDisabled || isReadonly;
+      const isOptionDisabled = option.disabled || disabled || readonly;
 
       const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         e.stopPropagation();
@@ -412,11 +347,6 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
         {label && label !== "" && (
           <label className={labelClasses}>
             {label}
-            {commerceState && commerceState !== "none" && (
-              <span className="ml-2 text-xs text-gray-500 uppercase">
-                {commerceState}
-              </span>
-            )}
           </label>
         )}
 
@@ -427,7 +357,7 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
             onClick={handleTriggerClick}
             onFocus={handleTriggerFocus}
             onBlur={handleTriggerBlur}
-            tabIndex={isDisabled || isReadonly ? -1 : 0}
+            tabIndex={disabled || readonly ? -1 : 0}
             role="combobox"
             aria-expanded={isOpen}
             aria-haspopup="listbox"
@@ -449,7 +379,7 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
                       key={option.value}
                       variant={badgeVariant}
                       color={badgeColor}
-                      removable={!isDisabled && !isReadonly}
+                      removable={!disabled && !readonly}
                       onRemove={() =>
                         option.value && handleBadgeRemove(option.value)
                       }
@@ -508,7 +438,7 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
           </select>
 
           {/* Dropdown */}
-          {isOpen && !isDisabled && !isReadonly && (
+          {isOpen && !disabled && !readonly && (
             <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-hidden">
               {/* Search input */}
               {searchable && (
@@ -565,8 +495,8 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
           {/* Clear button */}
           {clearable &&
             internalValue.length > 0 &&
-            !isDisabled &&
-            !isReadonly && (
+            !disabled &&
+            !readonly && (
               <button
                 type="button"
                 onClick={handleClear}
@@ -597,13 +527,6 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
               ? errorMessage
               : helperText}
           </p>
-        )}
-
-        {/* AI Config Display (development only) */}
-        {process.env.NODE_ENV === "development" && aiConfig && (
-          <div className="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-600">
-            AI Config: {JSON.stringify(aiConfig, null, 2)}
-          </div>
         )}
       </div>
     );

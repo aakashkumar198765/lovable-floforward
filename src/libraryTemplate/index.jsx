@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, Sun, Moon, Code, Home, ChevronRight } from 'lucide-react';
 
 // Import component showcase pages
 import ComponentShowcase from './ComponentShowcase';
@@ -258,17 +259,13 @@ const Header = ({ sidebarOpen, setSidebarOpen, darkMode, setDarkMode }) => {
                     onClick={() => setSidebarOpen(!sidebarOpen)}
                     className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 lg:hidden transition-all duration-200"
                 >
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
+                    <Menu className="h-5 w-5" />
                 </button>
 
                 {/* Library Name */}
                 <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate("/")}>
                     <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd"/>
-                        </svg>
+                        <Code className="w-4 h-4 text-white" />
                     </div>
                     <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                         <span className="hidden sm:inline">Re-usable Components Library</span>
@@ -285,13 +282,9 @@ const Header = ({ sidebarOpen, setSidebarOpen, darkMode, setDarkMode }) => {
                     title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
                 >
                     {darkMode ? (
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
+                        <Sun className="h-5 w-5" />
                     ) : (
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                        </svg>
+                        <Moon className="h-5 w-5" />
                     )}
                 </button>
             </div>
@@ -319,17 +312,6 @@ const DesktopSidebar = () => {
     
     const navigationItems = NAVIGATION_ITEMS;
 
-    // Icon component for consistent icon rendering
-    const Icon = ({ name, size = "w-4 h-4" }) => {
-        const icons = {
-            home: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>,
-            atom: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 2c-1.5 0-3 4.5-3 10s1.5 10 3 10 3-4.5 3-10S13.5 2 12 2z"/><path d="M2 12c0 1.5 4.5 3 10 3s10-1.5 10-3-4.5-3-10-3S2 10.5 2 12z"/><path d="M2 12c0-1.5 4.5-3 10-3s10 1.5 10 3-4.5 3-10 3S2 13.5 2 12z"/></svg>,
-            molecule: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>,
-            organism: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
-            template: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
-        };
-        return icons[name] || <div className={size}></div>;
-    };
 
     return (
         <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto">
@@ -342,19 +324,14 @@ const DesktopSidebar = () => {
                             className="w-full flex items-center justify-between px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
                         >
                             <div className="flex items-center space-x-3">
-                                {/* <Icon name={section.icon} size="w-4 h-4" /> */}
+                                {/* Category icons could be added here if needed */}
                                 <span>{section.category}</span>
                             </div>
-                            <svg 
+                            <ChevronRight 
                                 className={`w-4 h-4 text-gray-400 transition-transform ${
                                     expandedCategories[section.category] ? 'rotate-90' : ''
                                 }`} 
-                                fill="none" 
-                                stroke="currentColor" 
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
+                            />
                         </button>
 
                         {/* Category Items */}
@@ -431,17 +408,6 @@ const Sidebar = ({ isOpen }) => {
     
     const navigationItems = NAVIGATION_ITEMS;
 
-    // Icon component for consistent icon rendering
-    const Icon = ({ name, size = "w-4 h-4" }) => {
-        const icons = {
-            home: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>,
-            atom: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 2c-1.5 0-3 4.5-3 10s1.5 10 3 10 3-4.5 3-10S13.5 2 12 2z"/><path d="M2 12c0 1.5 4.5 3 10 3s10-1.5 10-3-4.5-3-10-3S2 10.5 2 12z"/><path d="M2 12c0-1.5 4.5-3 10-3s10 1.5 10 3-4.5 3-10 3S2 13.5 2 12z"/></svg>,
-            molecule: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>,
-            organism: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
-            template: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
-        };
-        return icons[name] || <div className={size}></div>;
-    };
 
     return (
         <aside className={`bg-white dark:bg-gray-800 transition-all duration-300 ${
@@ -458,19 +424,14 @@ const Sidebar = ({ isOpen }) => {
                             className="w-full flex items-center justify-between px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
                         >
                             <div className="flex items-center space-x-3">
-                                <Icon name={section.icon} size="w-4 h-4" />
+                                {/* Category icon would go here */}
                                 <span>{section.category}</span>
                             </div>
-                            <svg 
+                            <ChevronRight 
                                 className={`w-4 h-4 text-gray-400 transition-transform ${
                                     expandedCategories[section.category] ? 'rotate-90' : ''
                                 }`} 
-                                fill="none" 
-                                stroke="currentColor" 
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
+                            />
                         </button>
 
                         {/* Category Items */}

@@ -1,6 +1,8 @@
 import React, { forwardRef, useState, useCallback } from 'react';
 import { InputProps } from '../../../types';
 import { cn } from '../../../utils/cn';
+import { Lock } from 'lucide-react';
+import { formInputSizeClasses } from '../../../utils/tailwindClassMaps';
 
 interface CreditCardInputProps extends Omit<InputProps, 'type' | 'pattern'> {
   showCardType?: boolean;
@@ -35,15 +37,6 @@ const CreditCardInput = forwardRef<HTMLInputElement, CreditCardInputProps>(
       onBlur,
       onFocus,
       onCardTypeChange,
-      commerceState = 'none',
-      workflowContext,
-      aiConfig,
-      schema,
-      allowedActions = [],
-      userRole,
-      data,
-      onUpdate,
-      auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
       encryptionLevel = 'field', // Credit cards should default to field-level encryption
       ...props
     },
@@ -112,32 +105,14 @@ const CreditCardInput = forwardRef<HTMLInputElement, CreditCardInputProps>(
         onCardTypeChange(newCardType);
       }
       
-      // Audit trail logging
-      if (auditTrail.enabled && auditTrail.trackChanges) {
-        console.log('Credit card input change tracked:', {
-          field: name || id || 'credit-card',
-          cardType: newCardType,
-          length: cleanValue.length,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          encryptionLevel
-        });
-      }
-      
       // Call external onChange with clean value (no spaces)
       if (onChange) {
         const modifiedEvent = { ...event, target: { ...event.target, value: cleanValue } };
         onChange(modifiedEvent);
       }
-      
-      // Call update callback for enterprise integration
-      if (onUpdate) {
-        onUpdate(cleanValue);
-      }
     }, [
-      formatCardNumber, detectCardType, cardType, onCardTypeChange, auditTrail, 
-      name, id, commerceState, workflowContext, encryptionLevel, onChange, onUpdate
+      formatCardNumber, detectCardType, cardType, onCardTypeChange, 
+      name, id, onChange, encryptionLevel
     ]);
 
     // Card type icons
@@ -158,13 +133,6 @@ const CreditCardInput = forwardRef<HTMLInputElement, CreditCardInputProps>(
       }
     };
 
-    // Size classes
-    const sizeClasses = {
-      sm: 'px-3 py-2 text-sm',
-      md: 'px-4 py-3 text-base',
-      lg: 'px-5 py-4 text-lg'
-    };
-
     // Variant classes
     const variantClasses = {
       default: 'border border-gray-300 bg-white',
@@ -180,22 +148,12 @@ const CreditCardInput = forwardRef<HTMLInputElement, CreditCardInputProps>(
       success: 'border-green-500 focus:border-green-500 focus:ring-1 focus:ring-green-500'
     };
 
-    // Commerce state classes
-    const commerceStateClasses = {
-      initiation: 'border-blue-300',
-      agreement: 'border-yellow-300',
-      execution: 'border-green-300',
-      settlement: 'border-purple-300',
-      completion: 'border-gray-400',
-      none: 'ring-0'
-    };
 
     const inputClasses = cn(
       'w-full rounded-md transition-all duration-200 outline-none font-mono',
-      sizeClasses[size],
+      formInputSizeClasses[size],
       variantClasses[variant],
       statusClasses[status],
-      commerceState && commerceStateClasses[commerceState],
       disabled && 'opacity-50 cursor-not-allowed',
       readonly && 'bg-gray-50',
       encryptionLevel !== 'none' && 'border-l-4 border-l-green-500',
@@ -277,9 +235,7 @@ const CreditCardInput = forwardRef<HTMLInputElement, CreditCardInputProps>(
           {encryptionLevel !== 'none' && (
             <div className="absolute inset-y-0 right-0 flex items-center pr-2">
               <div className="flex items-center space-x-1 text-green-600">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                </svg>
+                <Lock className="w-4 h-4" />
                 <span className="text-xs">Encrypted</span>
               </div>
             </div>

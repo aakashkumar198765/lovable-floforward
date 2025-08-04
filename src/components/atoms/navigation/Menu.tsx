@@ -1,6 +1,8 @@
 import React, { forwardRef, useState, useRef, useEffect, useCallback } from 'react';
+import { ChevronRight } from 'lucide-react';
 import { MenuProps } from '../../../types';
 import { cn } from '../../../utils/cn';
+import { menuVariantClasses, menuPlacementClasses } from '../../../utils/tailwindClassMaps';
 
 const Menu = forwardRef<HTMLDivElement, MenuProps>(
   (
@@ -16,16 +18,6 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
       onSelect,
       onOpen,
       onClose,
-      commerceState = 'none',
-      workflowContext,
-      aiConfig,
-      schema,
-      allowedActions = [],
-      userRole,
-      data,
-      onUpdate,
-      auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-      encryptionLevel = 'none',
       className = '',
       style = {},
       children,
@@ -92,26 +84,8 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
     const handleItemSelect = (item: any) => {
       if (item.disabled || item.divider) return;
 
-      // Audit trail logging
-      if (auditTrail && typeof auditTrail === 'object' && auditTrail.enabled && auditTrail.logUserActions) {
-        console.log('Menu item select tracked:', {
-          action: 'menu_item_select',
-          itemId: item.id,
-          label: item.label,
-          href: item.href,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          userRole
-        });
-      }
-
       if (onSelect && typeof onSelect === 'function') {
         onSelect(item);
-      }
-
-      if (onUpdate && typeof onUpdate === 'function') {
-        onUpdate(item);
       }
 
       if (closeOnClick && !item.submenu) {
@@ -179,30 +153,10 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
       }
     };
 
-    // Variant classes
-    const variantClasses = {
-      default: 'bg-white border border-gray-200 rounded-lg shadow-lg',
-      compact: 'bg-white border border-gray-200 rounded-md shadow-sm',
-      sidebar: 'bg-white border-r border-gray-200 rounded-none shadow-none'
-    };
+    // Use centralized variant and placement classes
+    const variantClasses = menuVariantClasses;
+    const placementClasses = menuPlacementClasses;
 
-    // Placement classes
-    const placementClasses = {
-      top: 'bottom-full mb-2',
-      bottom: 'top-full mt-2',
-      left: 'right-full mr-2',
-      right: 'left-full ml-2'
-    };
-
-    // Commerce state classes
-    const commerceStateClasses = {
-      initiation: 'ring-primary-300',
-      agreement: 'ring-warning-300',
-      execution: 'ring-primary-500',
-      settlement: 'ring-gray-400',
-      completion: 'ring-success-300',
-      none: 'ring-0'
-    };
 
     // Render menu item
     const renderMenuItem = (item: any, level = 0) => {
@@ -284,18 +238,13 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
 
             {/* Submenu indicator */}
             {hasSubmenu && (
-              <svg
+              <ChevronRight
                 className={cn(
                   'ml-2 w-4 h-4 transition-transform duration-200 text-gray-400',
                   trigger === 'click' && isSubmenuOpen && 'transform rotate-90',
                   trigger === 'hover' && 'transform rotate-0'
                 )}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              />
             )}
           </button>
 
@@ -382,7 +331,6 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
               'absolute z-50 min-w-48 py-1 font-work-sans',
               variantClasses[variant],
               placementClasses[placement],
-              commerceState && commerceStateClasses[commerceState] ? `ring-2 ${commerceStateClasses[commerceState]}` : '',
               'animate-in fade-in slide-in-from-top-2 duration-200',
               className
             )}
@@ -401,24 +349,6 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
 
         {/* Submenus (rendered separately as fixed positioned elements) */}
         {isOpen && items && items.map((item) => renderSubmenu(item))}
-
-        {/* Commerce state indicator */}
-        {/* {commerceState && commerceState !== 'initiation' && (
-          <div className={cn(
-            'absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white z-10',
-            commerceState === 'agreement' && 'bg-warning-500',
-            commerceState === 'execution' && 'bg-primary-600',
-            commerceState === 'settlement' && 'bg-gray-500',
-            commerceState === 'completion' && 'bg-success-500'
-          )} />
-        )} */}
-
-        {/* AI Config Display (development only) */}
-        {process.env.NODE_ENV === 'development' && aiConfig && (
-          <div className="absolute -top-8 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-            AI Config: {JSON.stringify(aiConfig.layout || 'default')}
-          </div>
-        )}
       </div>
     );
   }

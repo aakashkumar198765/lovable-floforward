@@ -19,11 +19,8 @@ export const APIConnector: React.FC<APIConnectorProps> = ({
   onIntegrationCreate,
   className = '',
   style = {},
-  commerceState = 'execution',
   allowedActions = [],
   userRole,
-  encryptionLevel = 'none',
-  auditTrail,
 }) => {
   const [activeTab, setActiveTab] = useState<'endpoints' | 'integrations' | 'logs' | 'metrics'>('endpoints');
   const [selectedEndpoint, setSelectedEndpoint] = useState<any>(null);
@@ -561,17 +558,6 @@ export const APIConnector: React.FC<APIConnectorProps> = ({
               </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Audit trail logging */}
-      {auditTrail?.enabled && commerceState && (
-        <div className="sr-only">
-          API connector accessed - Commerce State: {commerceState}, 
-          Active Tab: {activeTab}, 
-          Total Endpoints: {endpoints.length},
-          Total Integrations: {integrations.length},
-          User: {userRole?.name || 'Unknown'}
         </div>
       )}
     </div>

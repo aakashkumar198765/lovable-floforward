@@ -33,11 +33,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({
   className = '',
   style = {},
   children,
-  commerceState = 'execution',
   allowedActions = [],
-  userRole,
-  encryptionLevel = 'none',
-  auditTrail,
 }) => {
   const [activeFilters, setActiveFilters] = useState<any>({});
   const [currentDateRange, setCurrentDateRange] = useState(selectedDateRange);
@@ -479,17 +475,6 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({
           {children}
         </div>
       </div>
-
-      {/* Audit trail logging */}
-      {auditTrail?.enabled && commerceState && (
-        <div className="sr-only">
-          Reports page rendered - Commerce State: {commerceState}, 
-          Date Range: {currentDateRange}, 
-          Active Filters: {Object.keys(activeFilters).length},
-          Selected Reports: {selectedReports.length},
-          User: {userRole?.name || 'Unknown'}
-        </div>
-      )}
     </div>
   );
 };

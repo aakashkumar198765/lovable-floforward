@@ -33,14 +33,7 @@ const EditableDataGrid: React.FC<EditableDataGridProps> = ({
   sortable = true,
   filterable = true,
   exportable = true,
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
   allowedActions = [],
-  userRole,
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
   className = '',
   style = {},
   onRowClick,
@@ -51,7 +44,6 @@ const EditableDataGrid: React.FC<EditableDataGridProps> = ({
   onExport,
   onSort,
   onFilter,
-  onUpdate = () => {},
 }) => {
   const [internalData, setInternalData] = useState<DataGridData[]>(data);
   const [editingCell, setEditingCell] = useState<{ rowId: string | number; columnKey: string } | null>(null);
@@ -72,27 +64,6 @@ const EditableDataGrid: React.FC<EditableDataGridProps> = ({
     setInternalData(data);
   }, [data]);
 
-  // Audit logging utility
-  const logAuditEvent = useCallback((action: string, details: any) => {
-    if (auditTrail.enabled) {
-      console.log(`[AUDIT] ${action}:`, {
-        timestamp: new Date().toISOString(),
-        user: userRole?.id || 'unknown',
-        component: 'EditableDataGrid',
-        action,
-        details,
-        commerceState,
-        workflowContext,
-      });
-      onUpdate?.({
-        type: 'audit',
-        action,
-        details,
-        timestamp: new Date().toISOString(),
-      });
-    }
-  }, [auditTrail, userRole, commerceState, workflowContext, onUpdate]);
-
   // Show toast notification
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
     setToast({ show: true, message, type });
@@ -104,15 +75,14 @@ const EditableDataGrid: React.FC<EditableDataGridProps> = ({
     const column = columns.find(col => col.key === columnKey);
     if (!column?.editable || !editable) return;
 
-    if (commerceState === 'completion' && !allowedActions.includes('edit_completed')) {
+    if (!allowedActions.includes('edit_completed')) {
       showToast('Cannot edit completed records', 'error');
       return;
     }
 
     setEditingCell({ rowId, columnKey });
     setEditValue(currentValue);
-    logAuditEvent('cell_edit_start', { rowId, columnKey, currentValue });
-  }, [columns, editable, commerceState, allowedActions, logAuditEvent, showToast]);
+  }, [columns, editable, allowedActions, showToast]);
 
   const handleCellSave = useCallback(async () => {
     if (!editingCell) return;
@@ -129,13 +99,6 @@ const EditableDataGrid: React.FC<EditableDataGridProps> = ({
       if (row.id === editingCell.rowId) {
         const oldValue = row[editingCell.columnKey];
         const newRow = { ...row, [editingCell.columnKey]: editValue };
-        
-        logAuditEvent('cell_edit_complete', {
-          rowId: editingCell.rowId,
-          columnKey: editingCell.columnKey,
-          oldValue,
-          newValue: editValue
-        });
 
         onCellEdit?.(editValue, newRow, column!);
         return newRow;
@@ -147,50 +110,34 @@ const EditableDataGrid: React.FC<EditableDataGridProps> = ({
     setEditingCell(null);
     setEditValue('');
     showToast('Cell updated successfully', 'success');
-  }, [editingCell, editValue, columns, internalData, onCellEdit, logAuditEvent, showToast]);
+  }, [editingCell, editValue, columns, internalData, onCellEdit, showToast]);
 
   const handleCellCancel = useCallback(() => {
-    logAuditEvent('cell_edit_cancel', { 
-      rowId: editingCell?.rowId, 
-      columnKey: editingCell?.columnKey 
-    });
     setEditingCell(null);
     setEditValue('');
-  }, [editingCell, logAuditEvent]);
+  }, [editingCell]);
 
   // Handle row operations
   const handleRowAdd = useCallback(() => {
-    if (commerceState === 'completion' && !allowedActions.includes('add_to_completed')) {
-      showToast('Cannot add rows to completed records', 'error');
-      return;
-    }
-
     const newRow: DataGridData = {
       id: `new_${Date.now()}`,
       ...columns.reduce((acc, col) => ({ ...acc, [col.dataIndex || col.key!]: '' }), {})
     };
 
     setInternalData(prev => [...prev, newRow]);
-    logAuditEvent('row_add', { newRowId: newRow.id });
     onRowAdd?.();
     showToast('New row added', 'success');
-  }, [columns, commerceState, allowedActions, logAuditEvent, onRowAdd, showToast]);
+  }, [columns, allowedActions, onRowAdd, showToast]);
 
   const handleRowDelete = useCallback((rowId: string) => {
-    if (commerceState === 'completion' && !allowedActions.includes('delete_from_completed')) {
-      showToast('Cannot delete from completed records', 'error');
-      return;
-    }
-
     const rowToDelete = internalData.find(row => row.id === rowId);
     setInternalData(prev => prev.filter(row => row.id !== rowId));
     setSelectedRows(prev => prev.filter(id => id !== rowId));
     
-    logAuditEvent('row_delete', { deletedRowId: rowId, rowData: rowToDelete });
     onRowDelete?.(rowToDelete!);
     setShowDeleteConfirm(null);
     showToast('Row deleted successfully', 'success');
-  }, [internalData, commerceState, allowedActions, logAuditEvent, onRowDelete, showToast]);
+  }, [internalData, allowedActions, onRowDelete, showToast]);
 
   // Handle selection
   const handleRowSelection = useCallback((rowId: string, checked: boolean) => {
@@ -225,11 +172,10 @@ const EditableDataGrid: React.FC<EditableDataGridProps> = ({
 
   // Handle export
   const handleExport = useCallback((format: string) => {
-    logAuditEvent('data_export', { format, rowCount: internalData.length });
     onExport?.(format);
     setShowExportModal(false);
     showToast(`Data exported as ${format.toUpperCase()}`, 'success');
-  }, [internalData, logAuditEvent, onExport, showToast]);
+  }, [internalData, onExport, showToast]);
 
   // Render cell content
   const renderCellContent = useCallback((value: any, record: DataGridData, column: DataGridColumn, isEditing: boolean) => {
@@ -301,7 +247,7 @@ const EditableDataGrid: React.FC<EditableDataGridProps> = ({
   const bulkActions = useMemo(() => {
     const actions = [];
     
-    if (allowedActions.includes('bulk_delete') && commerceState !== 'completion') {
+    if (allowedActions.includes('bulk_delete')) {
       actions.push({
         key: 'delete',
         label: 'Delete Selected',
@@ -323,23 +269,7 @@ const EditableDataGrid: React.FC<EditableDataGridProps> = ({
     }
 
     return actions;
-  }, [allowedActions, commerceState, selectedRows.length]);
-
-  // Component styling based on commerce state
-  const getStateStyles = () => {
-    switch (commerceState) {
-      case 'completion':
-        return 'border-green-200';
-      case 'settlement':
-        return 'border-blue-200';
-      case 'execution':
-        return 'border-orange-200';
-      case 'agreement':
-        return 'border-yellow-200';
-      default:
-        return 'border-gray-300';
-    }
-  };
+  }, [allowedActions, selectedRows.length]);
 
   const sizeClasses = {
     sm: 'text-xs',
@@ -354,11 +284,9 @@ const EditableDataGrid: React.FC<EditableDataGridProps> = ({
         className
       )}
       style={style}
-      data-commerce-state={commerceState}
     >
       <div className={cn(
         'bg-white rounded-lg border shadow-sm',
-        getStateStyles(),
         sizeClasses[size]
       )}>
       {/* Header */}
