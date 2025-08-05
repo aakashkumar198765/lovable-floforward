@@ -503,7 +503,13 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
       <div className="border-b bg-gray-50 p-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">{title}</h2>
-          <div className="flex gap-2">
+          <div className="flex items-center space-x-2">
+            <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+              Export
+            </button>
+            <button className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+              Import
+            </button>
             {allowSkipSteps && currentStep?.optional && (
               <Button variant="ghost" size="sm" onClick={skipStep}>
                 Skip Step

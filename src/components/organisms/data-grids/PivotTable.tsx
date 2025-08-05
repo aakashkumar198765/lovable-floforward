@@ -263,12 +263,11 @@ const PivotTable: React.FC<PivotTableProps> = ({
         sizeClasses[size]
       )}>
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Pivot Analysis</h2>
-        <p className="text-gray-600 text-sm mb-4">Interactive pivot table with configurable rows, columns and aggregation functions for data analysis.</p>
-        
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Pivot Analysis</h2>
+          <p className="text-gray-600 text-sm mt-1">Interactive pivot table with configurable rows, columns and aggregation functions for data analysis.</p>
+          <div className="flex items-center gap-2 mt-2">
             {localRows.length > 0 && (
               <Badge variant="primary" size="sm">
                 Rows: {localRows.length}
@@ -285,29 +284,23 @@ const PivotTable: React.FC<PivotTableProps> = ({
               </Badge>
             )}
           </div>
-
-          <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setConfigMode(!configMode)}
-              iconLeft={<Icon name="settings" />}
-              className="text-gray-700 border-gray-300 hover:bg-gray-50"
-            >
-              Configure
-            </Button>
-            {exportable && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setShowExportModal(true)}
-                iconLeft={<Icon name="download" />}
-                className="text-gray-700 border-gray-300 hover:bg-gray-50"
-              >
-                Export
-              </Button>
-            )}
-          </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={() => setShowExportModal(true)}>
+            Export
+          </button>
+          <button className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+            Import
+          </button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setConfigMode(!configMode)}
+            iconLeft={<Icon name="settings" />}
+            className="text-gray-700 border-gray-300 hover:bg-gray-50"
+          >
+            Configure
+          </Button>
         </div>
       </div>
 

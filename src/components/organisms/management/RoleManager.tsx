@@ -586,13 +586,19 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-        <div className="flex space-x-3">
+        <div className="flex items-center space-x-2">
+          <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+            Export
+          </button>
+          <button className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+            Import
+          </button>
           {allowedActions.includes('create_roles') && (
             <button
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
             >
-              ➕ Create Role
+              Create Role
             </button>
           )}
         </div>

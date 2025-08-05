@@ -409,6 +409,15 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
               </div>
             )}
           </div>
+          
+          <div className="flex items-center space-x-2">
+            <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+              Export
+            </button>
+            <button className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+              Import
+            </button>
+          </div>
         </div>
       </div>
 

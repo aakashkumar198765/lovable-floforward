@@ -303,42 +303,36 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
         sizeClasses[size]
       )}>
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Item Comparison</h2>
-        <p className="text-gray-600 text-sm mb-4">Compare items across multiple criteria with weighted scoring and detailed analysis.</p>
-        
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Item Comparison</h2>
+          <p className="text-gray-600 text-sm mt-1">Compare items across multiple criteria with weighted scoring and detailed analysis.</p>
+          <div className="flex items-center gap-4 mt-2">
             {showScores && scoring.enabled && (
               <Badge variant="info" size="sm">
                 Scoring: {scoring.method}
               </Badge>
             )}
           </div>
-          <div className="flex gap-2">
-            {selectedItems.length > 1 && (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => handleCompare(selectedItems)}
-                iconLeft={<Icon name="compare" />}
-                className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
-              >
-                Compare ({selectedItems.length})
-              </Button>
-            )}
-            {exportable && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setShowExportModal(true)}
-                iconLeft={<Icon name="download" />}
-                className="text-gray-700 border-gray-300 hover:bg-gray-50"
-              >
-                Export
-              </Button>
-            )}
-          </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={() => setShowExportModal(true)}>
+            Export
+          </button>
+          <button className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+            Import
+          </button>
+          {selectedItems.length > 1 && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => handleCompare(selectedItems)}
+              iconLeft={<Icon name="compare" />}
+              className="bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
+            >
+              Compare ({selectedItems.length})
+            </Button>
+          )}
         </div>
       </div>
 

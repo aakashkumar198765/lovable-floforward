@@ -418,11 +418,19 @@ const StateTransition: React.FC<StateTransitionProps> = ({
             </div>
           </div>
           
-          {currentStateInfo?.description && (
-            <Tooltip content={currentStateInfo.description}>
-              <Icon name="info" className="text-gray-400" />
-            </Tooltip>
-          )}
+          <div className="flex items-center space-x-2">
+            <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+              Export
+            </button>
+            <button className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+              Import
+            </button>
+            {currentStateInfo?.description && (
+              <Tooltip content={currentStateInfo.description}>
+                <Icon name="info" className="text-gray-400" />
+              </Tooltip>
+            )}
+          </div>
         </div>
       </div>
 
