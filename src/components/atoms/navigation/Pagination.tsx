@@ -1,7 +1,7 @@
 import React, { forwardRef, useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { PaginationProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 
 const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
   (

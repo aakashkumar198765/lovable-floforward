@@ -1,7 +1,7 @@
 import React, { forwardRef, useState } from 'react';
 import { ChevronRight, Home, X } from 'lucide-react';
 import { BreadcrumbProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 
 const Breadcrumb = forwardRef<HTMLDivElement, BreadcrumbProps>(
   (

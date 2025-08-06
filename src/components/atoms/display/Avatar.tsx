@@ -1,6 +1,6 @@
 import React, { forwardRef, useState } from 'react';
 import { AvatarProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { sizeClasses, shapeClasses, statusClasses, positionClasses } from '../../../utils/tailwindClassMaps';
 import { User } from 'lucide-react';
 

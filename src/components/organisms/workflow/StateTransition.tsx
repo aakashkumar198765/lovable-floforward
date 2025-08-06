@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { StateTransitionProps } from '../../../types';
-import { cn } from '../../../utils/cn';
 import Button from '../../atoms/form/Button';
 import Select from '../../atoms/form/Select';
 import Badge from '../../atoms/display/Badge';
@@ -9,6 +8,7 @@ import Tooltip from '../../atoms/display/Tooltip';
 import Modal from '../../atoms/feedback/Modal';
 import Alert from '../../atoms/feedback/Alert';
 import Toast from '../../atoms/feedback/Toast';
+import { cn } from '../../../utils/utils';
 
 const StateTransition: React.FC<StateTransitionProps> = ({
   id = 'state-transition',

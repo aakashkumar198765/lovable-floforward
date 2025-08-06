@@ -1,7 +1,8 @@
 import React, { forwardRef, useState } from 'react';
 import { AlertProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
+import { variantClasses } from '../../../utils/tailwindClassMaps';
 
 const Alert = forwardRef<HTMLDivElement, AlertProps>(
   (
@@ -41,34 +42,6 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(
       return null;
     }
 
-    // Variant colors with dark theme support
-    const variantColors = {
-      info: {
-        bg: 'bg-blue-50 dark:bg-blue-900/20',
-        border: 'border-blue-200 dark:border-blue-700',
-        text: 'text-blue-900 dark:text-blue-200',
-        icon: 'text-blue-500 dark:text-blue-400'
-      },
-      success: {
-        bg: 'bg-success-50 dark:bg-success-900/20',
-        border: 'border-success-200 dark:border-success-700',
-        text: 'text-success-900 dark:text-success-200',
-        icon: 'text-success-500 dark:text-success-400'
-      },
-      warning: {
-        bg: 'bg-warning-50 dark:bg-warning-900/20',
-        border: 'border-warning-200 dark:border-warning-700',
-        text: 'text-warning-900 dark:text-warning-200',
-        icon: 'text-warning-500 dark:text-warning-400'
-      },
-      error: {
-        bg: 'bg-error-50 dark:bg-error-900/20',
-        border: 'border-error-200 dark:border-error-700',
-        text: 'text-error-900 dark:text-error-200',
-        icon: 'text-error-500 dark:text-error-400'
-      }
-    };
-
     // Severity classes
     const severityClasses = {
       low: 'opacity-80',
@@ -100,9 +73,9 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(
       'relative p-4 font-work-sans transition-all duration-300 ease-in-out',
       banner ? 'rounded-none' : 'rounded-lg',
       bordered ? 'border' : 'border-0',
-      variantColors[variant].bg,
-      variantColors[variant].border,
-      variantColors[variant].text,
+      variantClasses.alertVariantColors[variant].bg,
+      variantClasses.alertVariantColors[variant].border,
+      variantClasses.alertVariantColors[variant].text,
       severityClasses[severity],
       severity === 'critical' && `ring-${variant === 'error' ? 'red' : variant === 'warning' ? 'yellow' : variant === 'success' ? 'green' : 'blue'}-500`,
       className
@@ -120,7 +93,7 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(
         <div className="flex items-start">
           {/* Icon */}
           {showIcon && (
-            <div className={cn('mr-3', variantColors[variant].icon)}>
+            <div className={cn('mr-3', variantClasses.alertVariantColors[variant].icon)}>
               {icon || getDefaultIcon()}
             </div>
           )}

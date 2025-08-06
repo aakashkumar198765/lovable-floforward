@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { SearchBoxProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Input from '../../atoms/form/Input';
 import Button from '../../atoms/form/Button';
 import { Search, X } from 'lucide-react';

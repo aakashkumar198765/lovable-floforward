@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { LabelProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { colorClasses, sizeClasses } from '../../../utils/tailwindClassMaps';
 
 const Label = forwardRef<HTMLLabelElement, LabelProps>(

@@ -1,6 +1,6 @@
 import React, { forwardRef, useEffect, useRef } from 'react';
 import { ToastProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
 import { toastVariantClasses, toastIconClasses } from '../../../utils/tailwindClassMaps';
 

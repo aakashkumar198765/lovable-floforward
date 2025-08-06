@@ -1,7 +1,7 @@
 import React, { forwardRef, useState, useEffect, useRef } from 'react';
 import { X, Plus } from 'lucide-react';
 import { TabProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { tabSizeClasses, tabVariantClasses } from '../../../utils/tailwindClassMaps';
 
 const Tab = forwardRef<HTMLDivElement, TabProps>(

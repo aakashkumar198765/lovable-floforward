@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { PivotTableProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Button from '../../atoms/form/Button';
 import Select from '../../atoms/form/Select';
 import Badge from '../../atoms/display/Badge';

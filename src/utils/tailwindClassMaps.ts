@@ -135,6 +135,83 @@ export const variantClasses = {
     error:
       "bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300",
   },
+
+  alertVariantColors: {
+    info: {
+      bg: "bg-blue-50 dark:bg-blue-900/20",
+      border: "border-blue-200 dark:border-blue-700",
+      text: "text-blue-900 dark:text-blue-200",
+      icon: "text-blue-500 dark:text-blue-400",
+    },
+    success: {
+      bg: "bg-success-50 dark:bg-success-900/20",
+      border: "border-success-200 dark:border-success-700",
+      text: "text-success-900 dark:text-success-200",
+      icon: "text-success-500 dark:text-success-400",
+    },
+    warning: {
+      bg: "bg-warning-50 dark:bg-warning-900/20",
+      border: "border-warning-200 dark:border-warning-700",
+      text: "text-warning-900 dark:text-warning-200",
+      icon: "text-warning-500 dark:text-warning-400",
+    },
+    error: {
+      bg: "bg-error-50 dark:bg-error-900/20",
+      border: "border-error-200 dark:border-error-700",
+      text: "text-error-900 dark:text-error-200",
+      icon: "text-error-500 dark:text-error-400",
+    },
+  },
+};
+
+export const badgeColorClasses = {
+  // Color classes with dark theme support
+  colorClasses: {
+    primary: {
+      default:
+        "bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-200 border-primary-200 dark:border-primary-700",
+      outlined:
+        "bg-transparent border-2 text-primary-600 dark:text-primary-400 border-primary-300 dark:border-primary-600",
+      filled: "bg-primary-500 text-white border-primary-500",
+    },
+    success: {
+      default:
+        "bg-success-100 dark:bg-success-900/30 text-success-800 dark:text-success-200 border-success-200 dark:border-success-700",
+      outlined:
+        "bg-transparent border-2 text-success-600 dark:text-success-400 border-success-300 dark:border-success-600",
+      filled: "bg-success-500 text-white border-success-500",
+    },
+    warning: {
+      default:
+        "bg-warning-100 dark:bg-warning-900/30 text-warning-800 dark:text-warning-200 border-warning-200 dark:border-warning-700",
+      outlined:
+        "bg-transparent border-2 text-warning-600 dark:text-warning-400 border-warning-300 dark:border-warning-600",
+      filled: "bg-warning-500 text-white border-warning-500",
+    },
+    error: {
+      default:
+        "bg-error-100 dark:bg-error-900/30 text-error-800 dark:text-error-200 border-error-200 dark:border-error-700",
+      outlined:
+        "bg-transparent border-2 text-error-600 dark:text-error-400 border-error-300 dark:border-error-600",
+      filled: "bg-error-500 text-white border-error-500",
+    },
+    gray: {
+      default:
+        "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600",
+      outlined:
+        "bg-transparent border-2 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600",
+      filled: "bg-gray-500 text-white border-gray-500",
+    },
+  },
+
+  // Variant classes with dark theme support
+  variantClasses: {
+    default:
+      "bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-200 border-primary-200 dark:border-primary-700",
+    outlined:
+      "bg-transparent border-2 text-primary-600 dark:text-primary-400 border-primary-300 dark:border-primary-600",
+    filled: "bg-primary-500 text-white border-primary-500",
+  },
 };
 
 // Status Classes
@@ -168,42 +245,71 @@ export const statusClasses = {
     warning: "text-orange-600 bg-orange-100",
   },
 
-  colorBgClasses : {
-  active: "bg-success-500",
-  inactive: "bg-gray-400",
-  pending: "bg-warning-500",
-  success: "bg-success-500",
-  error: "bg-error-500",
-  warning: "bg-warning-500",
-  online: "bg-success-500",
-  offline: "bg-gray-400",
-  away: "bg-warning-500",
-  busy: "bg-error-500",
-}, 
-textColors : {
-      active: 'text-success-600',
-      inactive: 'text-gray-500',
-      pending: 'text-warning-600',
-      success: 'text-success-600',
-      error: 'text-error-600',
-      warning: 'text-warning-600',
-      online: 'text-success-600',
-      offline: 'text-gray-500',
-      away: 'text-warning-600',
-      busy: 'text-error-600'
+  colorBgClasses: {
+    active: "bg-success-500",
+    inactive: "bg-gray-400",
+    pending: "bg-warning-500",
+    success: "bg-success-500",
+    error: "bg-error-500",
+    warning: "bg-warning-500",
+    online: "bg-success-500",
+    offline: "bg-gray-400",
+    away: "bg-warning-500",
+    busy: "bg-error-500",
+  },
+
+  textColors: {
+    active: "text-success-600",
+    inactive: "text-gray-500",
+    pending: "text-warning-600",
+    success: "text-success-600",
+    error: "text-error-600",
+    warning: "text-warning-600",
+    online: "text-success-600",
+    offline: "text-gray-500",
+    away: "text-warning-600",
+    busy: "text-error-600",
+  },
+
+  badgeColors: {
+    active: "bg-success-100 text-success-800 border-success-200",
+    inactive: "bg-gray-100 text-gray-800 border-gray-200",
+    pending: "bg-warning-100 text-warning-800 border-warning-200",
+    success: "bg-success-100 text-success-800 border-success-200",
+    error: "bg-error-100 text-error-800 border-error-200",
+    warning: "bg-warning-100 text-warning-800 border-warning-200",
+    online: "bg-success-100 text-success-800 border-success-200",
+    offline: "bg-gray-100 text-gray-800 border-gray-200",
+    away: "bg-warning-100 text-warning-800 border-warning-200",
+    busy: "bg-error-100 text-error-800 border-error-200",
+  },
+
+  sizeClasses: {
+    xs: {
+      dot: "w-2 h-2",
+      badge: "text-xs px-2 py-0.5",
+      text: "text-xs",
+      icon: "w-3 h-3",
     },
-    badgeColors : {
-      active: 'bg-success-100 text-success-800 border-success-200',
-      inactive: 'bg-gray-100 text-gray-800 border-gray-200',
-      pending: 'bg-warning-100 text-warning-800 border-warning-200',
-      success: 'bg-success-100 text-success-800 border-success-200',
-      error: 'bg-error-100 text-error-800 border-error-200',
-      warning: 'bg-warning-100 text-warning-800 border-warning-200',
-      online: 'bg-success-100 text-success-800 border-success-200',
-      offline: 'bg-gray-100 text-gray-800 border-gray-200',
-      away: 'bg-warning-100 text-warning-800 border-warning-200',
-      busy: 'bg-error-100 text-error-800 border-error-200'
-    }
+    sm: {
+      dot: "w-3 h-3",
+      badge: "text-sm px-2.5 py-0.5",
+      text: "text-sm",
+      icon: "w-4 h-4",
+    },
+    md: {
+      dot: "w-4 h-4",
+      badge: "text-sm px-3 py-1",
+      text: "text-base",
+      icon: "w-5 h-5",
+    },
+    lg: {
+      dot: "w-5 h-5",
+      badge: "text-base px-4 py-1.5",
+      text: "text-lg",
+      icon: "w-6 h-6",
+    },
+  },
 };
 
 // Shape Classes
@@ -226,6 +332,34 @@ export const shapeClasses = {
   },
 };
 
+export const modalSliderClasses = {
+  modalSizeClasses: {
+    xs: "max-w-xs",
+    sm: "max-w-sm",
+    md: "max-w-md",
+    lg: "max-w-lg",
+    xl: "max-w-xl",
+    "2xl": "max-w-2xl",
+    "3xl": "max-w-3xl",
+    "4xl": "max-w-4xl",
+    "5xl": "max-w-5xl",
+    "6xl": "max-w-6xl",
+    full: "max-w-full",
+  },
+  sliderSizeClasses: {
+    xs: "w-80",
+    sm: "w-96",
+    md: "w-1/3",
+    lg: "w-1/2",
+    xl: "w-2/3",
+    "2xl": "w-3/4",
+    "3xl": "w-4/5",
+    "4xl": "w-5/6",
+    "5xl": "w-11/12",
+    "6xl": "w-full",
+    full: "w-full",
+  },
+};
 // Position Classes
 export const positionClasses = {
   // Status position for avatars

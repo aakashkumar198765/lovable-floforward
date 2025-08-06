@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { CommerceState, MetricCardProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Badge from '../../atoms/display/Badge';
 import Button from '../../atoms/form/Button';
 import Tooltip from '../../atoms/display/Tooltip';

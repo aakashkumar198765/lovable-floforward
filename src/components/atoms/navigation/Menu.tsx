@@ -1,7 +1,7 @@
 import React, { forwardRef, useState, useRef, useEffect, useCallback } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { MenuProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { menuVariantClasses, menuPlacementClasses } from '../../../utils/tailwindClassMaps';
 
 const Menu = forwardRef<HTMLDivElement, MenuProps>(

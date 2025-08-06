@@ -1,6 +1,6 @@
 import React, { forwardRef, useState, useEffect, useRef } from 'react';
 import { CleanCheckboxProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 
 const Checkbox = forwardRef<HTMLInputElement, CleanCheckboxProps>(
   (

@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { SettingsManagerProps, SettingCategory, Setting } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Button from '../../atoms/form/Button';
 import Input from '../../atoms/form/Input';
 import Select from '../../atoms/form/Select';

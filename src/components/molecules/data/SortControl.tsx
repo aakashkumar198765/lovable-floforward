@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { SortControlProps, SortOption, SortCriteria } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Button from '../../atoms/form/Button';
 import Select from '../../atoms/form/Select';
 import { ChevronUp, ChevronDown, X } from 'lucide-react';

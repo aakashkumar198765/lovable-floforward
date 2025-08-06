@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { LoadingStateProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Spinner from './Spinner';
 
 const LoadingState = forwardRef<HTMLDivElement, LoadingStateProps>(
@@ -90,17 +90,6 @@ const LoadingState = forwardRef<HTMLDivElement, LoadingStateProps>(
             {description}
           </p>
         )}
-
-        {/* Commerce state indicator */}
-        {/* {commerceState && commerceState !== 'initiation' && (
-          <div className={cn(
-            'absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white',
-            commerceState === 'agreement' && 'bg-warning-500',
-            commerceState === 'execution' && 'bg-primary-600',
-            commerceState === 'settlement' && 'bg-gray-500',
-            commerceState === 'completion' && 'bg-success-500'
-          )} />
-        )} */}
       </div>
     );
 

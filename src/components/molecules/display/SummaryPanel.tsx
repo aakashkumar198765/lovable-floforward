@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { CommerceState, SummaryItem, SummaryPanelProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Badge from '../../atoms/display/Badge';
 import Button from '../../atoms/form/Button';
 import { RefreshCw, Download, ChevronDown, Copy } from 'lucide-react';

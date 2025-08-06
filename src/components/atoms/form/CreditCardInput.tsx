@@ -1,6 +1,6 @@
 import React, { forwardRef, useState, useCallback } from 'react';
 import { InputProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { Lock } from 'lucide-react';
 import { formInputSizeClasses } from '../../../utils/tailwindClassMaps';
 

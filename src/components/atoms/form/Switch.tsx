@@ -1,6 +1,6 @@
 import React, { forwardRef, useState, useEffect } from 'react';
 import { SwitchProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 
 const Switch = forwardRef<HTMLInputElement, SwitchProps>(
   (

@@ -1,6 +1,6 @@
 import React, { forwardRef, useState, useEffect } from 'react';
 import { CascadingSelectProps, SelectOption, SelectGroup } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { formInputSizeClasses } from '../../../utils/tailwindClassMaps';
 
 const CascadingSelect = forwardRef<HTMLDivElement, CascadingSelectProps>(

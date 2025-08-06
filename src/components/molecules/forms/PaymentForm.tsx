@@ -1,6 +1,6 @@
 import React, { forwardRef, useState, useEffect, useCallback } from 'react';
 import { PaymentFormProps, PaymentData } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { Input, Select, Checkbox, Button, Radio } from '../../atoms/form';
 import { Lock } from 'lucide-react';
 // import CreditCardInput from '../../atoms/form/CreditCardInput';

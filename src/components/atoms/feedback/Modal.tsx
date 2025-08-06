@@ -1,7 +1,8 @@
 import React, { forwardRef, useEffect, useRef } from 'react';
 import { ModalProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { X, Loader2 } from 'lucide-react';
+import { modalSliderClasses } from '../../../utils/tailwindClassMaps';
 
 const Modal = forwardRef<HTMLDivElement, ModalProps>(
   (
@@ -120,36 +121,6 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
       }
     };
 
-    // Size classes for modal variant
-    const modalSizeClasses = {
-      xs: 'max-w-xs',
-      sm: 'max-w-sm',
-      md: 'max-w-md',
-      lg: 'max-w-lg',
-      xl: 'max-w-xl',
-      '2xl': 'max-w-2xl',
-      '3xl': 'max-w-3xl',
-      '4xl': 'max-w-4xl',
-      '5xl': 'max-w-5xl',
-      '6xl': 'max-w-6xl',
-      full: 'max-w-full'
-    };
-
-    // Size classes for slider variant
-    const sliderSizeClasses = {
-      xs: 'w-80',
-      sm: 'w-96',
-      md: 'w-1/3',
-      lg: 'w-1/2',
-      xl: 'w-2/3',
-      '2xl': 'w-3/4',
-      '3xl': 'w-4/5',
-      '4xl': 'w-5/6',
-      '5xl': 'w-11/12',
-      '6xl': 'w-full',
-      full: 'w-full'
-    };
-
     // Position classes for modal variant
     const modalPositionClasses = {
       center: 'items-center justify-center',
@@ -238,7 +209,7 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
                 ref={modalRef}
                 className={cn(
                   'relative w-full transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-xl dark:shadow-2xl transition-all duration-300 ease-in-out font-work-sans',
-                  modalSizeClasses[size],
+                  modalSliderClasses.modalSizeClasses[size],
                   'scale-100',
                   className
                 )}
@@ -356,7 +327,7 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
               className={cn(
                 'relative bg-white dark:bg-gray-800 shadow-xl dark:shadow-2xl transform transition-all duration-300 ease-in-out font-work-sans flex flex-col',
                 sliderConfig.height,
-                slideDirection === 'left' || slideDirection === 'right' ? sliderSizeClasses[size] : 'w-full',
+                slideDirection === 'left' || slideDirection === 'right' ? modalSliderClasses.sliderSizeClasses[size] : 'w-full',
                 'translate-x-0 translate-y-0',
                 className
               )}

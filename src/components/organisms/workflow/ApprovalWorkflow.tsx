@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { ApprovalWorkflowProps, WorkflowStep } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Button from '../../atoms/form/Button';
 import Textarea from '../../atoms/form/Textarea';
 import Badge from '../../atoms/display/Badge';

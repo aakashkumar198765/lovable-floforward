@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { ImportWizardProps, ImportStep } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Button from '../../atoms/form/Button';
 import FileUpload from '../../atoms/form/FileUpload';
 import Select from '../../atoms/form/Select';

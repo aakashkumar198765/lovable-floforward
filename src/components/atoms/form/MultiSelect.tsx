@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { MultiSelectProps, SelectOption, SelectGroup } from "../../../types";
-import { cn } from "../../../utils/cn";
+import { cn } from "../../../utils/utils";
 import Badge from "../display/Badge";
 
 const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(

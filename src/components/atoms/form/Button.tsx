@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { ButtonProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { sizeClasses, variantClasses, stateClasses, focusClasses } from '../../../utils/tailwindClassMaps';
 import { Loader2 } from 'lucide-react';
 
