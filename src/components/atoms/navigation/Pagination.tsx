@@ -165,14 +165,21 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
         >
           {/* Previous button */}
           <Button
+            applyDefaultClasses={false}
             variant="secondary"
             size={size}
             onClick={() => handlePageChange(current - 1)}
             disabled={current <= 1 || disabled}
-            className="rounded-l-md border-r-0"
+            className={cn(
+              getButtonClasses(false, current <= 1 || disabled),
+              "rounded-l-md border-r-0"
+            )}
+            style={{ display: 'flex' }}
             aria-label="Previous page"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <span className="flex items-center justify-center">
+              <ChevronLeft className="w-4 h-4" />
+            </span>
           </Button>
 
           {/* Page info */}
@@ -188,14 +195,21 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
 
           {/* Next button */}
           <Button
+            applyDefaultClasses={false}
             variant="secondary"
             size={size}
             onClick={() => handlePageChange(current + 1)}
             disabled={current >= totalPages || disabled}
-            className="rounded-r-md border-l-0"
+            className={cn(
+              getButtonClasses(false, current >= totalPages || disabled),
+              "rounded-r-md border-l-0"
+            )}
+            style={{ display: 'flex' }}
             aria-label="Next page"
           >
-            <ChevronRight className="w-4 h-4" />
+            <span className="flex items-center justify-center">
+              <ChevronRight className="w-4 h-4" />
+            </span>
           </Button>
         </div>
       );
@@ -234,6 +248,7 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
                   label: option.toString()
                 }))}
                 size={size}
+                className="w-20"
               />
             </div>
           )}
@@ -244,28 +259,42 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
           {/* First page */}
           {showFirstLastJumpers && (
             <Button
+              applyDefaultClasses={false}
               variant="secondary"
               size={size}
               onClick={() => handlePageChange(1)}
               disabled={current <= 1 || disabled}
-              className="rounded-l-md"
+              className={cn(
+                getButtonClasses(false, current <= 1 || disabled),
+                "rounded-l-md"
+              )}
+              style={{ display: 'flex' }}
               aria-label="First page"
             >
-              <ChevronsLeft className="w-4 h-4" />
+              <span className="flex items-center justify-center">
+                <ChevronsLeft className="w-4 h-4" />
+              </span>
             </Button>
           )}
 
           {/* Previous page */}
           {showPrevNextJumpers && (
             <Button
+              applyDefaultClasses={false}
               variant="secondary"
               size={size}
               onClick={() => handlePageChange(current - 1)}
               disabled={current <= 1 || disabled}
-              className={!showFirstLastJumpers ? 'rounded-l-md' : ''}
+              className={cn(
+                getButtonClasses(false, current <= 1 || disabled),
+                !showFirstLastJumpers ? 'rounded-l-md' : ''
+              )}
+              style={{ display: 'flex' }}
               aria-label="Previous page"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <span className="flex items-center justify-center">
+                <ChevronLeft className="w-4 h-4" />
+              </span>
             </Button>
           )}
 
@@ -276,15 +305,22 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
                 <span className="px-3 py-2 dark:text-white text-gray-500">...</span>
               ) : (
                 <Button
+                  applyDefaultClasses={false}
                   variant={page === current ? 'primary' : 'secondary'}
                   size={size}
                   onClick={() => handlePageChange(page as number)}
                   disabled={disabled}
-                  className="rounded-md"
+                  className={cn(
+                    getButtonClasses(page === current, disabled),
+                    "rounded-md"
+                  )}
+                  style={{ display: 'flex' }}
                   aria-label={`Page ${page}`}
                   aria-current={page === current ? 'page' : undefined}
                 >
-                  {page}
+                  <span className="flex items-center justify-center">
+                    {page}
+                  </span>
                 </Button>
               )}
             </React.Fragment>
@@ -293,28 +329,42 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
           {/* Next page */}
           {showPrevNextJumpers && (
             <Button
+              applyDefaultClasses={false}
               variant="secondary"
               size={size}
               onClick={() => handlePageChange(current + 1)}
               disabled={current >= totalPages || disabled}
-              className={!showFirstLastJumpers ? 'rounded-r-md' : ''}
+              className={cn(
+                getButtonClasses(false, current >= totalPages || disabled),
+                !showFirstLastJumpers ? 'rounded-r-md' : ''
+              )}
+              style={{ display: 'flex' }}
               aria-label="Next page"
             >
-              <ChevronRight className="w-4 h-4" />
+              <span className="flex items-center justify-center">
+                <ChevronRight className="w-4 h-4" />
+              </span>
             </Button>
           )}
 
           {/* Last page */}
           {showFirstLastJumpers && (
             <Button
+              applyDefaultClasses={false}
               variant="secondary"
               size={size}
               onClick={() => handlePageChange(totalPages)}
               disabled={current >= totalPages || disabled}
-              className="rounded-r-md"
+              className={cn(
+                getButtonClasses(false, current >= totalPages || disabled),
+                "rounded-r-md"
+              )}
+              style={{ display: 'flex' }}
               aria-label="Last page"
             >
-              <ChevronsRight className="w-4 h-4" />
+              <span className="flex items-center justify-center">
+                <ChevronsRight className="w-4 h-4" />
+              </span>
             </Button>
           )}
         </div>
@@ -337,12 +387,19 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
                 className={sizeClasses[size].input}
               />
               <Button
+                applyDefaultClasses={false}
                 variant="primary"
                 size={size}
                 onClick={handleQuickJump}
                 disabled={disabled || !jumpPage}
+                className={cn(
+                  getButtonClasses(false, disabled || !jumpPage)
+                )}
+                style={{ display: 'flex' }}
               >
-                Go
+                <span className="flex items-center justify-center">
+                  Go
+                </span>
               </Button>
             </>
           )}

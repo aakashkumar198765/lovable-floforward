@@ -148,14 +148,16 @@ const Breadcrumb = forwardRef<HTMLDivElement, BreadcrumbProps>(
             <React.Fragment key={item.id}>
               {isEllipsis ? (
                 <Button
+                  applyDefaultClasses={false}
                   onClick={() => setIsExpanded(true)}
                   className={cn(
                     'inline-flex items-center dark:text-white text-gray-500 hover:text-gray-700 cursor-pointer transition-all duration-200 px-3 py-1 rounded-md hover:bg-gray-100',
                     'flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2'
                   )}
+                  style={{ display: 'flex' }}
                   aria-label="Show more breadcrumb items"
                 >
-                  <span className="text-lg font-bold hover:scale-125 transition-transform duration-200">
+                  <span className="text-lg font-bold hover:scale-125 transition-transform duration-200 flex items-center justify-center">
                     ...
                   </span>
                 </Button>
@@ -221,14 +223,18 @@ const Breadcrumb = forwardRef<HTMLDivElement, BreadcrumbProps>(
         {/* Collapse button */}
         {collapsible && isExpanded && items && items.length > maxItems && (
           <Button
+            applyDefaultClasses={false}
             onClick={() => setIsExpanded(false)}
             className={cn(
               'ml-3 p-1.5 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-200',
               'dark:text-white text-gray-400 hover:text-gray-600'
             )}
+            style={{ display: 'flex' }}
             aria-label="Collapse breadcrumb"
           >
-            <X className="w-4 h-4" />
+            <span className="flex items-center justify-center">
+              <X className="w-4 h-4" />
+            </span>
           </Button>
         )}
       </nav>

@@ -150,11 +150,15 @@ const NavigationButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, Navig
       <Button
         ref={ref as React.ForwardedRef<HTMLButtonElement>}
         type="button"
+        applyDefaultClasses={false}
         {...commonProps}
+        style={{ display: 'flex', ...style }}
       >
-        {iconPosition === 'left' && renderIcon()}
-        {children}
-        {iconPosition === 'right' && renderIcon()}
+        <span className="flex items-center justify-center gap-2">
+          {iconPosition === 'left' && renderIcon()}
+          {children}
+          {iconPosition === 'right' && renderIcon()}
+        </span>
       </Button>
     );
   }

@@ -632,18 +632,22 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
             onBlur={handleBlur}
             rightIcon={
               <Button
+                applyDefaultClasses={false}
                 type="button"
                 onClick={handleCalendarToggle}
                 disabled={disabled || readonly}
                 className={cn(
-                  'w-5 h-5 text-gray-400 hover:text-blue-500',
+                  'w-5 h-5 text-gray-400 hover:text-blue-500 flex items-center justify-center',
                   'disabled:cursor-not-allowed disabled:text-gray-300',
-                  'transition-colors duration-200',
+                  'transition-colors duration-200 p-0 border-0 bg-transparent',
                   (isFocused || isCalendarOpen) && 'text-blue-500'
                 )}
+                style={{ display: 'flex' }}
                 aria-label="Open calendar"
               >
-                {isTimeOnly ? <ClockIcon /> : <CalendarIcon />}
+                <span className="flex items-center justify-center">
+                  {isTimeOnly ? <ClockIcon /> : <CalendarIcon />}
+                </span>
               </Button>
             }
             {...props}

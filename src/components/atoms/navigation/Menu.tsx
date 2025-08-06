@@ -174,9 +174,10 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
       return (
         <div key={item.id} className="relative">
           <Button
+            applyDefaultClasses={false}
             ref={(element: any) => setItemRef(item.id, element)}
             className={cn(
-              'w-full flex items-center px-4 py-3 text-sm text-left transition-all duration-200 font-work-sans relative',
+              'w-full flex items-center justify-between px-4 py-3 text-sm text-left transition-all duration-200 font-work-sans relative',
               item.disabled
                 ? 'text-gray-400 cursor-not-allowed opacity-50'
                 : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 focus:bg-gray-50 focus:text-gray-900 focus:outline-none',
@@ -184,6 +185,7 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
               isSubmenuOpen && 'bg-gray-50',
               'group'
             )}
+            style={{ display: 'flex' }}
             onClick={() => {
               if (hasSubmenu && trigger === 'click') {
                 handleSubmenuToggle(item.id, !isSubmenuOpen);
@@ -209,44 +211,52 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
             aria-haspopup={hasSubmenu}
             aria-expanded={hasSubmenu ? isSubmenuOpen : undefined}
           >
-            {/* Icon */}
-            {showIcons && item.icon && (
-              <span className="mr-3 flex-shrink-0 w-4 h-4 text-gray-500 group-hover:text-gray-700">
-                {item.icon}
-              </span>
-            )}
-
-            {/* Label */}
-            {item.label && (
-              <span className="flex-1 truncate font-medium">
-                {item.label}
-              </span>
-            )}
-
-            {/* Badge */}
-            {item.badge && (
-              <span className="ml-2 px-2 py-1 text-xs bg-primary-100 text-primary-700 rounded-full font-medium">
-                {item.badge}
-              </span>
-            )}
-
-            {/* Shortcut */}
-            {showShortcuts && item.shortcut && (
-              <span className="ml-2 text-xs text-gray-400 font-mono bg-gray-100 px-1.5 py-0.5 rounded">
-                {item.shortcut}
-              </span>
-            )}
-
-            {/* Submenu indicator */}
-            {hasSubmenu && (
-              <ChevronRight
-                className={cn(
-                  'ml-2 w-4 h-4 transition-transform duration-200 text-gray-400',
-                  trigger === 'click' && isSubmenuOpen && 'transform rotate-90',
-                  trigger === 'hover' && 'transform rotate-0'
+            <span className="w-full flex items-center justify-between gap-3">
+              {/* Left side: Icon + Label */}
+              <span className="flex items-center gap-3">
+                {/* Icon */}
+                {showIcons && item.icon && (
+                  <span className="flex-shrink-0 w-4 h-4 text-gray-500 group-hover:text-gray-700 flex items-center justify-center">
+                    {item.icon}
+                  </span>
                 )}
-              />
-            )}
+
+                {/* Label */}
+                {item.label && (
+                  <span className="truncate font-medium flex items-center">
+                    {item.label}
+                  </span>
+                )}
+              </span>
+
+              {/* Right side: Badge + Shortcut + Submenu indicator */}
+              <span className="flex items-center gap-2 flex-shrink-0">
+                {/* Badge */}
+                {item.badge && (
+                  <span className="px-2 py-1 text-xs bg-primary-100 text-primary-700 rounded-full font-medium flex items-center justify-center">
+                    {item.badge}
+                  </span>
+                )}
+
+                {/* Shortcut */}
+                {showShortcuts && item.shortcut && (
+                  <span className="text-xs text-gray-400 font-mono bg-gray-100 px-1.5 py-0.5 rounded flex items-center justify-center">
+                    {item.shortcut}
+                  </span>
+                )}
+
+                {/* Submenu indicator */}
+                {hasSubmenu && (
+                  <ChevronRight
+                    className={cn(
+                      'w-4 h-4 transition-transform duration-200 text-gray-400 flex items-center justify-center',
+                      trigger === 'click' && isSubmenuOpen && 'transform rotate-90',
+                      trigger === 'hover' && 'transform rotate-0'
+                    )}
+                  />
+                )}
+              </span>
+            </span>
           </Button>
 
           {/* Description */}
