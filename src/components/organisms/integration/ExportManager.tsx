@@ -26,6 +26,8 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
   className = '',
   style = {},
   allowedActions = [],
+  importable = true,
+  exportable = true,
 }) => {
   const [selectedFormat, setSelectedFormat] = useState(formats[0]?.key || '');
   const [selectedFields, setSelectedFields] = useState<string[]>(fields.map(f => f.key!).filter(Boolean));
@@ -416,6 +418,14 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
     >
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+        <div className="flex items-center space-x-2">
+          {exportable && <button className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+            Export
+          </button>}
+          {importable && <button className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+            Import
+          </button>}
+        </div>
       </div>
 
       {renderProgress()}

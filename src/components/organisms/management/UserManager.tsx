@@ -13,6 +13,8 @@ export const UserManager: React.FC<UserManagerProps> = ({
   filterable = true,
   bulkActions = true,
   inviteUsers = true,
+  importable = true,
+  exportable = true,
   size = 'md',
   onUserCreate,
   onUserUpdate,
@@ -590,12 +592,12 @@ export const UserManager: React.FC<UserManagerProps> = ({
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
         <div className="flex items-center space-x-2">
-          <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+          {exportable && <button className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
             Export
-          </button>
-          <button className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+          </button>}
+          {importable && <button className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700">
             Import
-          </button>
+          </button>}
           {inviteUsers && allowedActions.includes('invite_users') && (
             <button
               onClick={() => setShowInviteModal(true)}

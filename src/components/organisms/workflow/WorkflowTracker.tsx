@@ -469,12 +469,18 @@ export const WorkflowTracker: React.FC<WorkflowTrackerProps> = ({
       {title && (
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-          {autoRefresh && (
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
-              <span>🔄</span>
-              <span>Auto-refresh every {refreshInterval / 1000}s</span>
-            </div>
-          )}
+          <div className="flex items-center space-x-2">
+            {autoRefresh && (
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <span>🔄</span>
+                <span>Auto-refresh every {refreshInterval / 1000}s</span>
+              </div>
+            )}
+            {/* Button action goes here */}
+            {/* <div className="flex items-center space-x-2">
+              
+            </div> */}
+          </div>
         </div>
       )}
 

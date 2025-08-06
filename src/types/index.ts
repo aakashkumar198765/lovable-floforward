@@ -1536,6 +1536,23 @@ export interface EditableDataGridProps extends EnterpriseComponentProps {
     onChange?: (page: number, pageSize?: number) => void;
     onShowSizeChange?: (page: number, pageSize: number) => void;
   };
+  infiniteScroll?: {
+    enabled?: boolean;
+    hasNextPage?: boolean;
+    isFetchingNextPage?: boolean;
+    threshold?: number;
+    showLoader?: boolean;
+    onLoadMore?: (cursor?: string | number) => Promise<{
+      data: DataGridData[];
+      nextCursor?: string | number;
+      hasNextPage: boolean;
+    }>;
+    onStateChange?: (state: {
+      hasNextPage: boolean;
+      isLoading: boolean;
+      cursor?: string | number;
+    }) => void;
+  };
   selection?: {
     type?: 'checkbox' | 'radio';
     selectedRowKeys?: string[];
@@ -1551,6 +1568,9 @@ export interface EditableDataGridProps extends EnterpriseComponentProps {
     enabled?: boolean;
     itemHeight?: number;
     overscan?: number;
+    containerHeight?: number;
+    scrollToIndex?: number;
+    onScroll?: (scrollTop: number, scrollHeight: number, clientHeight: number) => void;
   };
   size?: 'sm' | 'md' | 'lg';
   bordered?: boolean;
@@ -1619,6 +1639,7 @@ export interface PivotTableProps extends EnterpriseComponentProps {
   };
   expandable?: boolean;
   exportable?: boolean;
+  configurable?: boolean;
   size?: 'sm' | 'md' | 'lg';
   showTotals?: boolean;
   showSubtotals?: boolean;
@@ -1672,6 +1693,8 @@ export interface ApprovalWorkflowProps extends EnterpriseComponentProps {
   showComments?: boolean;
   allowDelegate?: boolean;
   allowSkip?: boolean;
+  exportable?: boolean;
+  importable?: boolean;
   onStepAction?: (stepId: string, action: string, data?: any) => void;
   onWorkflowComplete?: (result: 'approved' | 'rejected' | 'cancelled') => void;
   onDelegate?: (stepId: string, newAssignee: string) => void;
@@ -1705,6 +1728,8 @@ export interface StateTransitionProps extends EnterpriseComponentProps {
   showHistory?: boolean;
   showValidation?: boolean;
   confirmTransitions?: boolean;
+  exportable?: boolean;
+  importable?: boolean;
   onStateChange?: (fromState: string, toState: string) => void;
   onValidate?: (toState: string) => Promise<boolean>;
 }
@@ -1831,6 +1856,8 @@ export interface UserManagerProps extends EnterpriseComponentProps {
   filterable?: boolean;
   bulkActions?: boolean;
   inviteUsers?: boolean;
+  exportable?: boolean;
+  importable?: boolean;
   size?: 'sm' | 'md' | 'lg';
   onUserCreate?: (userData: any) => void;
   onUserUpdate?: (userId: string, userData: any) => void;
@@ -1868,6 +1895,8 @@ export interface RoleManagerProps extends EnterpriseComponentProps {
   cloneable?: boolean;
   size?: 'sm' | 'md' | 'lg';
   showPermissionMatrix?: boolean;
+  exportable?: boolean;
+  importable?: boolean;
   onRoleCreate?: (roleData: any) => void;
   onRoleUpdate?: (roleId: string, roleData: any) => void;
   onRoleDelete?: (roleId: string) => void;
@@ -1909,6 +1938,8 @@ export interface ImportWizardProps extends EnterpriseComponentProps {
   size?: 'sm' | 'md' | 'lg';
   showProgress?: boolean;
   allowSkipSteps?: boolean;
+  exportable?: boolean;
+  importable?: boolean;
   onFileUpload?: (file: File) => void;
   onFieldMapping?: (mapping: any[]) => void;
   onValidation?: (data: any[]) => Promise<any[]>;
@@ -1955,6 +1986,8 @@ export interface ExportManagerProps extends EnterpriseComponentProps {
   showPreview?: boolean;
   showProgress?: boolean;
   batchSize?: number;
+  exportable?: boolean;
+  importable?: boolean;
   onExport?: (format: string, options: any) => Promise<void>;
   onSchedule?: (schedule: any) => void;
   onTemplateCreate?: (template: any) => void;
@@ -1998,6 +2031,8 @@ export interface APIConnectorProps extends EnterpriseComponentProps {
     lastRun?: string;
     nextRun?: string;
   }>;
+  exportable?: boolean;
+  importable?: boolean;
   layout?: 'tabs' | 'accordion' | 'split';
   testable?: boolean;
   monitorable?: boolean;

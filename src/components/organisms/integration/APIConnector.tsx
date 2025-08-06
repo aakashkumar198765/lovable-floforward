@@ -21,6 +21,8 @@ export const APIConnector: React.FC<APIConnectorProps> = ({
   style = {},
   allowedActions = [],
   userRole,
+  exportable = true,
+  importable = true,
 }) => {
   const [activeTab, setActiveTab] = useState<'endpoints' | 'integrations' | 'logs' | 'metrics'>('endpoints');
   const [selectedEndpoint, setSelectedEndpoint] = useState<any>(null);
@@ -529,8 +531,18 @@ export const APIConnector: React.FC<APIConnectorProps> = ({
     >
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-        <div className="text-sm text-gray-600">
-          {endpoints.length} endpoints • {integrations.length} integrations
+        <div className="flex items-center space-x-4">
+          <div className="text-sm text-gray-600">
+            {endpoints.length} endpoints • {integrations.length} integrations
+          </div>
+          <div className="flex items-center space-x-2">
+            {exportable && <button className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+              Export
+            </button>}
+            {importable && <button className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+              Import
+            </button>}
+          </div>
         </div>
       </div>
 

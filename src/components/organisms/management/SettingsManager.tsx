@@ -475,12 +475,12 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
             )}
           </div>
           <div className="flex items-center space-x-2">
-            <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleExport}>
+            {exportable && <button className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleExport}>
               Export
-            </button>
-            <button className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700" onClick={() => setShowImportModal(true)}>
+            </button>}
+            {importable && <button className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700" onClick={() => setShowImportModal(true)}>
               Import
-            </button>
+            </button>}
             {searchable && (
               <SearchBox
                 value={searchQuery}
@@ -593,12 +593,12 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
           )}
         </div>
         <div className="flex items-center space-x-2">
-          <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleExport}>
+         {exportable && <button className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleExport}>
             Export
-          </button>
-          <button className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700" onClick={() => setShowImportModal(true)}>
+          </button>}
+          {importable && <button className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700" onClick={() => setShowImportModal(true)}>
             Import
-          </button>
+          </button>}
           {searchable && (
             <SearchBox
               value={searchQuery}
@@ -737,7 +737,7 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
         />
       )}
       </div>
-    </div>
+    // </div>
   );
 };
 

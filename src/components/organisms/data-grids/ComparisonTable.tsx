@@ -303,7 +303,7 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
         sizeClasses[size]
       )}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between m-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Item Comparison</h2>
           <p className="text-gray-600 text-sm mt-1">Compare items across multiple criteria with weighted scoring and detailed analysis.</p>
@@ -316,12 +316,9 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={() => setShowExportModal(true)}>
+          {exportable && <button className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={() => setShowExportModal(true)}>
             Export
-          </button>
-          <button className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700">
-            Import
-          </button>
+          </button>}
           {selectedItems.length > 1 && (
             <Button
               variant="primary"
@@ -337,7 +334,7 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
       </div>
 
       {/* Comparison Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto m-6">
         <table className="min-w-full border-collapse">
           <thead className="bg-gray-50">
             <tr className="border-b border-gray-200">

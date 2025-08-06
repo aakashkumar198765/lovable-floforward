@@ -31,6 +31,8 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
   allowSkip = false,
   className = '',
   style = {},
+  exportable = true,
+  importable = true,
   onStepAction,
   onWorkflowComplete,
   onDelegate,
@@ -411,12 +413,12 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
           </div>
           
           <div className="flex items-center space-x-2">
-            <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+            {exportable && <button className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
               Export
-            </button>
-            <button className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+            </button>}
+            {importable && <button className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700">
               Import
-            </button>
+            </button>}
           </div>
         </div>
       </div>

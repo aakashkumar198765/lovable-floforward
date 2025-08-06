@@ -54,6 +54,7 @@ import {
   WorkflowPage,
   ThemeToggle,
 } from "../components";
+import EditableDataGridInfiniteScrollExample from "./EditableDataGridInfiniteScrollExample";
 
 function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -2694,6 +2695,9 @@ function HomePage() {
             size="md"
           />
         </div>
+      </div>
+      <div className="min-h-screen bg-gray-50">
+        <EditableDataGridInfiniteScrollExample />
       </div>
     </div>
   );
