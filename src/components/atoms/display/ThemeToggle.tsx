@@ -102,15 +102,15 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
     >
       {theme === 'dark' ? (
-        <>
+        <span className="flex items-center gap-[5px]">
           <Sun className="w-4 h-4" />
           Light
-        </>
+        </span>
       ) : (
-        <>
+        <span className="flex items-center gap-[5px]">
           <Moon className="w-4 h-4" />
           Dark
-        </>
+        </span>
       )}
     </Button>
   );

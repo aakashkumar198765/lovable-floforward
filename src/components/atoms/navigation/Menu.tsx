@@ -3,6 +3,7 @@ import { ChevronRight } from 'lucide-react';
 import { MenuProps } from '../../../types';
 import { cn } from '../../../utils/utils';
 import { menuVariantClasses, menuPlacementClasses } from '../../../utils/tailwindClassMaps';
+import { Button } from '../form';
 
 const Menu = forwardRef<HTMLDivElement, MenuProps>(
   (
@@ -172,8 +173,8 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
 
       return (
         <div key={item.id} className="relative">
-          <button
-            ref={(element) => setItemRef(item.id, element)}
+          <Button
+            ref={(element: any) => setItemRef(item.id, element)}
             className={cn(
               'w-full flex items-center px-4 py-3 text-sm text-left transition-all duration-200 font-work-sans relative',
               item.disabled
@@ -246,7 +247,7 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
                 )}
               />
             )}
-          </button>
+          </Button>
 
           {/* Description */}
           {item.description && (

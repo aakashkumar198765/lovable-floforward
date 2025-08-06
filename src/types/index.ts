@@ -264,6 +264,7 @@ export interface SelectProps extends EnterpriseComponentProps {
   noOptionsMessage?: string;
   loadingMessage?: string;
   isLoading?: boolean;
+  tabIndex?: number;
   onChange?: (value: string | string[], option?: SelectOption | SelectOption[]) => void;
   onBlur?: (event: React.FocusEvent<HTMLSelectElement>) => void;
   onFocus?: (event: React.FocusEvent<HTMLSelectElement>) => void;
@@ -382,10 +383,13 @@ export interface ButtonProps extends EnterpriseComponentProps {
   target?: string;
   rel?: string;
   role?: string;
+  tabIndex?: number;
   applyDefaultClasses?: boolean;
   onClick?: (event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
   onFocus?: (event: React.FocusEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
+  onMouseEnter?: (event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
+  onMouseLeave?: (event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
 }
 
 // Clean Checkbox Types
@@ -2328,6 +2332,38 @@ export interface WorkflowPageProps extends EnterpriseComponentProps {
   onTemplateSelect?: (template: any) => void;
   onStepEdit?: (stepId: string, data: any) => void;
   onConnectionEdit?: (connectionId: string, data: any) => void;
+}
+
+export interface LoginPageProps extends EnterpriseComponentProps {
+  id?: string;
+  title?: string;
+  subtitle?: string;
+  logo?: string;
+  logoAlt?: string;
+  backgroundImage?: string;
+  showRememberMe?: boolean;
+  showForgotPassword?: boolean;
+  showSignUp?: boolean;
+  showSocialLogin?: boolean;
+  socialProviders?: Array<{
+    id: string;
+    name: string;
+    icon: string;
+    color: string;
+  }>;
+  otpLength?: number;
+  otpResendTime?: number;
+  showOtpResend?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  layout?: 'centered' | 'split' | 'minimal';
+  theme?: 'light' | 'dark' | 'auto';
+  onEmailSubmit?: (email: string) => Promise<boolean>;
+  onOtpSubmit?: (otp: string) => Promise<boolean>;
+  onSocialLogin?: (provider: string) => Promise<boolean>;
+  onForgotPassword?: (email: string) => Promise<boolean>;
+  onSignUp?: () => void;
+  onLoginSuccess?: (user: any) => void;
+  onLoginError?: (error: string) => void;
 }
 
 // =============================================================================

@@ -218,7 +218,29 @@ export const componentRegistry = {
     },
     pages: {
       components: [
-        // Add page template components here...
+        {
+          name: 'LoginPage',
+          component: Templates.LoginPageTemplate,
+          description: 'Enterprise-grade login page template with email and OTP authentication',
+          variations: [
+            {
+              name: 'Default',
+              props: {},
+              description: 'Complete login page with email validation, OTP verification, social login, and enterprise features'
+            }
+          ],
+          features: [
+            'Two-step authentication (email + OTP)',
+            'Form validation and error handling',
+            'Loading states and user feedback',
+            'Social login integration',
+            'Remember me functionality',
+            'Forgot password support',
+            'Responsive design',
+            'Accessibility compliance',
+            'Enterprise security features'
+          ]
+        }
       ]
     }
   }

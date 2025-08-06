@@ -182,13 +182,13 @@ const StatusCard: React.FC<StatusCardProps> = ({
           )}
           
           {collapsible && (
-            <button
+            <Button
               type="button"
               className="text-gray-400 hover:text-gray-600 transition-colors"
               aria-label={collapsed ? 'Expand card' : 'Collapse card'}
             >
               <CollapseIcon />
-            </button>
+            </Button>
           )}
         </div>
       </div>

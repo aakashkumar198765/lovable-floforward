@@ -1,6 +1,9 @@
 import React, { forwardRef, useState, useEffect } from 'react';
 import { SwitchProps } from '../../../types';
 import { cn } from '../../../utils/utils';
+import { Label } from '../display';
+import Button from './Button';
+import Checkbox from './Checkbox';
 
 const Switch = forwardRef<HTMLInputElement, SwitchProps>(
   (
@@ -136,7 +139,7 @@ const Switch = forwardRef<HTMLInputElement, SwitchProps>(
     return (
       <div className={containerClasses} style={style}>
         <div className={switchWrapperClasses}>
-          <button
+          <Button
             type="button"
             role="switch"
             aria-checked={internalChecked}
@@ -154,29 +157,34 @@ const Switch = forwardRef<HTMLInputElement, SwitchProps>(
           >
             <span className={thumbClasses} />
             
-            {/* Hidden input for form submission */}
-            {/* <input
+            {/* Hidden checkbox for form submission */}
+            <Checkbox
               ref={ref}
-              type="checkbox"
               checked={internalChecked}
               disabled={disabled}
-              readOnly={readonly}
-              onChange={handleChange}
+              readonly={readonly}
+              onChange={(checked, e) => {
+                if (e) {
+                  handleChange(e);
+                }
+              }}
               onFocus={handleFocus}
               onBlur={handleBlur}
               className="sr-only"
               aria-hidden="true"
               {...props}
-            /> */}
-          </button>
+            />
+          </Button>
         </div>
         
         {(label || description) && (
           <div className="flex-1 min-w-0">
             {label && label !== '' && (
-              <label className={labelClasses}>
+              <Label
+                className={labelClasses}
+              >
                 {label}
-              </label>
+              </Label>
             )}
             
             {description && description !== '' && (

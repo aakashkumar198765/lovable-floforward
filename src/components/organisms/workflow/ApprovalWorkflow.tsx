@@ -12,6 +12,7 @@ import Toast from '../../atoms/feedback/Toast';
 import Alert from '../../atoms/feedback/Alert';
 import ProgressTracker from '../../molecules/display/ProgressTracker';
 import StatusCard from '../../molecules/display/StatusCard';
+import { Label } from '../../atoms';
 
 const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
   id = 'approval-workflow',
@@ -721,9 +722,9 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
           
           {showComments && (
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <Label className="block text-sm font-medium mb-2">
                 Comments {actionType === 'reject' ? '(Required)' : '(Optional)'}
-              </label>
+              </Label>
               <Textarea
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}

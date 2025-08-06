@@ -7,6 +7,7 @@ import ThemeTestPage from "./pages/ThemeTestPage";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import HomePage from "./pages/HomePage";
 import LibraryTemplate from "./libraryTemplate";
+import LoginPage from "./pages/LoginPage";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/theme-test" element={<ThemeTestPage />} />
           <Route path="/purchase-order/*" element={<PurchaseOrderApp />} />
           <Route path="/home" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/*" element={<LibraryTemplate />} />
         </Routes>
         

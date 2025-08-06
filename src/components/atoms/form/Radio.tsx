@@ -2,6 +2,48 @@ import React, { forwardRef, useState, useEffect } from 'react';
 import { RadioProps, RadioOption } from '../../../types';
 import { cn } from '../../../utils/utils';
 
+// Reusable RadioInput component
+interface RadioInputProps {
+  id?: string;
+  name?: string;
+  value?: string;
+  checked?: boolean;
+  disabled?: boolean;
+  readonly?: boolean;
+  required?: boolean;
+  className?: string;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
+  'aria-invalid'?: boolean;
+  'aria-describedby'?: string;
+}
+
+const RadioInput = forwardRef<HTMLInputElement, RadioInputProps>(
+  ({ id, name, value, checked, disabled, readonly, required, className, onChange, onFocus, onBlur, ...props }, ref) => {
+    return (
+      <input
+        ref={ref}
+        id={id}
+        type="radio"
+        name={name}
+        value={value}
+        checked={checked}
+        disabled={disabled}
+        readOnly={readonly}
+        required={required}
+        className={className}
+        onChange={onChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        {...props}
+      />
+    );
+  }
+);
+
+RadioInput.displayName = 'RadioInput';
+
 const Radio = forwardRef<HTMLDivElement, RadioProps>(
   (
     {
@@ -114,14 +156,13 @@ const Radio = forwardRef<HTMLDivElement, RadioProps>(
 
       return (
         <label key={option.value} className={optionLabelClasses}>
-          <input
+          <RadioInput
             id={optionId}
-            type="radio"
             name={name}
             value={option.value}
             checked={isSelected}
             disabled={isOptionDisabled}
-            readOnly={readonly}
+            readonly={readonly}
             required={required && index === 0} // Only first option needs required attribute
             className={radioClasses}
             onChange={(e) => option.value && handleChange(option.value, e)}

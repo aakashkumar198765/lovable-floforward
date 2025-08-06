@@ -2,6 +2,7 @@ import React, { forwardRef, useState } from 'react';
 import { ChevronRight, Home, X } from 'lucide-react';
 import { BreadcrumbProps } from '../../../types';
 import { cn } from '../../../utils/utils';
+import { Button } from '../form';
 
 const Breadcrumb = forwardRef<HTMLDivElement, BreadcrumbProps>(
   (
@@ -146,7 +147,7 @@ const Breadcrumb = forwardRef<HTMLDivElement, BreadcrumbProps>(
           return (
             <React.Fragment key={item.id}>
               {isEllipsis ? (
-                <button
+                <Button
                   onClick={() => setIsExpanded(true)}
                   className={cn(
                     'inline-flex items-center dark:text-white text-gray-500 hover:text-gray-700 cursor-pointer transition-all duration-200 px-3 py-1 rounded-md hover:bg-gray-100',
@@ -157,7 +158,7 @@ const Breadcrumb = forwardRef<HTMLDivElement, BreadcrumbProps>(
                   <span className="text-lg font-bold hover:scale-125 transition-transform duration-200">
                     ...
                   </span>
-                </button>
+                </Button>
               ) : (
                 <div className={getItemClasses(item, isLast)}>
                   {/* Icon */}
@@ -219,7 +220,7 @@ const Breadcrumb = forwardRef<HTMLDivElement, BreadcrumbProps>(
 
         {/* Collapse button */}
         {collapsible && isExpanded && items && items.length > maxItems && (
-          <button
+          <Button
             onClick={() => setIsExpanded(false)}
             className={cn(
               'ml-3 p-1.5 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-200',
@@ -228,7 +229,7 @@ const Breadcrumb = forwardRef<HTMLDivElement, BreadcrumbProps>(
             aria-label="Collapse breadcrumb"
           >
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         )}
       </nav>
     );

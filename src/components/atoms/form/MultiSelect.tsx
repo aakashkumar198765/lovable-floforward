@@ -8,6 +8,11 @@ import React, {
 import { MultiSelectProps, SelectOption, SelectGroup } from "../../../types";
 import { cn } from "../../../utils/utils";
 import Badge from "../display/Badge";
+import { Label } from "../display";
+import Button from "./Button";
+import Input from "./Input";
+import Checkbox from "./Checkbox";
+import Select from "./Select";
 
 const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
   (
@@ -319,14 +324,22 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
           )}
           onClick={handleLabelClick}
         >
-          <input
-            type="checkbox"
-            checked={isSelected}
-            onChange={handleCheckboxChange}
-            disabled={isOptionDisabled}
-            className="mr-3 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div onClick={(e) => e.stopPropagation()}>
+            <Checkbox
+              checked={isSelected}
+              onChange={(checked: boolean, e?: React.ChangeEvent<HTMLInputElement>) => {
+                if (e) {
+                  e.stopPropagation();
+                }
+                if (!isOptionDisabled && option.value) {
+                  handleOptionToggle(option.value, e);
+                }
+              }}
+              disabled={isOptionDisabled}
+              size="sm"
+              className="mr-3"
+            />
+          </div>
 
           {option.icon && <span className="mr-2 text-base">{option.icon}</span>}
 
@@ -345,9 +358,11 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
     return (
       <div className={wrapperClasses} style={style} ref={ref}>
         {label && label !== "" && (
-          <label className={labelClasses}>
+          <Label
+           className={labelClasses}
+          >
             {label}
-          </label>
+          </Label>
         )}
 
         <div className="relative" ref={dropdownRef}>
@@ -420,22 +435,20 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
           </div>
 
           {/* Hidden select for form submission */}
-          <select
+          <Select
             name={name || ""}
-            multiple
+            multiple={true}
             value={internalValue}
             onChange={() => {}} // Controlled by our logic
+            options={allOptions.filter(opt => opt.value && internalValue.includes(opt.value)).map(opt => ({
+              value: opt.value,
+              label: opt.label
+            }))}
+            className="hidden"
             style={{ display: "none" }}
             tabIndex={-1}
             aria-hidden="true"
-          >
-            {internalValue.map((val) => (
-              <option key={val} value={val} selected>
-                {allOptions.find((opt) => opt && opt.value === val)?.label ||
-                  val}
-              </option>
-            ))}
-          </select>
+          />
 
           {/* Dropdown */}
           {isOpen && !disabled && !readonly && (
@@ -443,16 +456,18 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
               {/* Search input */}
               {searchable && (
                 <div className="p-3 border-b border-gray-200">
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    placeholder="Search options..."
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    onClick={(e) => e.stopPropagation()}
-                    onKeyDown={(e) => e.stopPropagation()}
-                  />
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Input
+                      ref={searchInputRef}
+                      type="text"
+                      placeholder="Search options..."
+                      value={searchTerm}
+                      onChange={handleSearch}
+                      size="sm"
+                      className="text-sm"
+                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.stopPropagation()}
+                    />
+                  </div>
                 </div>
               )}
 
@@ -497,14 +512,13 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
             internalValue.length > 0 &&
             !disabled &&
             !readonly && (
-              <button
-                type="button"
+              <Button
                 onClick={handleClear}
                 className="absolute right-8 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none z-10"
                 aria-label="Clear selection"
               >
                 <span className="text-lg">×</span>
-              </button>
+              </Button>
             )}
         </div>
 

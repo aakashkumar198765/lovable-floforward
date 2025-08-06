@@ -2,6 +2,10 @@ import React, { forwardRef, useState, useEffect, useRef } from 'react';
 import { DatePickerProps, CommerceState } from '../../../types';
 import { cn } from '../../../utils/utils';
 import { Calendar, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import Input from './Input';
+import Select from './Select';
+import { Label } from '../display';
+import Button from './Button';
 
 const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
   (
@@ -604,14 +608,8 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
 
     return (
       <div ref={containerRef} className="relative w-full" style={style}>
-        {label && label !== '' && (
-          <label htmlFor={id || ''} className={labelClasses}>
-            {label}
-          </label>
-        )}
-        
         <div className="relative">
-          <input
+          <Input
             ref={inputRef}
             id={id || ''}
             name={name || ''}
@@ -619,38 +617,37 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
             placeholder={placeholder || (isTimeOnly ? 'Select time' : isDateAndTime ? 'Select date and time' : 'Select date')}
             value={internalValue}
             disabled={disabled}
-            readOnly={readonly}
+            readonly={readonly}
             required={required}
             autoComplete={autoComplete}
             autoFocus={autoFocus}
-            className={inputClasses}
+            size={size}
+            variant={variant}
+            status={(inputErrors.length > 0 || status === 'error') ? 'error' : status}
+            label={label}
+            helperText={inputErrors.length > 0 ? inputErrors.join(', ') : (status === 'error' && errorMessage ? errorMessage : helperText)}
+            className={cn(inputClasses, className)}
             onChange={handleChange}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            aria-invalid={inputErrors.length > 0 || status === 'error'}
-            aria-describedby={
-              (helperText && helperText !== '') || (errorMessage && errorMessage !== '') || inputErrors.length > 0
-                ? `${id || 'datepicker'}-description`
-                : undefined
+            rightIcon={
+              <Button
+                type="button"
+                onClick={handleCalendarToggle}
+                disabled={disabled || readonly}
+                className={cn(
+                  'w-5 h-5 text-gray-400 hover:text-blue-500',
+                  'disabled:cursor-not-allowed disabled:text-gray-300',
+                  'transition-colors duration-200',
+                  (isFocused || isCalendarOpen) && 'text-blue-500'
+                )}
+                aria-label="Open calendar"
+              >
+                {isTimeOnly ? <ClockIcon /> : <CalendarIcon />}
+              </Button>
             }
             {...props}
           />
-          
-          <button
-            type="button"
-            onClick={handleCalendarToggle}
-            disabled={disabled || readonly}
-            className={cn(
-              'absolute right-3 top-1/2 transform -translate-y-1/2',
-              'w-5 h-5 text-gray-400 hover:text-blue-500',
-              'disabled:cursor-not-allowed disabled:text-gray-300',
-              'transition-colors duration-200',
-              (isFocused || isCalendarOpen) && 'text-blue-500'
-            )}
-            aria-label="Open calendar"
-          >
-            {isTimeOnly ? <ClockIcon /> : <CalendarIcon />}
-          </button>
         </div>
         
         {/* Custom Calendar/Time Picker Dropdown */}
@@ -788,45 +785,43 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
                   <div className="flex items-center justify-center space-x-2 mb-6">
                     {/* Hours */}
                     <div className="flex flex-col items-center">
-                      <label className="text-xs font-medium text-gray-500 mb-1">Hours</label>
-                      <select
+                      <Label className="text-xs font-medium text-gray-500 mb-1">Hours</Label>
+                      <Select
                         value={selectedTime.hours}
-                        onChange={(e) => handleTimeSelect('hours', e.target.value)}
-                        className="w-16 py-2 px-1 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        {generateHourOptions().map(hour => (
-                          <option key={hour} value={hour}>{hour}</option>
-                        ))}
-                      </select>
+                        onChange={(value) => handleTimeSelect('hours', String(value))}
+                        size="sm"
+                        className="w-16 text-center"
+                        options={generateHourOptions().map(hour => ({ value: hour, label: hour }))}
+                      />
                     </div>
                     
                     <div className="text-2xl font-bold text-gray-400 mt-6">:</div>
                     
                     {/* Minutes */}
                     <div className="flex flex-col items-center">
-                      <label className="text-xs font-medium text-gray-500 mb-1">Minutes</label>
-                      <select
+                      <Label className="text-xs font-medium text-gray-500 mb-1">Minutes</Label>
+                      <Select
                         value={selectedTime.minutes}
-                        onChange={(e) => handleTimeSelect('minutes', e.target.value)}
-                        className="w-16 py-2 px-1 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        {generateMinuteOptions().map(minute => (
-                          <option key={minute} value={minute}>{minute}</option>
-                        ))}
-                      </select>
+                        onChange={(value) => handleTimeSelect('minutes', String(value))}
+                        size="sm"
+                        className="w-16 text-center"
+                        options={generateMinuteOptions().map(minute => ({ value: minute, label: minute }))}
+                      />
                     </div>
                     
                     {/* AM/PM */}
                     <div className="flex flex-col items-center">
-                      <label className="text-xs font-medium text-gray-500 mb-1">Period</label>
-                      <select
+                      <Label className="text-xs font-medium text-gray-500 mb-1">Period</Label>
+                      <Select
                         value={selectedTime.period}
-                        onChange={(e) => handleTimeSelect('period', e.target.value)}
-                        className="w-16 py-2 px-1 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="AM">AM</option>
-                        <option value="PM">PM</option>
-                      </select>
+                        onChange={(value) => handleTimeSelect('period', String(value))}
+                        size="sm"
+                        className="w-16 text-center"
+                        options={[
+                          { value: 'AM', label: 'AM' },
+                          { value: 'PM', label: 'PM' }
+                        ]}
+                      />
                     </div>
                   </div>
                   
@@ -868,23 +863,6 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
                 </div>
               )}
             </div>
-          </div>
-        )}
-        
-        {/* Error and Helper Messages */}
-        {((helperText && helperText !== '') || (errorMessage && errorMessage !== '') || inputErrors.length > 0) && (
-          <div id={`${id || 'datepicker'}-description`} className={helperTextClasses}>
-            {inputErrors.length > 0 ? (
-              <div className="space-y-1">
-                {inputErrors.map((error, index) => (
-                  <p key={index} className="text-red-500 text-sm">{error}</p>
-                ))}
-              </div>
-            ) : status === 'error' && errorMessage && errorMessage !== '' ? (
-              <p>{errorMessage}</p>
-            ) : (
-              helperText && <p>{helperText}</p>
-            )}
           </div>
         )}
       </div>
