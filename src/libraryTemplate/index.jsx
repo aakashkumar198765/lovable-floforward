@@ -175,6 +175,7 @@ const NAVIGATION_ITEMS = [
                 path: 'templates/pages', 
                 isCategory: true,
                 subItems: [
+                    { name: 'LoginPage', path: 'templates/pages/LoginPage' },
                     { name: 'ReportsPage', path: 'templates/pages/ReportsPage' },
                     { name: 'SettingsPage', path: 'templates/pages/SettingsPage' },
                     { name: 'WorkflowPage', path: 'templates/pages/WorkflowPage' }
