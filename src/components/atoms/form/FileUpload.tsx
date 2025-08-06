@@ -2,6 +2,8 @@ import React, { forwardRef, useState, useEffect, useRef } from 'react';
 import { FileUploadProps, CommerceState } from '../../../types';
 import { cn } from '../../../utils/utils';
 import { Upload, File, X } from 'lucide-react';
+import { Label } from '../display';
+import Button from './Button';
 
 const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
   (
@@ -302,9 +304,9 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
     return (
       <div className="space-y-2" style={style}>
         {label && label !== '' && (
-          <label className={labelClasses}>
+          <Label className={labelClasses}>
             {label}
-          </label>
+          </Label>
         )}
         
         <div
@@ -372,8 +374,7 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
                   )}
                 </div>
                 {!disabled && !readonly && (
-                  <button
-                    type="button"
+                  <Button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleFileRemove(index);
@@ -382,7 +383,7 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
                     aria-label={`Remove ${file.name}`}
                   >
                     <RemoveIcon />
-                  </button>
+                  </Button>
                 )}
               </div>
             ))}

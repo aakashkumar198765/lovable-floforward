@@ -4,6 +4,7 @@ import Button from '../../atoms/form/Button';
 import Checkbox from '../../atoms/form/Checkbox';
 import Input from '../../atoms/form/Input';
 import Modal from '../../atoms/feedback/Modal';
+import { Label } from '../../atoms';
 
 export const ExportManager: React.FC<ExportManagerProps> = ({
   id,
@@ -210,7 +211,7 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {fields.map((field) => (
+          {fields.map((field: any) => (
             <label key={field.key} className="flex items-center space-x-2 cursor-pointer">
               <Checkbox
                 checked={selectedFields.includes(field.key!)}
@@ -302,9 +303,9 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Object.entries(localFilters).map(([key, value]) => (
             <div key={key}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <Label className="block text-sm font-medium text-gray-700 mb-1">
                 {key.charAt(0).toUpperCase() + key.slice(1)}
-              </label>
+              </Label>
               <Input
                 type="text"
                 value={value as string || ''}
@@ -469,7 +470,9 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-medium mb-4">Save Export Template</h3>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Template Name</label>
+              <Label className="block text-sm font-medium text-gray-700 mb-2">
+                Template Name
+              </Label>
               <Input
                 type="text"
                 value={newTemplateName}

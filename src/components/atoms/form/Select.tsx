@@ -1,6 +1,8 @@
 import React, { forwardRef, useState, useEffect, useRef } from 'react';
 import { SelectProps, SelectOption, SelectGroup } from '../../../types';
 import { cn } from '../../../utils/utils';
+import { Label } from '../display';
+import Button from './Button';
 
 const Select = forwardRef<HTMLSelectElement, SelectProps>(
   (
@@ -255,9 +257,15 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className={containerClasses} style={style}>
         {label && label !== '' && (
-          <label htmlFor={id || ''} className={labelClasses}>
+          // <label htmlFor={id || ''} className={labelClasses}>
+          //   {label}
+          // </label>
+          <Label
+            htmlFor={id || ''}
+            className={labelClasses}
+          >
             {label}
-          </label>
+          </Label>
         )}
         
         <div className="relative" ref={dropdownRef}>
@@ -265,14 +273,13 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
           
           {/* Clear button */}
           {clearable && internalValue && !isDisabled && !isReadonly && (
-            <button
-              type="button"
+            <Button
               onClick={handleClear}
-              className="absolute right-8 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
               aria-label="Clear selection"
             >
               <span className="text-lg">×</span>
-            </button>
+            </Button>
           )}
         </div>
         

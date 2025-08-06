@@ -264,6 +264,7 @@ export interface SelectProps extends EnterpriseComponentProps {
   noOptionsMessage?: string;
   loadingMessage?: string;
   isLoading?: boolean;
+  tabIndex?: number;
   onChange?: (value: string | string[], option?: SelectOption | SelectOption[]) => void;
   onBlur?: (event: React.FocusEvent<HTMLSelectElement>) => void;
   onFocus?: (event: React.FocusEvent<HTMLSelectElement>) => void;
@@ -382,10 +383,13 @@ export interface ButtonProps extends EnterpriseComponentProps {
   target?: string;
   rel?: string;
   role?: string;
+  tabIndex?: number;
   applyDefaultClasses?: boolean;
   onClick?: (event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
   onFocus?: (event: React.FocusEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
+  onMouseEnter?: (event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
+  onMouseLeave?: (event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
 }
 
 // Clean Checkbox Types

@@ -2,6 +2,7 @@ import React, { forwardRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import { NavigationButtonProps } from '../../../types';
 import { cn } from '../../../utils/utils';
+import { Button } from '../form';
 
 const NavigationButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, NavigationButtonProps>(
   (
@@ -146,7 +147,7 @@ const NavigationButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, Navig
 
     // Render as button
     return (
-      <button
+      <Button
         ref={ref as React.ForwardedRef<HTMLButtonElement>}
         type="button"
         {...commonProps}
@@ -154,7 +155,7 @@ const NavigationButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, Navig
         {iconPosition === 'left' && renderIcon()}
         {children}
         {iconPosition === 'right' && renderIcon()}
-      </button>
+      </Button>
     );
   }
 );

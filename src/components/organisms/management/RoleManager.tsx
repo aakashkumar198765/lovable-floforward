@@ -8,6 +8,7 @@ import Checkbox from '../../atoms/form/Checkbox';
 import Badge from '../../atoms/display/Badge';
 import Icon from '../../atoms/display/Icon';
 import Modal from '../../atoms/feedback/Modal';
+import { Label } from '../../atoms';
 
 export const RoleManager: React.FC<RoleManagerProps> = ({
   id,
@@ -193,7 +194,9 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
           />
 
           <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700">Sort:</label>
+            <Label className="text-sm font-medium text-gray-700">
+              Sort:
+            </Label>
             <Select
               value={sortBy}
               onChange={(value) => setSortBy(value as any)}

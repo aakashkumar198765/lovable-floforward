@@ -281,7 +281,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
           )}
           
           {refreshable && (
-            <button
+            <Button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
@@ -295,7 +295,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
               aria-label="Refresh metric"
             >
               <RefreshIcon />
-            </button>
+            </Button>
           )}
         </div>
       </div>
