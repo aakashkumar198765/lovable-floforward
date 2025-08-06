@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { AddressData, AddressFormProps, CommerceState } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Input from '../../atoms/form/Input';
 import Select from '../../atoms/form/Select';
 import Checkbox from '../../atoms/form/Checkbox';

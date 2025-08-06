@@ -1,6 +1,13 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { UserManagerProps } from '../../../types';
 import { Search } from 'lucide-react';
+import Button from '../../atoms/form/Button';
+import Input from '../../atoms/form/Input';
+import Select from '../../atoms/form/Select';
+import Checkbox from '../../atoms/form/Checkbox';
+import Badge from '../../atoms/display/Badge';
+import Icon from '../../atoms/display/Icon';
+import Modal from '../../atoms/feedback/Modal';
 
 export const UserManager: React.FC<UserManagerProps> = ({
   id,
@@ -13,6 +20,8 @@ export const UserManager: React.FC<UserManagerProps> = ({
   filterable = true,
   bulkActions = true,
   inviteUsers = true,
+  importable = true,
+  exportable = true,
   size = 'md',
   onUserCreate,
   onUserUpdate,
@@ -148,12 +157,13 @@ export const UserManager: React.FC<UserManagerProps> = ({
       <div className="mb-6 space-y-4">
         {searchable && (
           <div className="relative">
-            <input
+            <Input
               type="text"
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              leftIcon={<Search className="h-5 w-5 text-gray-400" />}
+              className="w-full"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
@@ -163,49 +173,52 @@ export const UserManager: React.FC<UserManagerProps> = ({
 
         {filterable && (
           <div className="flex flex-wrap gap-4">
-            <select
+            <Select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="suspended">Suspended</option>
-              <option value="pending">Pending</option>
-            </select>
+              onChange={(value) => setStatusFilter(value as string)}
+              options={[
+                { value: '', label: 'All Status' },
+                { value: 'active', label: 'Active' },
+                { value: 'inactive', label: 'Inactive' },
+                { value: 'suspended', label: 'Suspended' },
+                { value: 'pending', label: 'Pending' }
+              ]}
+              size="sm"
+            />
 
-            <select
+            <Select
               value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Roles</option>
-              {roles.map(role => (
-                <option key={role.id} value={role.id}>{role.name}</option>
-              ))}
-            </select>
+              onChange={(value) => setRoleFilter(value as string)}
+              options={[
+                { value: '', label: 'All Roles' },
+                ...roles.map(role => ({ value: role.id!, label: role.name! }))
+              ]}
+              size="sm"
+            />
 
             <div className="flex items-center space-x-2">
               <label className="text-sm font-medium text-gray-700">Sort:</label>
-              <select
+              <Select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="username">Username</option>
-                <option value="email">Email</option>
-                <option value="firstName">First Name</option>
-                <option value="lastName">Last Name</option>
-                <option value="status">Status</option>
-                <option value="lastLogin">Last Login</option>
-              </select>
-              <button
+                onChange={(value) => setSortBy(value as any)}
+                options={[
+                  { value: 'username', label: 'Username' },
+                  { value: 'email', label: 'Email' },
+                  { value: 'firstName', label: 'First Name' },
+                  { value: 'lastName', label: 'Last Name' },
+                  { value: 'status', label: 'Status' },
+                  { value: 'lastLogin', label: 'Last Login' }
+                ]}
+                size="sm"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-                className="px-2 py-2 text-gray-600 hover:text-gray-900"
+                className="text-gray-600 hover:text-gray-900"
               >
                 {sortDirection === 'asc' ? '↑' : '↓'}
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -224,35 +237,43 @@ export const UserManager: React.FC<UserManagerProps> = ({
           </span>
           <div className="flex space-x-2">
             {allowedActions.includes('activate_users') && (
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={() => handleBulkAction('activate')}
-                className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                className="bg-green-600 hover:bg-green-700 text-white border-green-600"
               >
                 Activate
-              </button>
+              </Button>
             )}
             {allowedActions.includes('deactivate_users') && (
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={() => handleBulkAction('deactivate')}
-                className="px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700"
+                className="bg-yellow-600 hover:bg-yellow-700 text-white border-yellow-600"
               >
                 Deactivate
-              </button>
+              </Button>
             )}
             {allowedActions.includes('delete_users') && (
-              <button
+              <Button
+                variant="danger"
+                size="sm"
                 onClick={() => handleBulkAction('delete')}
-                className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                className="bg-red-600 hover:bg-red-700 text-white border-red-600"
               >
                 Delete
-              </button>
+              </Button>
             )}
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => setSelectedUsers([])}
-              className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+              className="bg-gray-600 hover:bg-gray-700 text-white border-gray-600"
             >
               Clear
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -267,11 +288,10 @@ export const UserManager: React.FC<UserManagerProps> = ({
             <tr>
               {bulkActions && (
                 <th className="px-6 py-3 text-left">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={selectedUsers.length === sortedUsers.length && sortedUsers.length > 0}
-                    onChange={(e) => handleSelectAll(e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    onChange={(checked) => handleSelectAll(checked)}
+                    size="sm"
                   />
                 </th>
               )}
@@ -300,11 +320,10 @@ export const UserManager: React.FC<UserManagerProps> = ({
               <tr key={user.id} className="hover:bg-gray-50">
                 {bulkActions && (
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={selectedUsers.includes(user.id!)}
-                      onChange={(e) => handleUserSelect(user.id!, e.target.checked)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      onChange={(checked) => handleUserSelect(user.id!, checked)}
+                      size="sm"
                     />
                   </td>
                 )}
@@ -333,24 +352,24 @@ export const UserManager: React.FC<UserManagerProps> = ({
                   <div className="truncate" title={user.email}>{user.email}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.status || '')}`}>
+                  <Badge variant="secondary" size="xs" className={getStatusColor(user.status || '')}>
                     {user.status}
-                  </span>
+                  </Badge>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
                   <div className="flex flex-wrap gap-1">
                     {user.roles?.slice(0, 2).map(roleId => {
                       const role = roles.find(r => r.id === roleId);
                       return role ? (
-                        <span key={roleId} className="inline-flex px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full truncate max-w-24">
+                        <Badge key={roleId} variant="primary" size="xs" className="bg-blue-100 text-blue-800 truncate max-w-24">
                           {role.name}
-                        </span>
+                        </Badge>
                       ) : null;
                     })}
                     {(user.roles?.length || 0) > 2 && (
-                      <span className="inline-flex px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
+                      <Badge variant="secondary" size="xs" className="bg-gray-100 text-gray-600">
                         +{(user.roles?.length || 0) - 2} more
-                      </span>
+                      </Badge>
                     )}
                   </div>
                 </td>
@@ -360,31 +379,39 @@ export const UserManager: React.FC<UserManagerProps> = ({
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex space-x-2">
                     {allowedActions.includes('edit_users') && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => setEditingUser(user)}
                         className="text-blue-600 hover:text-blue-900"
                       >
                         Edit
-                      </button>
+                      </Button>
                     )}
                     {allowedActions.includes('change_user_status') && user.status !== 'active' && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => onStatusChange?.(user.id!, 'active')}
                         className="text-green-600 hover:text-green-900"
                       >
                         Activate
-                      </button>
+                      </Button>
                     )}
                     {allowedActions.includes('change_user_status') && user.status === 'active' && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => onStatusChange?.(user.id!, 'inactive')}
                         className="text-yellow-600 hover:text-yellow-900"
                       >
                         Deactivate
-                      </button>
+                      </Button>
                     )}
                     {allowedActions.includes('delete_users') && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => {
                           if (window.confirm('Are you sure you want to delete this user?')) {
                             onUserDelete?.(user.id!);
@@ -393,7 +420,7 @@ export const UserManager: React.FC<UserManagerProps> = ({
                         className="text-red-600 hover:text-red-900"
                       >
                         Delete
-                      </button>
+                      </Button>
                     )}
                   </div>
                 </td>
@@ -427,11 +454,10 @@ export const UserManager: React.FC<UserManagerProps> = ({
                 <p className="text-sm text-gray-600">@{user.username}</p>
               </div>
               {bulkActions && (
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={selectedUsers.includes(user.id!)}
-                  onChange={(e) => handleUserSelect(user.id!, e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  onChange={(checked) => handleUserSelect(user.id!, checked)}
+                  size="sm"
                 />
               )}
             </div>
@@ -442,9 +468,9 @@ export const UserManager: React.FC<UserManagerProps> = ({
               </div>
               <div className="text-sm text-gray-600">
                 <strong>Status:</strong>
-                <span className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.status || '')}`}>
+                <Badge variant="secondary" size="xs" className={`ml-2 ${getStatusColor(user.status || '')}`}>
                   {user.status}
-                </span>
+                </Badge>
               </div>
               <div className="text-sm text-gray-600">
                 <strong>Last Login:</strong> {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
@@ -457,9 +483,9 @@ export const UserManager: React.FC<UserManagerProps> = ({
                 {user.roles?.map(roleId => {
                   const role = roles.find(r => r.id === roleId);
                   return role ? (
-                    <span key={roleId} className="inline-flex px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                    <Badge key={roleId} variant="primary" size="xs" className="bg-blue-100 text-blue-800">
                       {role.name}
-                    </span>
+                    </Badge>
                   ) : null;
                 })}
               </div>
@@ -467,24 +493,28 @@ export const UserManager: React.FC<UserManagerProps> = ({
 
             <div className="flex space-x-2 pt-4 border-t border-gray-200">
               {allowedActions.includes('edit_users') && (
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => setEditingUser(user)}
-                  className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
                 >
                   Edit
-                </button>
+                </Button>
               )}
               {allowedActions.includes('change_user_status') && (
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => onStatusChange?.(user.id!, user.status === 'active' ? 'inactive' : 'active')}
-                  className={`flex-1 px-3 py-2 text-sm rounded ${
+                  className={`flex-1 text-white ${
                     user.status === 'active' 
-                      ? 'bg-yellow-600 hover:bg-yellow-700 text-white' 
-                      : 'bg-green-600 hover:bg-green-700 text-white'
+                      ? 'bg-yellow-600 hover:bg-yellow-700 border-yellow-600' 
+                      : 'bg-green-600 hover:bg-green-700 border-green-600'
                   }`}
                 >
                   {user.status === 'active' ? 'Deactivate' : 'Activate'}
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -501,11 +531,10 @@ export const UserManager: React.FC<UserManagerProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 {bulkActions && (
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={selectedUsers.includes(user.id!)}
-                    onChange={(e) => handleUserSelect(user.id!, e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    onChange={(checked) => handleUserSelect(user.id!, checked)}
+                    size="sm"
                   />
                 )}
                 {user.avatar ? (
@@ -526,18 +555,20 @@ export const UserManager: React.FC<UserManagerProps> = ({
               </div>
 
               <div className="flex items-center space-x-4">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.status || '')}`}>
+                <Badge variant="secondary" size="xs" className={getStatusColor(user.status || '')}>
                   {user.status}
-                </span>
+                </Badge>
                 
                 <div className="flex space-x-2">
                   {allowedActions.includes('edit_users') && (
-                    <button
+                    <Button
+                      variant="primary"
+                      size="sm"
                       onClick={() => setEditingUser(user)}
-                      className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                      className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
                     >
                       Edit
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -560,12 +591,13 @@ export const UserManager: React.FC<UserManagerProps> = ({
               : 'Get started by creating your first user.'}
           </p>
           {allowedActions.includes('create_users') && (
-            <button
+            <Button
+              variant="primary"
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
             >
               Create User
-            </button>
+            </Button>
           )}
         </div>
       );
@@ -589,22 +621,40 @@ export const UserManager: React.FC<UserManagerProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-        <div className="flex space-x-3">
+        <div className="flex items-center space-x-2">
+          {exportable && <Button
+            variant="primary"
+            size="sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+          >
+            Export
+          </Button>}
+          {importable && <Button
+            variant="primary"
+            size="sm"
+            className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+          >
+            Import
+          </Button>}
           {inviteUsers && allowedActions.includes('invite_users') && (
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={() => setShowInviteModal(true)}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              className="bg-yellow-600 hover:bg-yellow-700 text-white border-yellow-600"
             >
-              📧 Invite User
-            </button>
+              Invite User
+            </Button>
           )}
           {allowedActions.includes('create_users') && (
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              className="bg-gray-600 hover:bg-gray-700 text-white border-gray-600"
             >
-              ➕ Create User
-            </button>
+              Create User
+            </Button>
           )}
         </div>
       </div>
@@ -620,18 +670,20 @@ export const UserManager: React.FC<UserManagerProps> = ({
             <h3 className="text-lg font-medium mb-4">Create New User</h3>
             <p className="text-gray-600 mb-4">Create user form would go here...</p>
             <div className="flex justify-end space-x-3">
-              <button
+              <Button
+                variant="secondary"
                 onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-sm border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                className="text-gray-700 border-gray-300 hover:bg-gray-50"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
                 onClick={() => handleCreateUser({ username: 'newuser' })}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
               >
                 Create
-              </button>
+              </Button>
             </div>
           </div>
         </div>

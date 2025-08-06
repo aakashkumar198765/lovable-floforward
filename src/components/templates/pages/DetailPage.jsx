@@ -14,8 +14,8 @@ import {
 
   // Feedback Components
   LoadingState
-} from '../components';
-import Timeline from '../components/organisms/workflow/Timeline';
+} from '../..';
+import Timeline from '../../organisms/workflow/Timeline';
 
 /**
  * SampleDetailPage - Generic Detail Page Template

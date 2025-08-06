@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { LabelProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { colorClasses, sizeClasses } from '../../../utils/tailwindClassMaps';
 
 const Label = forwardRef<HTMLLabelElement, LabelProps>(
@@ -22,7 +22,7 @@ const Label = forwardRef<HTMLLabelElement, LabelProps>(
 
     // Build label classes
     const labelClasses = cn(
-      'block font-work-sans select-none transition-colors duration-200',
+      'flex font-work-sans select-none transition-colors duration-200',
       sizeClasses.text[size] || sizeClasses.text.md,
       sizeClasses.fontWeight[weight] || sizeClasses.fontWeight.medium,
       colorClasses[color] || colorClasses.default,

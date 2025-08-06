@@ -303,11 +303,15 @@ export const FormLayout: React.FC<FormLayoutProps> = ({
             <p className="mt-2 text-sm text-gray-600">{description}</p>
           )}
         </div>
-        {headerActions && (
-          <div className="flex space-x-3">
-            {headerActions}
-          </div>
-        )}
+        <div className="flex items-center space-x-2">
+          {headerActions ? (
+            headerActions
+          ) : (
+            <>
+              {/* Action buttons */}
+            </>
+          )}
+        </div>
       </div>
       
       {showRequiredIndicator && (

@@ -188,25 +188,21 @@ const SelectAllTypes: React.FC<SelectAllTypesProps> = ({
     <div className={`space-y-8 ${className}`} style={style}>
       {/* Commerce State Selector */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Commerce State
-        </label>
-        <select
+        <Select
+          id="commerce-state-selector"
+          label="Commerce State"
           value={commerceState}
-          onChange={(e) => {
-            const newState = e.target.value as CommerceState;
-            if (commerceStates.includes(newState)) {
-              handleCommerceStateChange(newState);
+          onChange={(value) => {
+            const newState = Array.isArray(value) ? value[0] : value;
+            if (commerceStates.includes(newState as CommerceState)) {
+              handleCommerceStateChange(newState as CommerceState);
             }
           }}
-          className="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-        >
-          {commerceStates.map((state) => (
-            <option key={state} value={state}>
-              {state.charAt(0).toUpperCase() + state.slice(1)}
-            </option>
-          ))}
-        </select>
+          options={commerceStates.map((state) => ({
+            value: state,
+            label: state.charAt(0).toUpperCase() + state.slice(1)
+          }))}
+        />
       </div>
 
       {/* Single Select Examples */}

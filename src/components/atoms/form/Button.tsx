@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { ButtonProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { sizeClasses, variantClasses, stateClasses, focusClasses } from '../../../utils/tailwindClassMaps';
 import { Loader2 } from 'lucide-react';
 
@@ -24,6 +24,7 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
       onClick = () => {},
       onFocus = () => {},
       onBlur = () => {},
+      applyDefaultClasses = true,
       ...props
     },
     ref
@@ -60,12 +61,13 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
 
     // Build button classes
     const buttonClasses = cn(
-      'inline-flex items-center justify-center gap-2 font-medium rounded-md border transition-all duration-200',
+      'inline-flex items-center justify-center gap-2 font-medium rounded-md transition-all duration-200',
       'font-work-sans',
-      focusClasses.ring.default,
-      stateClasses.disabled.button,
-      sizeClasses.button[size] || sizeClasses.button.md,
-      variantClasses.button[variant] || variantClasses.button.primary,
+      applyDefaultClasses && 'border',
+      applyDefaultClasses && focusClasses.ring.default,
+      applyDefaultClasses && stateClasses.disabled.button,
+      applyDefaultClasses && (sizeClasses.button[size] || sizeClasses.button.md),
+      applyDefaultClasses && (variantClasses.button[variant] || variantClasses.button.primary),
       fullWidth && 'w-full',
       isDisabled && stateClasses.disabled.general,
       className || ''
@@ -122,15 +124,24 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
         {...props}
       >
         {loading && <LoadingSpinner />}
-        {!loading && iconLeft && <span className="flex-shrink-0">{iconLeft}</span>}
-        
+
+        {!loading && iconLeft && (
+          <span className="flex items-center justify-center h-4 w-4">
+            {iconLeft}
+          </span>
+        )}
+
         {children && (
-          <span className={cn('truncate', loading && 'opacity-70')}>
+          <span className={cn(loading && 'opacity-70')}>
             {children}
           </span>
         )}
-        
-        {!loading && iconRight && <span className="flex-shrink-0">{iconRight}</span>}
+
+        {!loading && iconRight && (
+          <span className="flex items-center justify-center h-4 w-4">
+            {iconRight}
+          </span>
+        )}
       </button>
     );
   }

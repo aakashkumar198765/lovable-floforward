@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { BulkActionsProps, BulkAction } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { sizeClasses, layoutClasses, animationClasses } from '../../../utils/tailwindClassMaps';
 import Button from '../../atoms/form/Button';
 import Select from '../../atoms/form/Select';

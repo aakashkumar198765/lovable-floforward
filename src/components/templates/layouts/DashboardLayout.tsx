@@ -182,6 +182,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       </div>
 
       <div className="flex items-center space-x-4">
+        {/* Action buttons */}
+        <div className="flex items-center space-x-2">
+        </div>
+
         {/* Notifications */}
         {notifications.length > 0 && (
           <div className="relative">

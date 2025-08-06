@@ -1,7 +1,9 @@
 import React, { forwardRef } from 'react';
 import { SpinnerProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { Loader2 } from 'lucide-react';
+import { animationClasses, colorClasses, spinnerSizeClasses } from '../../../utils/tailwindClassMaps';
+import { Label } from '../display';
 
 const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
   (
@@ -20,47 +22,12 @@ const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
     },
     ref
   ) => {
-    // Size classes
-    const sizeClasses = {
-      xs: 'w-3 h-3',
-      sm: 'w-4 h-4',
-      md: 'w-6 h-6',
-      lg: 'w-8 h-8',
-      xl: 'w-12 h-12'
-    };
-
-    // Color classes
-    const colorClasses = {
-      primary: 'text-primary-600',
-      secondary: 'text-gray-600',
-      success: 'text-success-600',
-      warning: 'text-warning-600',
-      danger: 'text-error-600',
-      muted: 'text-gray-400',
-      white: 'text-white'
-    };
-
-    // Speed classes
-    const speedClasses = {
-      slow: 'animate-spin',
-      normal: 'animate-spin',
-      fast: 'animate-spin'
-    };
-
-    // Speed duration styles
-    const speedDurations = {
-      slow: '2s',
-      normal: '1s',
-      fast: '0.5s'
-    };
-
-
     // Spinner classes
     const spinnerClasses = cn(
       'inline-block',
-      sizeClasses[size],
+      spinnerSizeClasses[size],
       colorClasses[color],
-      speedClasses[speed],
+      animationClasses.loading[speed],
       centered && 'mx-auto',
       overlay && 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2',
       className
@@ -68,8 +35,7 @@ const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
 
     // Container classes
     const containerClasses = cn(
-      'relative',
-      centered && 'flex justify-center items-center',
+      'relative flex justify-center items-center',
       overlay && 'absolute inset-0 bg-white bg-opacity-75 z-10',
     );
 
@@ -78,7 +44,7 @@ const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
       <Loader2
         className={spinnerClasses}
         style={{
-          animationDuration: speedDurations[speed],
+          animationDuration: animationClasses.speedDurations[speed],
           strokeWidth: thickness,
           ...style
         }}
@@ -98,13 +64,22 @@ const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
         
         {/* Label */}
         {label && (
-          <span className={cn(
-            'ml-2 text-sm font-medium font-work-sans',
-            colorClasses[color],
-            overlay && 'block mt-2 ml-0'
-          )}>
+          <Label
+            className={cn(
+              'flex ml-2 text-sm font-medium font-work-sans',
+              colorClasses[color],
+              overlay && 'block mt-2 ml-0'
+            )}
+          >
             {label}
-          </span>
+          </Label>
+          // <span className={cn(
+          //   'ml-2 text-sm font-medium font-work-sans',
+          //   colorClasses[color],
+          //   overlay && 'block mt-2 ml-0'
+          // )}>
+          //   {label}
+          // </span>
         )}
 
         {/* Screen reader text */}

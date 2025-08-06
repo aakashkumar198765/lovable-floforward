@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CreateModal from '../components/organisms/data-grids/CreateModal';
+import CreateModal from '../../organisms/data-grids/CreateModal';
 
 /**
  * CreateModalPage - Standalone Create Modal Page

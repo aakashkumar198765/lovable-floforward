@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ImportModal from '../components/organisms/data-grids/ImportModal';
+import ImportModal from '../../organisms/data-grids/ImportModal';
 
 /**
  * ImportModalPage - Standalone Import Modal Page

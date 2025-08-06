@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { StatusProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { CheckCircle, XCircle, Clock, Check, X, AlertTriangle, Circle } from 'lucide-react';
 import { statusClasses } from '../../../utils/tailwindClassMaps';
 
@@ -23,35 +23,6 @@ const Status = forwardRef<HTMLDivElement, StatusProps>(
     },
     ref
   ) => {
-    // Size classes
-    const sizeClasses = {
-      xs: {
-        dot: 'w-2 h-2',
-        badge: 'text-xs px-2 py-0.5',
-        text: 'text-xs',
-        icon: 'w-3 h-3'
-      },
-      sm: {
-        dot: 'w-3 h-3',
-        badge: 'text-sm px-2.5 py-0.5',
-        text: 'text-sm',
-        icon: 'w-4 h-4'
-      },
-      md: {
-        dot: 'w-4 h-4',
-        badge: 'text-sm px-3 py-1',
-        text: 'text-base',
-        icon: 'w-5 h-5'
-      },
-      lg: {
-        dot: 'w-5 h-5',
-        badge: 'text-base px-4 py-1.5',
-        text: 'text-lg',
-        icon: 'w-6 h-6'
-      }
-    };
-
-
     // Get status label
     const getStatusLabel = () => {
       if (label) return label;
@@ -97,7 +68,7 @@ const Status = forwardRef<HTMLDivElement, StatusProps>(
     const renderDot = () => {
       const dotClasses = cn(
         'rounded-full inline-block',
-        sizeClasses[size].dot,
+        statusClasses.sizeClasses[size].dot,
         customColor ? '' : statusClasses.colorBgClasses[status],
         animated && 'animate-pulse',
         className
@@ -113,7 +84,7 @@ const Status = forwardRef<HTMLDivElement, StatusProps>(
             aria-label={getStatusLabel()}
           />
           {showLabel && (
-            <span className={cn('font-work-sans', sizeClasses[size].text, statusClasses.textColors[status])}>
+            <span className={cn('font-work-sans', statusClasses.sizeClasses[size].text, statusClasses.textColors[status])}>
               {getStatusLabel()}
             </span>
           )}
@@ -125,7 +96,7 @@ const Status = forwardRef<HTMLDivElement, StatusProps>(
     const renderBadge = () => {
       const badgeClasses = cn(
         'inline-flex items-center rounded-full border font-medium font-work-sans',
-        sizeClasses[size].badge,
+        statusClasses.sizeClasses[size].badge,
         customColor ? '' : statusClasses.badgeColors[status],
         animated && 'animate-pulse',
         className
@@ -148,7 +119,7 @@ const Status = forwardRef<HTMLDivElement, StatusProps>(
     const renderText = () => {
       const textClasses = cn(
         'inline-flex items-center gap-1 font-medium font-work-sans',
-        sizeClasses[size].text,
+        statusClasses.sizeClasses[size].text,
         customColor ? '' : statusClasses.textColors[status],
         animated && 'animate-pulse',
         className
@@ -171,7 +142,7 @@ const Status = forwardRef<HTMLDivElement, StatusProps>(
     const renderIcon = () => {
       const iconClasses = cn(
         'inline-flex items-center gap-2',
-        sizeClasses[size].icon,
+        statusClasses.sizeClasses[size].icon,
         customColor ? '' : statusClasses.textColors[status],
         animated && 'animate-pulse',
         className
@@ -189,7 +160,7 @@ const Status = forwardRef<HTMLDivElement, StatusProps>(
             {getStatusIcon()}
           </div>
           {showLabel && (
-            <span className={cn('font-work-sans', sizeClasses[size].text, statusClasses.textColors[status])}>
+            <span className={cn('font-work-sans', statusClasses.sizeClasses[size].text, statusClasses.textColors[status])}>
               {getStatusLabel()}
             </span>
           )}

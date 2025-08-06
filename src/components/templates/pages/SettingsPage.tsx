@@ -459,8 +459,24 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
       <div className="py-8">
         <div className={`mx-auto px-6 ${sizeClasses[size]}`}>
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-            <p className="mt-2 text-sm text-gray-600">{description}</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+                <p className="mt-2 text-sm text-gray-600">{description}</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                {allowedActions.includes('export_settings') && (
+                  <button className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Export
+                  </button>
+                )}
+                {allowedActions.includes('import_settings') && (
+                  <button className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+                    Import
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
           {renderSearchBar()}

@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { IconProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn, iconMap } from '../../../utils/utils';
 import * as LucideIcons from 'lucide-react';
 
 const Icon = forwardRef<HTMLSpanElement, IconProps>(

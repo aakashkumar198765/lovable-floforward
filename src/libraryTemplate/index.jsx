@@ -6,13 +6,13 @@ import { Menu, Sun, Moon, Code, Home, ChevronRight } from 'lucide-react';
 import ComponentShowcase from './ComponentShowcase';
 import OverviewPage from './OverviewPage';
 import InstallationPage from './InstallationPage';
-import SampleListingPage from '../examples/SampleListingPage';
-import SampleDetailPage from '../examples/SampleDetailPage';
-import SampleDetailPage2 from '../examples/SampleDetailPage2';
-import ExportModalPage from '../examples/ExportModalPage';
-import ImportModalPage from '../examples/ImportModalPage';
-import CreatePage from '../examples/CreatePage';
-import CreateModalPage from '../examples/CreateModalPage';
+import SampleListingPage from '../components/templates/pages/ListingPage';
+import SampleDetailPage from '../components/templates/pages/DetailPage';
+import SampleDetailPage2 from '../components/templates/pages/DetailPage2';
+import ExportModalPage from '../components/templates/pages/Export';
+import ImportModalPage from '../components/templates/pages/Import';
+import CreatePage from '../components/templates/pages/CreateForm';
+import CreateModalPage from '../components/templates/pages/CreateFormModal';
 
 // Shared navigation configuration - Proper component architecture grouping with individual components
 const NAVIGATION_ITEMS = [

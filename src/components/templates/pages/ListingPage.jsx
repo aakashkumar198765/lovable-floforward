@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   // Navigation Components
@@ -18,11 +18,11 @@ import {
 
   // Feedback Components
   LoadingState
-} from '../components';
+} from '../..';
 
 // Import modals directly
-import ExportModal from '../components/organisms/data-grids/ExportModal';
-import ImportModal from '../components/organisms/data-grids/ImportModal';
+import ExportModal from '../../organisms/data-grids/ExportModal';
+import ImportModal from '../../organisms/data-grids/ImportModal';
 
 /**
  * SampleListingPage - Clean and Professional Sample Listing Page
@@ -39,6 +39,8 @@ const SampleListingPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedItems, setSelectedItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [data, setData] = useState([]);
+  const [hasNextPage, setHasNextPage] = useState(true);
 
   // Modal state management
   const [showExportModal, setShowExportModal] = useState(false);
@@ -51,86 +53,139 @@ const SampleListingPage = () => {
     { key: 'state3', label: 'State 3' }
   ];
 
-  // Generate compact sample data
-  const generateSampleData = () => {
-    const sampleCount = 5;
-    return Array.from({ length: sampleCount }, (_, index) => {
-      const item = {
-        id: `ITEM-${String(index + 1).padStart(3, '0')}`,
-        status: currentState
-      };
+  // Generate dummy data like the infinite scroll example
+  const generateDummyData = (start, count) => {
+    const data = [];
+    const statuses = ['state1', 'state2', 'state3'];
+    const departments = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance'];
+    const employees = [
+      'John Smith',
+      'Alice Johnson',
+      'Bob Brown',
+      'Carol Davis',
+      'David Miller',
+      'Eva Garcia',
+      'Frank Wilson',
+      'Grace Lee'
+    ];
 
-      item.field1 = `Value ${index + 1}`;
-      item.field2 = `Sample Data ${String.fromCharCode(65 + (index % 26))}`;
-      item.field3 = Math.floor(Math.random() * 1000);
-      item.field4 = new Date(Date.now() - Math.random() * 10000000000).toLocaleDateString();
-      item.field5 = (Math.random() * 100).toFixed(2);
+    for (let i = start; i < start + count; i++) {
+      const nameIndex = i % employees.length;
+      const name = employees[nameIndex] + ` (${i})`;
 
-      return item;
-    });
+      data.push({
+        id: `ITEM-${String(i + 1).padStart(3, '0')}`,
+        name,
+        email: `employee${i}@company.com`,
+        department: departments[i % departments.length],
+        status: statuses[i % statuses.length],
+        salary: Math.floor(Math.random() * 100000) + 40000,
+        joinDate: new Date(2020 + Math.floor(i / 100), (i % 12), (i % 28) + 1).toISOString().split('T')[0],
+        phone: `+1-555-${String(i).padStart(4, '0')}`,
+      });
+    }
+
+    return data;
   };
 
-  const displayData = generateSampleData();
+  // Initialize data
+  React.useEffect(() => {
+    setData(generateDummyData(0, 50));
+  }, []);
 
-  // Compact column configuration
+  // Column configuration matching the infinite scroll example
   const columns = [
     {
-      key: 'id',
-      title: 'ID',
-      dataIndex: 'id',
-      sortable: true,
-      width: 100,
-      fixed: 'left',
-      render: (value, record) => (
-        <Button
-          variant="link"
-          size="sm"
-          onClick={() => handleItemClick(record)}
-          className="p-0 h-auto font-medium text-blue-600 hover:text-blue-800"
-        >
-          {value}
-        </Button>
-      )
-    },
-    {
-      key: 'field1',
-      title: 'Field 1',
-      dataIndex: 'field1',
+      key: 'name',
+      title: 'Name',
+      dataIndex: 'name',
       sortable: true,
       filterable: true,
-      width: 120
+      editable: true,
+      width: '150px',
     },
     {
-      key: 'field2',
-      title: 'Field 2',
-      dataIndex: 'field2',
+      key: 'email',
+      title: 'Email',
+      dataIndex: 'email',
       sortable: true,
       filterable: true,
-      width: 140
+      editable: true,
+      width: '200px',
     },
     {
-      key: 'field3',
-      title: 'Field 3',
-      dataIndex: 'field3',
+      key: 'department',
+      title: 'Department',
+      dataIndex: 'department',
       sortable: true,
-      align: 'right',
-      width: 100
+      filterable: true,
+      editable: true,
+      editor: 'select',
+      editorProps: {
+        options: [
+          { value: 'Engineering', label: 'Engineering' },
+          { value: 'Marketing', label: 'Marketing' },
+          { value: 'Sales', label: 'Sales' },
+          { value: 'HR', label: 'HR' },
+          { value: 'Finance', label: 'Finance' },
+        ],
+      },
+      width: '120px',
     },
     {
-      key: 'field4',
-      title: 'Field 4',
-      dataIndex: 'field4',
+      key: 'status',
+      title: 'Status',
+      dataIndex: 'status',
       sortable: true,
-      width: 120
+      filterable: true,
+      editable: true,
+      editor: 'select',
+      editorProps: {
+        options: [
+          { value: 'state1', label: 'State 1' },
+          { value: 'state2', label: 'State 2' },
+          { value: 'state3', label: 'State 3' },
+        ],
+      },
+      width: '100px',
+      render: (value) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${value === 'state1' ? 'bg-green-100 text-green-800' :
+            value === 'state2' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-blue-100 text-blue-800'
+          }`}>
+          {value === 'state1' ? 'State 1' : value === 'state2' ? 'State 2' : 'State 3'}
+        </span>
+      ),
     },
     {
-      key: 'field5',
-      title: 'Field 5',
-      dataIndex: 'field5',
+      key: 'salary',
+      title: 'Salary',
+      dataIndex: 'salary',
       sortable: true,
-      align: 'right',
-      width: 100
-    }
+      filterable: true,
+      editable: true,
+      width: '120px',
+      render: (value) => `$${value?.toLocaleString() || 0}`,
+    },
+    {
+      key: 'joinDate',
+      title: 'Join Date',
+      dataIndex: 'joinDate',
+      sortable: true,
+      filterable: true,
+      editable: true,
+      editor: 'datepicker',
+      width: '120px',
+    },
+    {
+      key: 'phone',
+      title: 'Phone',
+      dataIndex: 'phone',
+      sortable: true,
+      filterable: true,
+      editable: true,
+      width: '140px',
+    },
   ];
 
   // Bulk actions
@@ -141,6 +196,56 @@ const SampleListingPage = () => {
   ];
 
   const enableBulkActions = true;
+
+  // Simulate API call for loading more data
+  const handleLoadMore = useCallback(async (cursor) => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const currentLength = data.length;
+    const newData = generateDummyData(currentLength, 25);
+    const nextHasMore = currentLength + newData.length < 500; // Limit to 500 total records
+
+    return {
+      data: newData,
+      nextCursor: currentLength + newData.length,
+      hasNextPage: nextHasMore,
+    };
+  }, [data.length]);
+
+  const handleCellEdit = useCallback((value, record, column) => {
+    console.log('Cell edited:', { value, record, column });
+
+    // Update the data
+    setData(prevData =>
+      prevData.map(item =>
+        item.id === record.id
+          ? { ...item, [column.key]: value }
+          : item
+      )
+    );
+  }, []);
+
+  const handleRowAdd = useCallback(() => {
+    const newId = Math.max(...data.map(d => Number(d.id.split('-')[1]))) + 1;
+    const newRow = {
+      id: `ITEM-${String(newId).padStart(3, '0')}`,
+      name: `New Employee ${newId}`,
+      email: `new${newId}@company.com`,
+      department: 'Engineering',
+      status: 'state1',
+      salary: 50000,
+      joinDate: new Date().toISOString().split('T')[0],
+      phone: `+1-555-${String(newId).padStart(4, '0')}`,
+    };
+
+    setData(prevData => [...prevData, newRow]);
+  }, [data]);
+
+  const handleRowDelete = useCallback((record) => {
+    console.log('Row deleted:', record);
+    setData(prevData => prevData.filter(item => item.id !== record.id));
+  }, []);
 
   // Event Handlers
   const handleStateChange = (newState) => {
@@ -293,34 +398,56 @@ const SampleListingPage = () => {
                   <div className="p-0">
                     <LoadingState loading={loading} text="Loading data...">
                       <EditableDataGrid
+                        id="listing-page-infinite-scroll"
                         columns={columns}
-                        data={displayData.filter(item => item.status === state.key)}
+                        data={data.filter(item => item.status === state.key)}
                         loading={loading}
-                        editable={false}
+                        editable={true}
+                        infiniteScroll={{
+                          enabled: true,
+                          hasNextPage,
+                          threshold: 200,
+                          onLoadMore: handleLoadMore,
+                          showLoader: false,
+                          onStateChange: (scrollState) => {
+                            setHasNextPage(scrollState.hasNextPage);
+                          },
+                        }}
+                        virtualization={{
+                          enabled: true,
+                          itemHeight: 35,
+                          containerHeight: 600,
+                          overscan: 3,
+                        }}
                         selection={{
                           type: enableBulkActions ? 'checkbox' : 'none',
                           selectedRowKeys: selectedItems,
                           onSelectionChange: handleSelectionChange
                         }}
-                        pagination={{
-                          current: currentPage,
-                          total: displayData.filter(item => item.status === state.key).length,
-                          pageSize: 10,
-                          showSizeChanger: true,
-                          showQuickJumper: true,
-                          showTotal: (total, range) =>
-                            `${range[0]}-${range[1]} of ${total}`,
-                          onChange: handlePageChange,
-                          pageSizeOptions: ['10', '25', '50', '100'],
-                          size: 'small'
+                        sortable={true}
+                        filterable={true}
+                        exportable={true}
+                        allowedActions={[
+                          'edit_completed',
+                          'edit_rows',
+                          'delete_rows',
+                          'bulk_delete',
+                          'bulk_edit',
+                        ]}
+                        onCellEdit={handleCellEdit}
+                        onRowAdd={handleRowAdd}
+                        onRowDelete={handleRowDelete}
+                        onRowClick={handleItemClick}
+                        onSort={(columnKey, direction) => {
+                          console.log('Sort:', columnKey, direction);
+                        }}
+                        onFilter={(filters) => {
+                          console.log('Filter:', filters);
                         }}
                         scroll={{ x: 900 }}
                         size="small"
-                        onRowClick={handleItemClick}
                         rowKey="id"
-                        className="border-0"
-
-                        // Empty state configuration
+                        className="border-0 w-full"
                         emptyText="No items available"
                       />
                     </LoadingState>

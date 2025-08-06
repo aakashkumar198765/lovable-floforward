@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { ApprovalData, ApprovalFormProps, CommerceState } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Textarea from '../../atoms/form/Textarea';
 import Button from '../../atoms/form/Button';
 import Checkbox from '../../atoms/form/Checkbox';

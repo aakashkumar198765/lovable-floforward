@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { ApprovalWorkflowProps, WorkflowStep } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Button from '../../atoms/form/Button';
 import Textarea from '../../atoms/form/Textarea';
 import Badge from '../../atoms/display/Badge';
@@ -31,6 +31,8 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
   allowSkip = false,
   className = '',
   style = {},
+  exportable = true,
+  importable = true,
   onStepAction,
   onWorkflowComplete,
   onDelegate,
@@ -408,6 +410,23 @@ const ApprovalWorkflow: React.FC<ApprovalWorkflowProps> = ({
                 </div>
               </div>
             )}
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            {exportable && <Button
+              variant="primary"
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+            >
+              Export
+            </Button>}
+            {importable && <Button
+              variant="primary"
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+            >
+              Import
+            </Button>}
           </div>
         </div>
       </div>

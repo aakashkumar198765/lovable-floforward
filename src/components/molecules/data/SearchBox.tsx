@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { SearchBoxProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Input from '../../atoms/form/Input';
 import Button from '../../atoms/form/Button';
+import Label from '../../atoms/display/Label';
 import { Search, X } from 'lucide-react';
 
 const SearchBox: React.FC<SearchBoxProps> = ({
@@ -142,14 +143,15 @@ const SearchBox: React.FC<SearchBoxProps> = ({
           leftIcon={searchIcon || defaultSearchIcon}
           rightIcon={
             showClearButton && internalValue && !disabled && !readonly ? (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="xs"
                 onClick={handleClearClick}
-                className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
+                className="text-gray-400 hover:text-gray-600 p-1"
                 aria-label="Clear search"
               >
                 {clearIcon || defaultClearIcon}
-              </button>
+              </Button>
             ) : undefined
           }
           onChange={handleInputChange}
@@ -160,9 +162,9 @@ const SearchBox: React.FC<SearchBoxProps> = ({
       ) : (
         <>
           {label && (
-            <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+            <Label htmlFor={id}>
               {label}
-            </label>
+            </Label>
           )}
           
           <div className={inputGroupClasses}>
@@ -171,19 +173,18 @@ const SearchBox: React.FC<SearchBoxProps> = ({
                 {searchIcon || defaultSearchIcon}
               </div>
               
-              <input
+              <Input
                 id={`${id}-search-input`}
                 name={name}
                 type="text"
                 placeholder={placeholder}
                 value={internalValue}
                 disabled={disabled}
-                readOnly={readonly}
-                className={cn(
-                  'w-full pl-10 pr-4 py-2 border-0 focus:outline-none bg-transparent',
-                  size === 'sm' && 'text-sm py-1.5',
-                  size === 'lg' && 'text-lg py-3'
-                )}
+                readonly={readonly}
+                size={size}
+                status={status}
+                leftIcon={searchIcon || defaultSearchIcon}
+                className="w-full border-0 focus:outline-none bg-transparent"
                 onChange={handleInputChange}
                 onFocus={onFocus}
                 onBlur={onBlur}
@@ -195,14 +196,15 @@ const SearchBox: React.FC<SearchBoxProps> = ({
               />
               
               {showClearButton && internalValue && !disabled && !readonly && (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="xs"
                   onClick={handleClearClick}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
                   aria-label="Clear search"
                 >
                   {clearIcon || defaultClearIcon}
-                </button>
+                </Button>
               )}
             </div>
             

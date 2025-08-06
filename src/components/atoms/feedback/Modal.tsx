@@ -1,7 +1,9 @@
 import React, { forwardRef, useEffect, useRef } from 'react';
 import { ModalProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { X, Loader2 } from 'lucide-react';
+import { modalSliderClasses } from '../../../utils/tailwindClassMaps';
+import Button from '../form/Button';
 
 const Modal = forwardRef<HTMLDivElement, ModalProps>(
   (
@@ -120,49 +122,6 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
       }
     };
 
-    // Size classes for modal variant
-    const modalSizeClasses = {
-      xs: 'max-w-xs',
-      sm: 'max-w-sm',
-      md: 'max-w-md',
-      lg: 'max-w-lg',
-      xl: 'max-w-xl',
-      '2xl': 'max-w-2xl',
-      '3xl': 'max-w-3xl',
-      '4xl': 'max-w-4xl',
-      '5xl': 'max-w-5xl',
-      '6xl': 'max-w-6xl',
-      full: 'max-w-full'
-    };
-
-    // Size classes for slider variant
-    const sliderSizeClasses = {
-      xs: 'w-80',
-      sm: 'w-96',
-      md: 'w-1/3',
-      lg: 'w-1/2',
-      xl: 'w-2/3',
-      '2xl': 'w-3/4',
-      '3xl': 'w-4/5',
-      '4xl': 'w-5/6',
-      '5xl': 'w-11/12',
-      '6xl': 'w-full',
-      full: 'w-full'
-    };
-
-    // Position classes for modal variant
-    const modalPositionClasses = {
-      center: 'items-center justify-center',
-      top: 'items-start justify-center pt-16',
-      bottom: 'items-end justify-center pb-16',
-      left: 'items-center justify-start pl-16',
-      right: 'items-center justify-end pr-16',
-      'top-left': 'items-start justify-start pt-16 pl-16',
-      'top-right': 'items-start justify-end pt-16 pr-16',
-      'bottom-left': 'items-end justify-start pb-16 pl-16',
-      'bottom-right': 'items-end justify-end pb-16 pr-16'
-    };
-
     // Slider position and animation classes
     const sliderPositionClasses = {
       left: {
@@ -231,14 +190,14 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
             <div
               className={cn(
                 'flex min-h-full p-4',
-                centered ? modalPositionClasses[position] : modalPositionClasses[position]
+                centered ? modalSliderClasses.modalPositionClasses[position] : modalSliderClasses.modalPositionClasses[position]
               )}
             >
               <div
                 ref={modalRef}
                 className={cn(
                   'relative w-full transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-xl dark:shadow-2xl transition-all duration-300 ease-in-out font-work-sans',
-                  modalSizeClasses[size],
+                  modalSliderClasses.modalSizeClasses[size],
                   'scale-100',
                   className
                 )}
@@ -263,14 +222,15 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
                           </h3>
                         )}
                         {closable && (
-                          <button
-                            type="button"
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={handleClose}
-                            className="ml-3 flex-shrink-0 p-1 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors duration-200"
+                            className="ml-3 flex-shrink-0 p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                             aria-label="Close modal"
                           >
                             <X className="w-6 h-6" />
-                          </button>
+                          </Button>
                         )}
                       </div>
                     )}
@@ -294,17 +254,6 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
                     {footer}
                   </div>
                 )}
-
-                {/* Commerce state indicator */}
-                {/* {commerceState && commerceState !== 'initiation' && (
-                  <div className={cn(
-                    'absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white',
-                    commerceState === 'agreement' && 'bg-warning-500',
-                    commerceState === 'execution' && 'bg-primary-600',
-                    commerceState === 'settlement' && 'bg-gray-500',
-                    commerceState === 'completion' && 'bg-success-500'
-                  )} />
-                )} */}
               </div>
             </div>
           </div>
@@ -356,7 +305,7 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
               className={cn(
                 'relative bg-white dark:bg-gray-800 shadow-xl dark:shadow-2xl transform transition-all duration-300 ease-in-out font-work-sans flex flex-col',
                 sliderConfig.height,
-                slideDirection === 'left' || slideDirection === 'right' ? sliderSizeClasses[size] : 'w-full',
+                slideDirection === 'left' || slideDirection === 'right' ? modalSliderClasses.sliderSizeClasses[size] : 'w-full',
                 'translate-x-0 translate-y-0',
                 className
               )}
@@ -381,14 +330,15 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
                         </h3>
                       )}
                       {closable && (
-                        <button
-                          type="button"
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={handleClose}
-                          className="ml-3 flex-shrink-0 p-1 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors duration-200"
+                          className="ml-3 flex-shrink-0 p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                           aria-label="Close slider"
                         >
                           <X className="w-6 h-6" />
-                        </button>
+                        </Button>
                       )}
                     </div>
                   )}

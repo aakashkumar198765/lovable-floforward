@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { StateTransitionProps } from '../../../types';
-import { cn } from '../../../utils/cn';
 import Button from '../../atoms/form/Button';
 import Select from '../../atoms/form/Select';
 import Badge from '../../atoms/display/Badge';
@@ -9,6 +8,7 @@ import Tooltip from '../../atoms/display/Tooltip';
 import Modal from '../../atoms/feedback/Modal';
 import Alert from '../../atoms/feedback/Alert';
 import Toast from '../../atoms/feedback/Toast';
+import { cn } from '../../../utils/utils';
 
 const StateTransition: React.FC<StateTransitionProps> = ({
   id = 'state-transition',
@@ -25,7 +25,9 @@ const StateTransition: React.FC<StateTransitionProps> = ({
   style = {},
   onStateChange,
   onValidate,
-  allowedActions = []
+  allowedActions = [],
+  exportable = true,
+  importable = true
 }) => {
   const [selectedState, setSelectedState] = useState<string>('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -418,11 +420,27 @@ const StateTransition: React.FC<StateTransitionProps> = ({
             </div>
           </div>
           
-          {currentStateInfo?.description && (
-            <Tooltip content={currentStateInfo.description}>
-              <Icon name="info" className="text-gray-400" />
-            </Tooltip>
-          )}
+          <div className="flex items-center space-x-2">
+            {exportable && <Button
+              variant="primary"
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+            >
+              Export
+            </Button>}
+            {importable && <Button
+              variant="primary"
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+            >
+              Import
+            </Button>}
+            {currentStateInfo?.description && (
+              <Tooltip content={currentStateInfo.description}>
+                <Icon name="info" className="text-gray-400" />
+              </Tooltip>
+            )}
+          </div>
         </div>
       </div>
 

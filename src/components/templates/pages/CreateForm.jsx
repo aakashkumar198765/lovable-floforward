@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
 
@@ -18,7 +18,7 @@ import {
 
   // Feedback Components
   LoadingState
-} from '../components';
+} from '../..';
 
 /**
  * CreatePage - Generic Create/Form Page Component
@@ -73,14 +73,15 @@ const CreatePage = () => {
 
     // Sub-schema 4 - Table data
     tableData: [
-      { id: 1, name: 'Item 1', quantity: 10, price: 25.50, status: 'active' },
-      { id: 2, name: 'Item 2', quantity: 5, price: 15.00, status: 'inactive' }
+      { id: 1, name: 'Item 1', email: 'item1@company.com', department: 'Engineering', status: 'Active', salary: 50000, joinDate: '2023-01-15', phone: '+1-555-0001' },
+      { id: 2, name: 'Item 2', email: 'item2@company.com', department: 'Marketing', status: 'Inactive', salary: 45000, joinDate: '2023-02-20', phone: '+1-555-0002' }
     ],
     notes4: ''
   });
 
   const [formErrors, setFormErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [hasNextPage, setHasNextPage] = useState(true);
 
   // Simple validation
   const validateForm = () => {
@@ -147,6 +148,98 @@ const CreatePage = () => {
       tableData: prev.tableData.filter((_, i) => i !== index)
     }));
   };
+
+  // Generate dummy data for infinite scroll
+  const generateDummyData = (start, count) => {
+    const data = [];
+    const departments = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance'];
+    const statuses = ['Active', 'Inactive', 'Pending'];
+    const employees = [
+      'John Smith',
+      'Alice Johnson',
+      'Bob Brown',
+      'Carol Davis',
+      'David Miller',
+      'Eva Garcia',
+      'Frank Wilson',
+      'Grace Lee'
+    ];
+
+    for (let i = start; i < start + count; i++) {
+      const nameIndex = i % employees.length;
+      const name = employees[nameIndex] + ` (${i})`;
+
+      data.push({
+        id: i + 3, // Start from 3 since we have 2 initial items
+        name,
+        email: `employee${i}@company.com`,
+        department: departments[i % departments.length],
+        status: statuses[i % statuses.length],
+        salary: Math.floor(Math.random() * 100000) + 40000,
+        joinDate: new Date(2020 + Math.floor(i / 100), (i % 12), (i % 28) + 1).toISOString().split('T')[0],
+        phone: `+1-555-${String(i).padStart(4, '0')}`,
+      });
+    }
+
+    return data;
+  };
+
+  // Simulate API call for loading more data
+  const handleLoadMore = useCallback(async (cursor) => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const currentLength = formData.tableData.length;
+    const newData = generateDummyData(currentLength - 2, 10); // -2 because we start with 2 items
+    const nextHasMore = currentLength + newData.length < 100; // Limit to 100 total records
+
+    return {
+      data: newData,
+      nextCursor: currentLength + newData.length,
+      hasNextPage: nextHasMore,
+    };
+  }, [formData.tableData.length]);
+
+  const handleCellEdit = useCallback((value, record, column) => {
+    console.log('Cell edited:', { value, record, column });
+
+    // Update the table data
+    setFormData(prev => ({
+      ...prev,
+      tableData: prev.tableData.map(item =>
+        item.id === record.id
+          ? { ...item, [column.key]: value }
+          : item
+      )
+    }));
+  }, []);
+
+  const handleRowAdd = useCallback(() => {
+    const newId = Math.max(...formData.tableData.map(d => Number(d.id))) + 1;
+    const newRow = {
+      id: newId,
+      name: `New Employee ${newId}`,
+      email: `new${newId}@company.com`,
+      department: 'Engineering',
+      status: 'Active',
+      salary: 50000,
+      joinDate: new Date().toISOString().split('T')[0],
+      phone: `+1-555-${String(newId).padStart(4, '0')}`,
+    };
+
+    setFormData(prev => ({
+      ...prev,
+      tableData: [...prev.tableData, newRow]
+    }));
+  }, [formData.tableData]);
+
+  const handleRowDelete = useCallback((record) => {
+    console.log('Row deleted:', record);
+    setFormData(prev => ({
+      ...prev,
+      tableData: prev.tableData.filter(item => item.id !== record.id)
+    }));
+  }, []);
 
   // Generic select options
   const selectOptions = [
@@ -559,66 +652,146 @@ const CreatePage = () => {
               </div>
               <div className="p-6">
                 <EditableDataGrid
+                  id="create-page-infinite-scroll"
                   columns={[
                     {
                       key: 'name',
                       title: 'Name',
                       dataIndex: 'name',
+                      sortable: true,
+                      filterable: true,
                       editable: true,
-                      width: 200
+                      width: '150px',
                     },
                     {
-                      key: 'quantity',
-                      title: 'Quantity',
-                      dataIndex: 'quantity',
+                      key: 'email',
+                      title: 'Email',
+                      dataIndex: 'email',
+                      sortable: true,
+                      filterable: true,
                       editable: true,
-                      width: 120,
-                      align: 'right'
+                      width: '200px',
                     },
                     {
-                      key: 'price',
-                      title: 'Value',
-                      dataIndex: 'price',
+                      key: 'department',
+                      title: 'Department',
+                      dataIndex: 'department',
+                      sortable: true,
+                      filterable: true,
                       editable: true,
-                      width: 120,
-                      align: 'right',
-                      render: (value) => `$${value}`
+                      editor: 'select',
+                      editorProps: {
+                        options: [
+                          { value: 'Engineering', label: 'Engineering' },
+                          { value: 'Marketing', label: 'Marketing' },
+                          { value: 'Sales', label: 'Sales' },
+                          { value: 'HR', label: 'HR' },
+                          { value: 'Finance', label: 'Finance' },
+                        ],
+                      },
+                      width: '120px',
                     },
                     {
                       key: 'status',
                       title: 'Status',
                       dataIndex: 'status',
+                      sortable: true,
+                      filterable: true,
                       editable: true,
-                      width: 120
+                      editor: 'select',
+                      editorProps: {
+                        options: [
+                          { value: 'Active', label: 'Active' },
+                          { value: 'Inactive', label: 'Inactive' },
+                          { value: 'Pending', label: 'Pending' },
+                        ],
+                      },
+                      width: '100px',
+                      render: (value) => (
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${value === 'Active' ? 'bg-green-100 text-green-800' :
+                            value === 'Inactive' ? 'bg-red-100 text-red-800' :
+                              'bg-yellow-100 text-yellow-800'
+                          }`}>
+                          {value}
+                        </span>
+                      ),
                     },
-                    // {
-                    //   key: 'actions',
-                    //   title: 'Actions',
-                    //   width: 80,
-                    //   align: 'center',
-                    //   render: (value, record, index) => (
-                    //     <Button
-                    //       variant="outline"
-                    //       size="xs"
-                    //       onClick={() => handleDeleteTableRow(index)}
-                    //       iconLeft={<Icon name="trash" size="xs" />}
-                    //       className="text-red-600 hover:text-red-800 border-red-300 hover:border-red-500"
-                    //       disabled={loading}
-                    //       aria-label={`Delete row ${record.name}`}
-                    //     />
-                    //   )
-                    // }
+                    {
+                      key: 'salary',
+                      title: 'Salary',
+                      dataIndex: 'salary',
+                      sortable: true,
+                      filterable: true,
+                      editable: true,
+                      width: '120px',
+                      render: (value) => `$${value?.toLocaleString() || 0}`,
+                    },
+                    {
+                      key: 'joinDate',
+                      title: 'Join Date',
+                      dataIndex: 'joinDate',
+                      sortable: true,
+                      filterable: true,
+                      editable: true,
+                      editor: 'datepicker',
+                      width: '120px',
+                    },
+                    {
+                      key: 'phone',
+                      title: 'Phone',
+                      dataIndex: 'phone',
+                      sortable: true,
+                      filterable: true,
+                      editable: true,
+                      width: '140px',
+                    },
                   ]}
                   data={formData.tableData}
                   editable={true}
-                  allowedActions={["delete_rows"]}
+                  infiniteScroll={{
+                    enabled: true,
+                    hasNextPage,
+                    threshold: 200,
+                    onLoadMore: handleLoadMore,
+                    showLoader: false,
+                    onStateChange: (state) => {
+                      setHasNextPage(state.hasNextPage);
+                    },
+                  }}
+                  virtualization={{
+                    enabled: true,
+                    itemHeight: 35,
+                    containerHeight: 400,
+                    overscan: 3,
+                  }}
+                  selection={{
+                    type: 'checkbox',
+                  }}
+                  sortable={true}
+                  filterable={true}
+                  exportable={true}
+                  allowedActions={[
+                    'edit_completed',
+                    'edit_rows',
+                    'delete_rows',
+                    'bulk_delete',
+                    'bulk_edit',
+                  ]}
+                  onCellEdit={handleCellEdit}
+                  onRowAdd={handleRowAdd}
+                  onRowDelete={handleRowDelete}
+                  onSort={(columnKey, direction) => {
+                    console.log('Sort:', columnKey, direction);
+                  }}
+                  onFilter={(filters) => {
+                    console.log('Filter:', filters);
+                  }}
                   size="small"
-                  pagination={false}
                   rowKey="id"
                   onDataChange={(newData) => {
                     setFormData(prev => ({ ...prev, tableData: newData }));
                   }}
-                  className="border border-gray-200 rounded-md mb-6"
+                  className="border border-gray-200 rounded-md mb-6 w-full"
                 />
 
                 {/* Textarea */}

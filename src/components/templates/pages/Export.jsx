@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ExportModal from '../components/organisms/data-grids/ExportModal';
+import ExportModal from '../../organisms/data-grids/ExportModal';
 
 /**
  * ExportModalPage - Standalone Export Modal Page

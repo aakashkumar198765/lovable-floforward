@@ -1,5 +1,9 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { WorkflowTrackerProps } from '../../../types';
+import Button from '../../atoms/form/Button';
+import Select from '../../atoms/form/Select';
+import Badge from '../../atoms/display/Badge';
+import Icon from '../../atoms/display/Icon';
 
 export const WorkflowTracker: React.FC<WorkflowTrackerProps> = ({
   id,
@@ -192,76 +196,82 @@ export const WorkflowTracker: React.FC<WorkflowTrackerProps> = ({
         <div className="flex flex-wrap gap-4 items-center">
           <div className="flex items-center space-x-2">
             <label className="text-sm font-medium text-gray-700">Status:</label>
-            <select
+            <Select
               value={localFilters.status?.[0] || ''}
-              onChange={(e) => handleFilterChange({
+              onChange={(value) => handleFilterChange({
                 ...localFilters,
-                status: e.target.value ? [e.target.value] : []
+                status: value ? [value] : []
               })}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm"
-            >
-              <option value="">All</option>
-              <option value="active">Active</option>
-              <option value="paused">Paused</option>
-              <option value="completed">Completed</option>
-              <option value="failed">Failed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+              options={[
+                { value: '', label: 'All' },
+                { value: 'active', label: 'Active' },
+                { value: 'paused', label: 'Paused' },
+                { value: 'completed', label: 'Completed' },
+                { value: 'failed', label: 'Failed' },
+                { value: 'cancelled', label: 'Cancelled' }
+              ]}
+              size="sm"
+            />
           </div>
 
           <div className="flex items-center space-x-2">
             <label className="text-sm font-medium text-gray-700">Priority:</label>
-            <select
+            <Select
               value={localFilters.priority?.[0] || ''}
-              onChange={(e) => handleFilterChange({
+              onChange={(value) => handleFilterChange({
                 ...localFilters,
-                priority: e.target.value ? [e.target.value] : []
+                priority: value ? [value] : []
               })}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm"
-            >
-              <option value="">All</option>
-              <option value="urgent">Urgent</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
+              options={[
+                { value: '', label: 'All' },
+                { value: 'urgent', label: 'Urgent' },
+                { value: 'high', label: 'High' },
+                { value: 'medium', label: 'Medium' },
+                { value: 'low', label: 'Low' }
+              ]}
+              size="sm"
+            />
           </div>
 
           <div className="flex items-center space-x-2">
             <label className="text-sm font-medium text-gray-700">Group By:</label>
-            <select
+            <Select
               value={groupBy}
-              onChange={(e) => handleFilterChange({
+              onChange={(value) => handleFilterChange({
                 ...localFilters,
-                groupBy: e.target.value
+                groupBy: value
               })}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm"
-            >
-              <option value="none">None</option>
-              <option value="status">Status</option>
-              <option value="assignee">Assignee</option>
-              <option value="priority">Priority</option>
-            </select>
+              options={[
+                { value: 'none', label: 'None' },
+                { value: 'status', label: 'Status' },
+                { value: 'assignee', label: 'Assignee' },
+                { value: 'priority', label: 'Priority' }
+              ]}
+              size="sm"
+            />
           </div>
 
           <div className="flex items-center space-x-2">
             <label className="text-sm font-medium text-gray-700">Sort:</label>
-            <select
+            <Select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm"
-            >
-              <option value="name">Name</option>
-              <option value="status">Status</option>
-              <option value="priority">Priority</option>
-              <option value="dueDate">Due Date</option>
-            </select>
-            <button
+              onChange={(value) => setSortBy(value as any)}
+              options={[
+                { value: 'name', label: 'Name' },
+                { value: 'status', label: 'Status' },
+                { value: 'priority', label: 'Priority' },
+                { value: 'dueDate', label: 'Due Date' }
+              ]}
+              size="sm"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-              className="px-2 py-1 text-sm text-gray-600 hover:text-gray-900"
+              className="text-gray-600 hover:text-gray-900"
             >
               {sortDirection === 'asc' ? '↑' : '↓'}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -283,53 +293,59 @@ export const WorkflowTracker: React.FC<WorkflowTrackerProps> = ({
           <div className="flex-1">
             <h4 className="font-medium text-gray-900 mb-1">{workflow.name}</h4>
             <div className="flex items-center space-x-2 text-sm text-gray-600">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(workflow.status)}`}>
+              <Badge variant="secondary" size="xs" className={getStatusColor(workflow.status)}>
                 {workflow.status}
-              </span>
+              </Badge>
               {workflow.priority && (
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(workflow.priority)}`}>
+                <Badge variant="secondary" size="xs" className={getPriorityColor(workflow.priority)}>
                   {workflow.priority}
-                </span>
+                </Badge>
               )}
             </div>
           </div>
           
           <div className="flex space-x-2">
             {workflow.status === 'active' && (
-              <button
+              <Button
+                variant="ghost"
+                size="xs"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleWorkflowAction(workflow.id, 'pause');
                 }}
                 className="p-1 text-gray-400 hover:text-gray-600"
-                title="Pause workflow"
+                aria-label="Pause workflow"
               >
                 ⏸️
-              </button>
+              </Button>
             )}
             {workflow.status === 'paused' && (
-              <button
+              <Button
+                variant="ghost"
+                size="xs"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleWorkflowAction(workflow.id, 'resume');
                 }}
                 className="p-1 text-gray-400 hover:text-gray-600"
-                title="Resume workflow"
+                aria-label="Resume workflow"
               >
                 ▶️
-              </button>
+              </Button>
             )}
             {['active', 'paused'].includes(workflow.status) && (
-              <button
+              <Button
+                variant="ghost"
+                size="xs"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleWorkflowAction(workflow.id, 'cancel');
                 }}
                 className="p-1 text-gray-400 hover:text-red-600"
-                title="Cancel workflow"
+                aria-label="Cancel workflow"
               >
                 ❌
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -436,14 +452,15 @@ export const WorkflowTracker: React.FC<WorkflowTrackerProps> = ({
           <div key={groupName}>
             {groupBy !== 'none' && (
               <div className="flex items-center justify-between mb-3">
-                <button
+                <Button
+                  variant="ghost"
                   onClick={() => toggleGroupExpansion(groupName)}
                   className="flex items-center space-x-2 text-lg font-medium text-gray-900 hover:text-gray-700"
                 >
                   <span>{expandedGroups.has(groupName) ? '▼' : '▶'}</span>
                   <span>{groupName}</span>
                   <span className="text-sm text-gray-600">({groupWorkflows.length})</span>
-                </button>
+                </Button>
               </div>
             )}
             
@@ -469,12 +486,18 @@ export const WorkflowTracker: React.FC<WorkflowTrackerProps> = ({
       {title && (
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-          {autoRefresh && (
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
-              <span>🔄</span>
-              <span>Auto-refresh every {refreshInterval / 1000}s</span>
-            </div>
-          )}
+          <div className="flex items-center space-x-2">
+            {autoRefresh && (
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <span>🔄</span>
+                <span>Auto-refresh every {refreshInterval / 1000}s</span>
+              </div>
+            )}
+            {/* Button action goes here */}
+            {/* <div className="flex items-center space-x-2">
+              
+            </div> */}
+          </div>
         </div>
       )}
 
