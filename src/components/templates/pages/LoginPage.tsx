@@ -38,9 +38,6 @@ import Button from '../../atoms/form/Button';
 import Input from '../../atoms/form/Input';
 import Alert from '../../atoms/feedback/Alert';
 import Spinner from '../../atoms/feedback/Spinner';
-import Badge from '../../atoms/display/Badge';
-import Status from '../../atoms/display/Status';
-import { cn } from '../../../utils/cn';
 
 const LoginPageTemplate: React.FC = () => {
   // Template State Management Pattern

@@ -24,9 +24,6 @@ import Button from '../components/atoms/form/Button';
 import Input from '../components/atoms/form/Input';
 import Alert from '../components/atoms/feedback/Alert';
 import Spinner from '../components/atoms/feedback/Spinner';
-import Badge from '../components/atoms/display/Badge';
-import Status from '../components/atoms/display/Status';
-import { cn } from '../utils/cn';
 
 const LoginPage: React.FC = () => {
   // Following LoginPageTemplate patterns exactly
