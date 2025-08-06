@@ -359,6 +359,18 @@ export const modalSliderClasses = {
     "6xl": "w-full",
     full: "w-full",
   },
+  // Position classes for modal variant
+  modalPositionClasses: {
+    center: "items-center justify-center",
+    top: "items-start justify-center pt-16",
+    bottom: "items-end justify-center pb-16",
+    left: "items-center justify-start pl-16",
+    right: "items-center justify-end pr-16",
+    "top-left": "items-start justify-start pt-16 pl-16",
+    "top-right": "items-start justify-end pt-16 pr-16",
+    "bottom-left": "items-end justify-start pb-16 pl-16",
+    "bottom-right": "items-end justify-end pb-16 pr-16",
+  },
 };
 // Position Classes
 export const positionClasses = {
@@ -432,6 +444,9 @@ export const animationClasses = {
     pulse: "animate-pulse",
     spin: "animate-spin",
     bounce: "animate-bounce",
+    slow: "animate-spin",
+    normal: "animate-spin",
+    fast: "animate-spin",
   },
 
   // Hover effects
@@ -439,6 +454,13 @@ export const animationClasses = {
     scale: "hover:scale-105 transition-transform duration-200",
     opacity: "hover:opacity-80 transition-opacity duration-200",
     shadow: "hover:shadow-md transition-shadow duration-200",
+  },
+
+  // Speed Durations
+  speedDurations: {
+    slow: "2s",
+    normal: "1s",
+    fast: "0.5s",
   },
 };
 

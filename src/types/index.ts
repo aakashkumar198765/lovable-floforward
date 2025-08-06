@@ -378,8 +378,11 @@ export interface ButtonProps extends EnterpriseComponentProps {
   iconLeft?: React.ReactNode;
   iconRight?: React.ReactNode;
   href?: string;
+  id?: string;
   target?: string;
   rel?: string;
+  role?: string;
+  applyDefaultClasses?: boolean;
   onClick?: (event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
   onFocus?: (event: React.FocusEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLButtonElement | HTMLAnchorElement>) => void;

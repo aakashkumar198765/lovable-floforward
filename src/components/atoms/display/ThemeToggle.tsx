@@ -2,6 +2,7 @@ import React from 'react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { cn } from '../../../utils/utils';
 import { Sun, Moon } from 'lucide-react';
+import Button from '../form/Button';
 
 interface ThemeToggleProps {
   className?: string;
@@ -30,10 +31,12 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
 
   if (variant === 'switch') {
     return (
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={toggleTheme}
         className={cn(
-          'relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
+          'relative inline-flex items-center h-6 rounded-full w-11 p-0',
           theme === 'dark' 
             ? 'bg-primary-600' 
             : 'bg-gray-200',
@@ -55,17 +58,19 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
             )}
           </span>
         </span>
-      </button>
+      </Button>
     );
   }
 
   if (variant === 'icon') {
     return (
-      <button
+      <Button
+        variant="secondary"
+        size={size}
         onClick={toggleTheme}
         className={cn(
-          'inline-flex items-center justify-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
-          'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
+          'rounded-full',
+          'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
           'hover:bg-gray-50 dark:hover:bg-gray-700',
           'text-gray-600 dark:text-gray-300',
           sizeClasses[size],
@@ -78,19 +83,20 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
         ) : (
           <Moon className="w-5 h-5" />
         )}
-      </button>
+      </Button>
     );
   }
 
   return (
-    <button
+    <Button
+      variant="secondary"
+      size={size}
       onClick={toggleTheme}
       className={cn(
-        'inline-flex items-center gap-2 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
-        'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
+        'gap-2',
+        'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
         'hover:bg-gray-50 dark:hover:bg-gray-700',
         'text-gray-700 dark:text-gray-200',
-        buttonSizeClasses[size],
         className
       )}
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
@@ -106,7 +112,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
           Dark
         </>
       )}
-    </button>
+    </Button>
   );
 };
 

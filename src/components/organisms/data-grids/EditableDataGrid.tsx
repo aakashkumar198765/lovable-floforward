@@ -746,6 +746,7 @@ const EditableDataGrid: React.FC<EditableDataGridProps> = ({
                           onChange={() =>
                             handleRowSelection(String(record.id), true)
                           }
+                          className="h-4 w-4 text-primary-600 border-gray-300 focus:ring-primary-500"
                         />
                       )}
                     </td>

@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { ComparisonTableProps } from '../../../types';
 import { cn } from '../../../utils/utils';
 import Button from '../../atoms/form/Button';
+import Checkbox from '../../atoms/form/Checkbox';
 import Badge from '../../atoms/display/Badge';
 import Icon from '../../atoms/display/Icon';
 import Tooltip from '../../atoms/display/Tooltip';
@@ -316,9 +317,14 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          {exportable && <button className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={() => setShowExportModal(true)}>
+          {exportable && <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setShowExportModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+          >
             Export
-          </button>}
+          </Button>}
           {selectedItems.length > 1 && (
             <Button
               variant="primary"
@@ -384,17 +390,16 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
               >
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={selectedItems.includes(item.id!)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
+                      onChange={(checked: boolean) => {
+                        if (checked) {
                           setSelectedItems(prev => [...prev, item.id!]);
                         } else {
                           setSelectedItems(prev => prev.filter(id => id !== item.id));
                         }
                       }}
-                      className="h-4 w-4 rounded border-gray-300"
+                      size="sm"
                     />
                     <div>
                       <div className="flex items-center gap-2">

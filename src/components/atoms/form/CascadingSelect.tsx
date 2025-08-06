@@ -2,6 +2,7 @@ import React, { forwardRef, useState, useEffect } from 'react';
 import { CascadingSelectProps, SelectOption, SelectGroup } from '../../../types';
 import { cn } from '../../../utils/utils';
 import { formInputSizeClasses } from '../../../utils/tailwindClassMaps';
+import { Label } from '../display';
 
 const CascadingSelect = forwardRef<HTMLDivElement, CascadingSelectProps>(
   (
@@ -207,9 +208,12 @@ const CascadingSelect = forwardRef<HTMLDivElement, CascadingSelectProps>(
     return (
       <div className={containerClasses} style={style} ref={ref}>
         {label && label !== '' && (
-          <label className={labelClasses}>
+          <Label
+            htmlFor={id || 'cascading-select'}
+            className={labelClasses}
+          >
             {label}
-          </label>
+          </Label>
         )}
         
         {/* Render all select levels */}
@@ -222,9 +226,11 @@ const CascadingSelect = forwardRef<HTMLDivElement, CascadingSelectProps>(
 
           return (
             <div key={levelIndex} className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <Label
+                className='block text-sm font-medium text-gray-700 mb-1'
+              >
                 {level.label || `Level ${levelIndex + 1}`}
-              </label>
+              </Label>
               
               <select
                 id={levelIndex === 0 ? (id || '') : `${id || 'cascading'}-${levelIndex}`}

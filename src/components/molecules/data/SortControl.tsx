@@ -3,6 +3,7 @@ import { SortControlProps, SortOption, SortCriteria } from '../../../types';
 import { cn } from '../../../utils/utils';
 import Button from '../../atoms/form/Button';
 import Select from '../../atoms/form/Select';
+import Label from '../../atoms/display/Label';
 import { ChevronUp, ChevronDown, X } from 'lucide-react';
 
 const SortControl: React.FC<SortControlProps> = ({
@@ -176,9 +177,9 @@ const SortControl: React.FC<SortControlProps> = ({
       {/* Label */}
       {label && layout !== 'inline' && (
         <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-medium text-gray-700">
+          <Label size="sm" className="text-gray-700">
             {label}
-          </label>
+          </Label>
           
           {showClearButton && internalSorts.length > 0 && (
             <Button
@@ -196,9 +197,9 @@ const SortControl: React.FC<SortControlProps> = ({
 
       {/* Inline label */}
       {label && layout === 'inline' && (
-        <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+        <Label size="sm" className="text-gray-700 whitespace-nowrap">
           {label}:
-        </span>
+        </Label>
       )}
 
       {/* Sort items */}

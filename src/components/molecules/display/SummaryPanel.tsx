@@ -3,6 +3,7 @@ import { CommerceState, SummaryItem, SummaryPanelProps } from '../../../types';
 import { cn } from '../../../utils/utils';
 import Badge from '../../atoms/display/Badge';
 import Button from '../../atoms/form/Button';
+import Input from '../../atoms/form/Input';
 import { RefreshCw, Download, ChevronDown, Copy } from 'lucide-react';
 
 const SummaryPanel: React.FC<SummaryPanelProps> = ({
@@ -215,13 +216,14 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
           <div className="flex items-center gap-2">
             {searchable && (
-              <input
+              <Input
                 type="text"
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                size="sm"
                 disabled={isDisabled}
+                className="w-48"
               />
             )}
             
@@ -362,16 +364,17 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
                           </span>
                           
                           {item.copyable && (
-                            <button
-                              type="button"
+                            <Button
+                              variant="ghost"
+                              size="xs"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleCopy(item.value as string | number);
                               }}
-                              className="text-gray-400 hover:text-gray-600 transition-colors"
-                            >
-                              <CopyIcon />
-                            </button>
+                              iconLeft={<CopyIcon />}
+                              className="text-gray-400 hover:text-gray-600 p-1"
+                              aria-label="Copy to clipboard"
+                            />
                           )}
                         </div>
                       </div>

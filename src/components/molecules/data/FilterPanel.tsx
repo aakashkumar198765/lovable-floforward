@@ -6,6 +6,7 @@ import Select from '../../atoms/form/Select';
 import Input from '../../atoms/form/Input';
 import Checkbox from '../../atoms/form/Checkbox';
 import DatePicker from '../../atoms/form/DatePicker';
+import Label from '../../atoms/display/Label';
 import { ChevronDown } from 'lucide-react';
 
 const FilterPanel: React.FC<FilterPanelProps> = ({
@@ -299,13 +300,17 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
         </div>
 
         {collapsible && (
-          <button
-            type="button"
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleCollapse();
+            }}
+            iconLeft={<CollapseIcon />}
             aria-label={collapsed ? "Expand filters" : "Collapse filters"}
-          >
-            <CollapseIcon />
-          </button>
+            className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+          />
         )}
       </div>
 
@@ -318,15 +323,12 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           .map((filter) => (
             <div key={filter.key} className="filter-item">
               {filter.type !== "checkbox" && (
-                <label
+                <Label
                   htmlFor={`${id}-${filter.key}`}
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  required={filter.validation?.required}
                 >
                   {filter.label}
-                  {filter.validation?.required && (
-                    <span className="text-error-500 ml-1">*</span>
-                  )}
-                </label>
+                </Label>
               )}
               {renderFilterInput(filter)}
             </div>

@@ -475,12 +475,22 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
             )}
           </div>
           <div className="flex items-center space-x-2">
-            {exportable && <button className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleExport}>
+            {exportable && <Button
+              variant="primary"
+              size="sm"
+              onClick={handleExport}
+              className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+            >
               Export
-            </button>}
-            {importable && <button className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700" onClick={() => setShowImportModal(true)}>
+            </Button>}
+            {importable && <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setShowImportModal(true)}
+              className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+            >
               Import
-            </button>}
+            </Button>}
             {searchable && (
               <SearchBox
                 value={searchQuery}
@@ -500,7 +510,8 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
             
             return (
               <div key={category.id} className={cn(index > 0 && 'border-t')}>
-                <button
+                <Button
+                  variant="ghost"
                   className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
                   onClick={() => {
                     setCollapsedCategories(prev => {
@@ -524,7 +535,7 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
                     </div>
                   </div>
                   <Icon name={isCollapsed ? "chevron-right" : "chevron-down"} />
-                </button>
+                </Button>
                 
                 {!isCollapsed && (
                   <div className="p-4 pt-0">
@@ -593,12 +604,22 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
           )}
         </div>
         <div className="flex items-center space-x-2">
-         {exportable && <button className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleExport}>
+         {exportable && <Button
+            variant="primary"
+            size="sm"
+            onClick={handleExport}
+            className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+          >
             Export
-          </button>}
-          {importable && <button className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700" onClick={() => setShowImportModal(true)}>
+          </Button>}
+          {importable && <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setShowImportModal(true)}
+            className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+          >
             Import
-          </button>}
+          </Button>}
           {searchable && (
             <SearchBox
               value={searchQuery}

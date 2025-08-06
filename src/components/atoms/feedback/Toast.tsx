@@ -3,6 +3,7 @@ import { ToastProps } from '../../../types';
 import { cn } from '../../../utils/utils';
 import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
 import { toastVariantClasses, toastIconClasses } from '../../../utils/tailwindClassMaps';
+import Button from '../form/Button';
 
 const Toast = forwardRef<HTMLDivElement, ToastProps>(
   (
@@ -125,14 +126,15 @@ const Toast = forwardRef<HTMLDivElement, ToastProps>(
 
           {/* Close button */}
           {closable && (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="xs"
               onClick={handleClose}
-              className="ml-3 flex-shrink-0 p-1 rounded-md hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:ring-offset-gray-800 focus:ring-current transition-colors duration-200"
+              className="ml-3 flex-shrink-0 p-1 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-10"
               aria-label="Close"
             >
               <X className="w-4 h-4 transition-colors duration-200" />
-            </button>
+            </Button>
           )}
         </div>
 
@@ -142,17 +144,6 @@ const Toast = forwardRef<HTMLDivElement, ToastProps>(
             {actions}
           </div>
         )}
-
-        {/* Commerce state indicator */}
-        {/* {commerceState && commerceState !== 'initiation' && (
-          <div className={cn(
-            'absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white',
-            commerceState === 'agreement' && 'bg-warning-500',
-            commerceState === 'execution' && 'bg-primary-600',
-            commerceState === 'settlement' && 'bg-gray-500',
-            commerceState === 'completion' && 'bg-success-500'
-          )} />
-        )} */}
 
         {/* Progress bar for duration */}
         {!persistent && duration > 0 && (

@@ -2,6 +2,7 @@ import React from "react";
 import { BadgeProps } from "../../../types";
 import { cn } from "../../../utils/utils";
 import { badgeColorClasses } from "../../../utils/tailwindClassMaps";
+import { Button } from "../form";
 
 const Badge: React.FC<BadgeProps> = ({
   children,
@@ -36,14 +37,16 @@ const Badge: React.FC<BadgeProps> = ({
     <span className={badgeClasses} style={style}>
       {children}
       {removable && (
-        <button
+        <Button
           type="button"
           onClick={handleRemove}
-          className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-current"
+          variant="ghost"
+          size="xs"
           aria-label="Remove"
+          className="ml-1 w-4 h-4 rounded-full text-xs text-white hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-current"
         >
-          <span className="text-xs">×</span>
-        </button>
+          ×
+        </Button>
       )}
     </span>
   );

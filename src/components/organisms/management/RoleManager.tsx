@@ -1,6 +1,13 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { RoleManagerProps } from '../../../types';
 import { Search } from 'lucide-react';
+import Button from '../../atoms/form/Button';
+import Input from '../../atoms/form/Input';
+import Select from '../../atoms/form/Select';
+import Checkbox from '../../atoms/form/Checkbox';
+import Badge from '../../atoms/display/Badge';
+import Icon from '../../atoms/display/Icon';
+import Modal from '../../atoms/feedback/Modal';
 
 export const RoleManager: React.FC<RoleManagerProps> = ({
   id,
@@ -160,12 +167,13 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
     return (
       <div className="mb-6 space-y-4">
         <div className="relative">
-          <input
+          <Input
             type="text"
             placeholder="Search roles..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            leftIcon={<Search className="h-5 w-5 text-gray-400" />}
+            className="w-full"
           />
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-gray-400" />
@@ -173,44 +181,49 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
         </div>
 
         <div className="flex flex-wrap gap-4 items-center">
-          <select
+          <Select
             value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">All Types</option>
-            <option value="system">System</option>
-            <option value="custom">Custom</option>
-          </select>
+            onChange={(value) => setTypeFilter(value as string)}
+            options={[
+              { value: '', label: 'All Types' },
+              { value: 'system', label: 'System' },
+              { value: 'custom', label: 'Custom' }
+            ]}
+            size="sm"
+          />
 
           <div className="flex items-center space-x-2">
             <label className="text-sm font-medium text-gray-700">Sort:</label>
-            <select
+            <Select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="name">Name</option>
-              <option value="type">Type</option>
-              <option value="userCount">User Count</option>
-              <option value="createdAt">Created</option>
-              <option value="updatedAt">Updated</option>
-            </select>
-            <button
+              onChange={(value) => setSortBy(value as any)}
+              options={[
+                { value: 'name', label: 'Name' },
+                { value: 'type', label: 'Type' },
+                { value: 'userCount', label: 'User Count' },
+                { value: 'createdAt', label: 'Created' },
+                { value: 'updatedAt', label: 'Updated' }
+              ]}
+              size="sm"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-              className="px-2 py-2 text-gray-600 hover:text-gray-900"
+              className="text-gray-600 hover:text-gray-900"
             >
               {sortDirection === 'asc' ? '↑' : '↓'}
-            </button>
+            </Button>
           </div>
 
           {showPermissionMatrix && (
-            <button
+            <Button
+              variant="primary"
               onClick={() => setShowMatrixModal(true)}
-              className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+              className="bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
             >
               📊 Permission Matrix
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -232,17 +245,16 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
                 const isGranted = rolePermissions.includes(permission.id!);
                 return (
                   <label key={permission.id} className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={isGranted}
-                      onChange={(e) => handlePermissionToggle(role.id!, permission.id!, e.target.checked)}
+                      onChange={(checked) => handlePermissionToggle(role.id!, permission.id!, checked)}
                       disabled={!allowedActions.includes('manage_permissions') || role.type === 'system'}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      size="sm"
                     />
                     <span className="text-sm text-gray-700">{permission.name}</span>
-                    <span className={`px-1 py-0.5 text-xs rounded ${getPermissionTypeColor(permission.type || '')}`}>
+                    <Badge variant="secondary" size="xs" className={getPermissionTypeColor(permission.type || '')}>
                       {permission.type}
-                    </span>
+                    </Badge>
                   </label>
                 );
               })}
@@ -260,11 +272,10 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={selectedRoles.length === sortedRoles.length && sortedRoles.length > 0}
-                  onChange={(e) => handleSelectAll(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  onChange={(checked) => handleSelectAll(checked)}
+                  size="sm"
                 />
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -289,11 +300,10 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
               <React.Fragment key={role.id}>
                 <tr className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={selectedRoles.includes(role.id!)}
-                      onChange={(e) => handleRoleSelect(role.id!, e.target.checked)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      onChange={(checked) => handleRoleSelect(role.id!, checked)}
+                      size="sm"
                     />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -303,9 +313,9 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(role.type || '')}`}>
+                    <Badge variant="secondary" size="xs" className={getTypeColor(role.type || '')}>
                       {role.type}
-                    </span>
+                    </Badge>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
                     <div className="truncate">{role.userCount || 0}</div>
@@ -313,26 +323,32 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
                   <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">
                     <div className="flex items-center space-x-2">
                       <span className="truncate">{(role.permissions || []).length} permissions</span>
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="xs"
                         onClick={() => toggleRoleExpansion(role.id!)}
                         className="text-blue-600 hover:text-blue-800 flex-shrink-0"
                       >
                         {expandedRoles.has(role.id!) ? '▼' : '▶'}
-                      </button>
+                      </Button>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       {allowedActions.includes('edit_roles') && (
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => setEditingRole(role)}
                           className="text-blue-600 hover:text-blue-900"
                         >
                           Edit
-                        </button>
+                        </Button>
                       )}
                       {cloneable && allowedActions.includes('clone_roles') && (
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => {
                             const newName = prompt('Enter new role name:', `${role.name} (Copy)`);
                             if (newName) handleCloneRole(role.id!, newName);
@@ -340,10 +356,12 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
                           className="text-green-600 hover:text-green-900"
                         >
                           Clone
-                        </button>
+                        </Button>
                       )}
                       {allowedActions.includes('delete_roles') && role.type !== 'system' && (
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => {
                             if (window.confirm('Are you sure you want to delete this role?')) {
                               onRoleDelete?.(role.id!);
@@ -352,7 +370,7 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
                           className="text-red-600 hover:text-red-900"
                         >
                           Delete
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </td>
@@ -382,17 +400,16 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-2">
                   <h3 className="text-lg font-medium text-gray-900">{role.name}</h3>
-                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(role.type || '')}`}>
+                  <Badge variant="secondary" size="xs" className={getTypeColor(role.type || '')}>
                     {role.type}
-                  </span>
+                  </Badge>
                 </div>
                 <p className="text-sm text-gray-600 mb-3">{role.description}</p>
               </div>
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={selectedRoles.includes(role.id!)}
-                onChange={(e) => handleRoleSelect(role.id!, e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                onChange={(checked) => handleRoleSelect(role.id!, checked)}
+                size="sm"
               />
             </div>
 
@@ -409,35 +426,41 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
             </div>
 
             <div className="border-t border-gray-200 pt-4">
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => toggleRoleExpansion(role.id!)}
                 className="w-full text-left text-sm text-blue-600 hover:text-blue-800 mb-3"
               >
                 {expandedRoles.has(role.id!) ? '▼ Hide Permissions' : '▶ Show Permissions'}
-              </button>
+              </Button>
               
               {expandedRoles.has(role.id!) && renderRolePermissions(role)}
             </div>
 
             <div className="flex space-x-2 pt-4 border-t border-gray-200">
               {allowedActions.includes('edit_roles') && (
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => setEditingRole(role)}
-                  className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
                 >
                   Edit
-                </button>
+                </Button>
               )}
               {cloneable && allowedActions.includes('clone_roles') && (
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => {
                     const newName = prompt('Enter new role name:', `${role.name} (Copy)`);
                     if (newName) handleCloneRole(role.id!, newName);
                   }}
-                  className="flex-1 px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white border-green-600"
                 >
                   Clone
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -456,9 +479,9 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <span className="text-gray-400">├─</span>
-                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(role.type || '')}`}>
+                  <Badge variant="secondary" size="xs" className={getTypeColor(role.type || '')}>
                     {role.type}
-                  </span>
+                  </Badge>
                 </div>
                 <div>
                   <h3 className="text-lg font-medium text-gray-900">{role.name}</h3>
@@ -472,12 +495,14 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
                 
                 <div className="flex space-x-2">
                   {allowedActions.includes('edit_roles') && (
-                    <button
+                    <Button
+                      variant="primary"
+                      size="sm"
                       onClick={() => setEditingRole(role)}
-                      className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                      className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
                     >
                       Edit
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -496,12 +521,14 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
         <div className="bg-white rounded-lg p-6 max-w-6xl max-h-[80vh] overflow-auto">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium">Permission Matrix</h3>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setShowMatrixModal(false)}
               className="text-gray-400 hover:text-gray-600"
             >
               ✕
-            </button>
+            </Button>
           </div>
           
           <div className="overflow-x-auto">
@@ -557,12 +584,13 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
               : 'Get started by creating your first role.'}
           </p>
           {allowedActions.includes('create_roles') && (
-            <button
+            <Button
+              variant="primary"
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
             >
               Create Role
-            </button>
+            </Button>
           )}
         </div>
       );
@@ -589,12 +617,14 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
         <div className="flex items-center space-x-2">
           {/* Action buttons */}
           {allowedActions.includes('create_roles') && (
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={() => setShowCreateModal(true)}
-              className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
+              className="bg-gray-600 hover:bg-gray-700 text-white border-gray-600"
             >
               Create Role
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -610,18 +640,20 @@ export const RoleManager: React.FC<RoleManagerProps> = ({
             <h3 className="text-lg font-medium mb-4">Create New Role</h3>
             <p className="text-gray-600 mb-4">Create role form would go here...</p>
             <div className="flex justify-end space-x-3">
-              <button
+              <Button
+                variant="secondary"
                 onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-sm border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                className="text-gray-700 border-gray-300 hover:bg-gray-50"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
                 onClick={() => handleCreateRole({ name: 'New Role', type: 'custom' })}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
               >
                 Create
-              </button>
+              </Button>
             </div>
           </div>
         </div>

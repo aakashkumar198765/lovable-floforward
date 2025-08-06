@@ -1,5 +1,11 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { APIConnectorProps } from '../../../types';
+import Button from '../../atoms/form/Button';
+import Switch from '../../atoms/form/Switch';
+import Badge from '../../atoms/display/Badge';
+import Modal from '../../atoms/feedback/Modal';
+import Input from '../../atoms/form/Input';
+import Tab from '../../atoms/navigation/Tab';
 
 export const APIConnector: React.FC<APIConnectorProps> = ({
   id,
@@ -178,11 +184,13 @@ export const APIConnector: React.FC<APIConnectorProps> = ({
             >
               {tab.label}
               {tab.count > 0 && (
-                <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
-                  activeTab === tab.key ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
-                }`}>
+                <Badge 
+                  variant={activeTab === tab.key ? "primary" : "secondary"} 
+                  size="xs" 
+                  className="ml-2"
+                >
                   {tab.count}
-                </span>
+                </Badge>
               )}
             </button>
           ))}
@@ -197,12 +205,12 @@ export const APIConnector: React.FC<APIConnectorProps> = ({
         <div className="flex-1">
           <div className="flex items-center space-x-3 mb-2">
             <h3 className="text-lg font-medium text-gray-900">{endpoint.name}</h3>
-            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(endpoint.status || 'disconnected')}`}>
+            <Badge variant="secondary" size="xs" className={getStatusColor(endpoint.status || 'disconnected')}>
               {endpoint.status || 'disconnected'}
-            </span>
-            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getMethodColor(endpoint.method)}`}>
+            </Badge>
+            <Badge variant="secondary" size="xs" className={getMethodColor(endpoint.method)}>
               {endpoint.method}
-            </span>
+            </Badge>
           </div>
           <p className="text-sm text-gray-600 mb-2">{endpoint.description}</p>
           <p className="text-sm font-mono text-gray-800 bg-gray-100 px-2 py-1 rounded">
@@ -233,9 +241,9 @@ export const APIConnector: React.FC<APIConnectorProps> = ({
             {endpoint.parameters.slice(0, 3).map((param: any, index: number) => (
               <div key={index} className="flex items-center space-x-2 text-sm">
                 <span className="text-gray-600">{param.name}</span>
-                <span className={`px-1 py-0.5 text-xs rounded ${param.required ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'}`}>
+                <Badge variant={param.required ? "error" : "secondary"} size="xs">
                   {param.required ? 'required' : 'optional'}
-                </span>
+                </Badge>
               </div>
             ))}
             {endpoint.parameters.length > 3 && (
@@ -262,30 +270,37 @@ export const APIConnector: React.FC<APIConnectorProps> = ({
 
       <div className="flex space-x-3 pt-4 border-t border-gray-200">
         {testable && allowedActions.includes('test_endpoints') && (
-          <button
+          <Button
+            variant="primary"
+            size="sm"
             onClick={() => handleTestEndpoint(endpoint.id)}
             disabled={isTestingEndpoint === endpoint.id}
-            className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            loading={isTestingEndpoint === endpoint.id}
+            className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
           >
             {isTestingEndpoint === endpoint.id ? 'Testing...' : 'Test'}
-          </button>
+          </Button>
         )}
         
         {allowedActions.includes('edit_endpoints') && (
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setEditingEndpoint(endpoint)}
-            className="px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
+            className="text-gray-700 border-gray-300 hover:bg-gray-50"
           >
             Edit
-          </button>
+          </Button>
         )}
 
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => setSelectedEndpoint(endpoint)}
-          className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
+          className="text-gray-600 hover:text-gray-800"
         >
           Details
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -296,12 +311,12 @@ export const APIConnector: React.FC<APIConnectorProps> = ({
         <div className="flex-1">
           <div className="flex items-center space-x-3 mb-2">
             <h3 className="text-lg font-medium text-gray-900">{integration.name}</h3>
-            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(integration.status || 'paused')}`}>
+            <Badge variant="secondary" size="xs" className={getStatusColor(integration.status || 'paused')}>
               {integration.status || 'paused'}
-            </span>
-            <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
+            </Badge>
+            <Badge variant="secondary" size="xs">
               {integration.type}
-            </span>
+            </Badge>
           </div>
           <p className="text-sm text-gray-600">
             {integration.source} → {integration.target}
@@ -309,15 +324,11 @@ export const APIConnector: React.FC<APIConnectorProps> = ({
         </div>
 
         {allowedActions.includes('toggle_integrations') && (
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={integration.status === 'active'}
-              onChange={(e) => handleToggleIntegration(integration.id, e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
+          <Switch
+            checked={integration.status === 'active'}
+            onChange={(checked) => handleToggleIntegration(integration.id, checked)}
+            size="sm"
+          />
         )}
       </div>
 
@@ -345,21 +356,25 @@ export const APIConnector: React.FC<APIConnectorProps> = ({
 
       <div className="flex space-x-3 pt-4 border-t border-gray-200">
         {allowedActions.includes('run_integrations') && integration.status === 'active' && (
-          <button
+          <Button
+            variant="primary"
+            size="sm"
             onClick={() => onIntegrationRun?.(integration.id)}
-            className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+            className="bg-green-600 hover:bg-green-700 text-white border-green-600"
           >
             Run Now
-          </button>
+          </Button>
         )}
         
         {allowedActions.includes('edit_integrations') && (
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setSelectedIntegration(integration)}
-            className="px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
+            className="text-gray-700 border-gray-300 hover:bg-gray-50"
           >
             Configure
-          </button>
+          </Button>
         )}
       </div>
     </div>
@@ -370,12 +385,13 @@ export const APIConnector: React.FC<APIConnectorProps> = ({
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-medium text-gray-900">API Endpoints</h3>
         {allowedActions.includes('create_endpoints') && (
-          <button
+          <Button
+            variant="primary"
             onClick={() => setShowEndpointModal(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
           >
             ➕ Add Endpoint
-          </button>
+          </Button>
         )}
       </div>
 
@@ -409,12 +425,13 @@ export const APIConnector: React.FC<APIConnectorProps> = ({
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-medium text-gray-900">Data Integrations</h3>
         {allowedActions.includes('create_integrations') && (
-          <button
+          <Button
+            variant="primary"
             onClick={() => setShowIntegrationModal(true)}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            className="bg-green-600 hover:bg-green-700 text-white border-green-600"
           >
             ➕ Create Integration
-          </button>
+          </Button>
         )}
       </div>
 
@@ -536,12 +553,20 @@ export const APIConnector: React.FC<APIConnectorProps> = ({
             {endpoints.length} endpoints • {integrations.length} integrations
           </div>
           <div className="flex items-center space-x-2">
-            {exportable && <button className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+            {exportable && <Button
+              variant="primary"
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+            >
               Export
-            </button>}
-            {importable && <button className="px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+            </Button>}
+            {importable && <Button
+              variant="primary"
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+            >
               Import
-            </button>}
+            </Button>}
           </div>
         </div>
       </div>
@@ -556,18 +581,20 @@ export const APIConnector: React.FC<APIConnectorProps> = ({
             <h3 className="text-lg font-medium mb-4">Add API Endpoint</h3>
             <p className="text-gray-600 mb-4">Endpoint configuration form would go here...</p>
             <div className="flex justify-end space-x-3">
-              <button
+              <Button
+                variant="secondary"
                 onClick={() => setShowEndpointModal(false)}
-                className="px-4 py-2 text-sm border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                className="text-gray-700 border-gray-300 hover:bg-gray-50"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
                 onClick={() => handleSaveEndpoint({ name: 'New Endpoint' })}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
               >
                 Save
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { ModalProps } from '../../../types';
 import { cn } from '../../../utils/utils';
 import { X, Loader2 } from 'lucide-react';
 import { modalSliderClasses } from '../../../utils/tailwindClassMaps';
+import Button from '../form/Button';
 
 const Modal = forwardRef<HTMLDivElement, ModalProps>(
   (
@@ -121,19 +122,6 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
       }
     };
 
-    // Position classes for modal variant
-    const modalPositionClasses = {
-      center: 'items-center justify-center',
-      top: 'items-start justify-center pt-16',
-      bottom: 'items-end justify-center pb-16',
-      left: 'items-center justify-start pl-16',
-      right: 'items-center justify-end pr-16',
-      'top-left': 'items-start justify-start pt-16 pl-16',
-      'top-right': 'items-start justify-end pt-16 pr-16',
-      'bottom-left': 'items-end justify-start pb-16 pl-16',
-      'bottom-right': 'items-end justify-end pb-16 pr-16'
-    };
-
     // Slider position and animation classes
     const sliderPositionClasses = {
       left: {
@@ -202,7 +190,7 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
             <div
               className={cn(
                 'flex min-h-full p-4',
-                centered ? modalPositionClasses[position] : modalPositionClasses[position]
+                centered ? modalSliderClasses.modalPositionClasses[position] : modalSliderClasses.modalPositionClasses[position]
               )}
             >
               <div
@@ -234,14 +222,15 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
                           </h3>
                         )}
                         {closable && (
-                          <button
-                            type="button"
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={handleClose}
-                            className="ml-3 flex-shrink-0 p-1 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors duration-200"
+                            className="ml-3 flex-shrink-0 p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                             aria-label="Close modal"
                           >
                             <X className="w-6 h-6" />
-                          </button>
+                          </Button>
                         )}
                       </div>
                     )}
@@ -265,17 +254,6 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
                     {footer}
                   </div>
                 )}
-
-                {/* Commerce state indicator */}
-                {/* {commerceState && commerceState !== 'initiation' && (
-                  <div className={cn(
-                    'absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white',
-                    commerceState === 'agreement' && 'bg-warning-500',
-                    commerceState === 'execution' && 'bg-primary-600',
-                    commerceState === 'settlement' && 'bg-gray-500',
-                    commerceState === 'completion' && 'bg-success-500'
-                  )} />
-                )} */}
               </div>
             </div>
           </div>
@@ -352,14 +330,15 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
                         </h3>
                       )}
                       {closable && (
-                        <button
-                          type="button"
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={handleClose}
-                          className="ml-3 flex-shrink-0 p-1 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors duration-200"
+                          className="ml-3 flex-shrink-0 p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                           aria-label="Close slider"
                         >
                           <X className="w-6 h-6" />
-                        </button>
+                        </Button>
                       )}
                     </div>
                   )}

@@ -3,6 +3,7 @@ import { AlertProps } from '../../../types';
 import { cn } from '../../../utils/utils';
 import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
 import { variantClasses } from '../../../utils/tailwindClassMaps';
+import { Button } from '../form';
 
 const Alert = forwardRef<HTMLDivElement, AlertProps>(
   (
@@ -128,14 +129,14 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(
 
           {/* Dismiss button */}
           {dismissible && (
-            <button
-              type="button"
+            <Button
               onClick={handleDismiss}
               className="ml-3 flex-shrink-0 p-1 rounded-md hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-current transition-colors duration-200"
               aria-label="Dismiss"
+              applyDefaultClasses={false}
             >
               <X className="w-4 h-4" />
-            </button>
+            </Button>
           )}
         </div>
 
