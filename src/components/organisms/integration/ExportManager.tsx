@@ -1,5 +1,9 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { ExportManagerProps } from '../../../types';
+import Button from '../../atoms/form/Button';
+import Checkbox from '../../atoms/form/Checkbox';
+import Input from '../../atoms/form/Input';
+import Modal from '../../atoms/feedback/Modal';
 
 export const ExportManager: React.FC<ExportManagerProps> = ({
   id,
@@ -26,6 +30,8 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
   className = '',
   style = {},
   allowedActions = [],
+  importable = true,
+  exportable = true,
 }) => {
   const [selectedFormat, setSelectedFormat] = useState(formats[0]?.key || '');
   const [selectedFields, setSelectedFields] = useState<string[]>(fields.map(f => f.key!).filter(Boolean));
@@ -184,35 +190,38 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
         <div className="flex items-center justify-between mb-4">
           <span className="text-sm text-gray-600">{selectedFields.length} of {fields.length} fields selected</span>
           <div className="flex space-x-2">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setSelectedFields(fields.map(f => f.key!).filter(Boolean))}
               className="text-sm text-blue-600 hover:text-blue-800"
             >
               Select All
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setSelectedFields([])}
               className="text-sm text-gray-600 hover:text-gray-800"
             >
               Clear All
-            </button>
+            </Button>
           </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {fields.map((field) => (
             <label key={field.key} className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={selectedFields.includes(field.key!)}
-                onChange={(e) => {
+                onChange={(checked) => {
                   setSelectedFields(prev => 
-                    e.target.checked 
+                    checked 
                       ? [...prev, field.key!]
                       : prev.filter(k => k !== field.key)
                   );
                 }}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                size="sm"
               />
               <span className="text-sm text-gray-700">{field.label}</span>
               {field.required && <span className="text-red-500">*</span>}
@@ -228,12 +237,14 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium text-gray-900">Templates</h3>
         {allowedActions.includes('create_templates') && (
-          <button
+          <Button
+            variant="primary"
+            size="sm"
             onClick={() => setShowTemplateModal(true)}
-            className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+            className="bg-green-600 hover:bg-green-700 text-white border-green-600"
           >
             Save as Template
-          </button>
+          </Button>
         )}
       </div>
       
@@ -260,7 +271,9 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
                   </p>
                 </div>
                 {allowedActions.includes('edit_templates') && (
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="xs"
                     onClick={(e) => {
                       e.stopPropagation();
                       // Edit template functionality
@@ -268,7 +281,7 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
                     className="text-gray-400 hover:text-gray-600"
                   >
                     ✏️
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -292,12 +305,12 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {key.charAt(0).toUpperCase() + key.slice(1)}
               </label>
-              <input
+              <Input
                 type="text"
                 value={value as string || ''}
                 onChange={(e) => setLocalFilters(prev => ({ ...prev, [key]: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder={`Filter by ${key}`}
+                size="sm"
               />
             </div>
           ))}
@@ -313,12 +326,14 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-gray-900">Data Preview</h3>
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={handlePreview}
-            className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700"
+            className="bg-gray-600 text-white hover:bg-gray-700 border-gray-600"
           >
             👁️ Preview Data
-          </button>
+          </Button>
         </div>
         
         <div className="bg-gray-50 border rounded-lg p-4">
@@ -339,12 +354,14 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-gray-900">Scheduling</h3>
           {allowedActions.includes('schedule_exports') && (
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={() => setShowScheduleModal(true)}
-              className="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700"
+              className="bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
             >
               📅 Schedule Export
-            </button>
+            </Button>
           )}
         </div>
         
@@ -386,22 +403,25 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
       
       <div className="flex space-x-3">
         {showPreview && (
-          <button
+          <Button
+            variant="secondary"
             onClick={handlePreview}
             disabled={isExporting}
-            className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+            className="text-gray-700 bg-white hover:bg-gray-50 border-gray-300"
           >
             Preview
-          </button>
+          </Button>
         )}
         
-        <button
+        <Button
+          variant="primary"
           onClick={handleExport}
           disabled={isExporting || !selectedFormat || selectedFields.length === 0}
-          className="px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          loading={isExporting}
+          className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
         >
           {isExporting ? 'Exporting...' : `Export as ${selectedFormat?.toUpperCase()}`}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -416,6 +436,22 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
     >
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+        <div className="flex items-center space-x-2">
+          {exportable && <Button
+            variant="primary"
+            size="sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+          >
+            Export
+          </Button>}
+          {importable && <Button
+            variant="primary"
+            size="sm"
+            className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+          >
+            Import
+          </Button>}
+        </div>
       </div>
 
       {renderProgress()}
@@ -434,28 +470,30 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
             <h3 className="text-lg font-medium mb-4">Save Export Template</h3>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Template Name</label>
-              <input
+              <Input
                 type="text"
                 value={newTemplateName}
                 onChange={(e) => setNewTemplateName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter template name"
+                className="w-full"
               />
             </div>
             <div className="flex justify-end space-x-3">
-              <button
+              <Button
+                variant="secondary"
                 onClick={() => setShowTemplateModal(false)}
-                className="px-4 py-2 text-sm border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                className="text-gray-700 hover:bg-gray-50 border-gray-300"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="primary"
                 onClick={handleTemplateCreate}
                 disabled={!newTemplateName.trim()}
-                className="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                className="bg-green-600 hover:bg-green-700 text-white border-green-600"
               >
                 Save Template
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -467,12 +505,14 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
           <div className="bg-white rounded-lg p-6 max-w-6xl max-h-[80vh] overflow-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">Data Preview</h3>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowPreviewModal(false)}
                 className="text-gray-400 hover:text-gray-600"
               >
                 ✕
-              </button>
+              </Button>
             </div>
             
             <div className="overflow-x-auto">

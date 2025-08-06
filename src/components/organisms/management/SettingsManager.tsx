@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { SettingsManagerProps, SettingCategory, Setting } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Button from '../../atoms/form/Button';
 import Input from '../../atoms/form/Input';
 import Select from '../../atoms/form/Select';
@@ -465,37 +465,41 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
         style={style}
       >
         {/* Header */}
-        <div className="border-b bg-gray-50 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h3 className="text-lg font-semibold">{title}</h3>
-              {changedSettings.size > 0 && (
-                <Badge variant="warning">
-                  {changedSettings.size} changed
-                </Badge>
-              )}
-            </div>
-            <div className="flex gap-2">
-              {searchable && (
-                <SearchBox
-                  value={searchQuery}
-                  onSearch={setSearchQuery}
-                  placeholder="Search settings..."
-                  size="sm"
-                  className="w-64"
-                />
-              )}
-              {exportable && (
-                <Button variant="secondary" size="sm" onClick={handleExport} iconLeft={<Icon name="download" />}>
-                  Export
-                </Button>
-              )}
-              {importable && (
-                <Button variant="secondary" size="sm" onClick={() => setShowImportModal(true)} iconLeft={<Icon name="upload" />}>
-                  Import
-                </Button>
-              )}
-            </div>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-lg font-semibold">{title}</h3>
+            {changedSettings.size > 0 && (
+              <Badge variant="warning" className="mt-1">
+                {changedSettings.size} changed
+              </Badge>
+            )}
+          </div>
+          <div className="flex items-center space-x-2">
+            {exportable && <Button
+              variant="primary"
+              size="sm"
+              onClick={handleExport}
+              className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+            >
+              Export
+            </Button>}
+            {importable && <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setShowImportModal(true)}
+              className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+            >
+              Import
+            </Button>}
+            {searchable && (
+              <SearchBox
+                value={searchQuery}
+                onSearch={setSearchQuery}
+                placeholder="Search settings..."
+                size="sm"
+                className="w-64"
+              />
+            )}
           </div>
         </div>
 
@@ -506,7 +510,8 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
             
             return (
               <div key={category.id} className={cn(index > 0 && 'border-t')}>
-                <button
+                <Button
+                  variant="ghost"
                   className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
                   onClick={() => {
                     setCollapsedCategories(prev => {
@@ -530,7 +535,7 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
                     </div>
                   </div>
                   <Icon name={isCollapsed ? "chevron-right" : "chevron-down"} />
-                </button>
+                </Button>
                 
                 {!isCollapsed && (
                   <div className="p-4 pt-0">
@@ -588,41 +593,42 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
       style={style}
     >
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">{title}</h2>
-        <p className="text-gray-600 text-sm mb-4">Configure application settings with validation, import/export and category organization.</p>
-        
-        <div className="border-b border-gray-200 bg-gray-50 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h3 className="text-lg font-semibold">{title}</h3>
-            {changedSettings.size > 0 && (
-              <Badge variant="warning">
-                {changedSettings.size} changed
-              </Badge>
-            )}
-          </div>
-          <div className="flex gap-2">
-            {searchable && (
-              <SearchBox
-                value={searchQuery}
-                onSearch={setSearchQuery}
-                placeholder="Search settings..."
-                size="sm"
-                className="w-64"
-              />
-            )}
-            {exportable && (
-              <Button variant="secondary" size="sm" onClick={handleExport} iconLeft={<Icon name="download" />}>
-                Export
-              </Button>
-            )}
-            {importable && (
-              <Button variant="secondary" size="sm" onClick={() => setShowImportModal(true)} iconLeft={<Icon name="upload" />}>
-                Import
-              </Button>
-            )}
-          </div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+          <p className="text-gray-600 text-sm mt-1">Configure application settings with validation, import/export and category organization.</p>
+          {changedSettings.size > 0 && (
+            <Badge variant="warning" className="mt-2">
+              {changedSettings.size} changed
+            </Badge>
+          )}
+        </div>
+        <div className="flex items-center space-x-2">
+         {exportable && <Button
+            variant="primary"
+            size="sm"
+            onClick={handleExport}
+            className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+          >
+            Export
+          </Button>}
+          {importable && <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setShowImportModal(true)}
+            className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+          >
+            Import
+          </Button>}
+          {searchable && (
+            <SearchBox
+              value={searchQuery}
+              onSearch={setSearchQuery}
+              placeholder="Search settings..."
+              size="sm"
+              className="w-64"
+            />
+          )}
         </div>
       </div>
 
@@ -752,7 +758,7 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
         />
       )}
       </div>
-    </div>
+    // </div>
   );
 };
 

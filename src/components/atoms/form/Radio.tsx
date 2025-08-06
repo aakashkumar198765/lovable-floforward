@@ -1,6 +1,6 @@
 import React, { forwardRef, useState, useEffect } from 'react';
 import { RadioProps, RadioOption } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 
 const Radio = forwardRef<HTMLDivElement, RadioProps>(
   (

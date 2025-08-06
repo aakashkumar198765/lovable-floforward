@@ -1,5 +1,5 @@
 import React, { forwardRef, useState, useRef, useCallback } from 'react';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 
 interface TooltipProps {
   children: React.ReactNode;

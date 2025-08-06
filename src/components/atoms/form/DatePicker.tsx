@@ -1,6 +1,6 @@
 import React, { forwardRef, useState, useEffect, useRef } from 'react';
 import { DatePickerProps, CommerceState } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { Calendar, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(

@@ -1,6 +1,6 @@
 import React, { forwardRef, useState, useEffect, useRef } from 'react';
 import { SelectProps, SelectOption, SelectGroup } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 
 const Select = forwardRef<HTMLSelectElement, SelectProps>(
   (

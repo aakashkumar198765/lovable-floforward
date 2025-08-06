@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { PivotTableProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Button from '../../atoms/form/Button';
 import Select from '../../atoms/form/Select';
 import Badge from '../../atoms/display/Badge';
@@ -20,6 +20,7 @@ const PivotTable: React.FC<PivotTableProps> = ({
   sorting,
   expandable = true,
   exportable = true,
+  configurable = true,
   size = 'md',
   showTotals = true,
   showSubtotals = true,
@@ -263,12 +264,11 @@ const PivotTable: React.FC<PivotTableProps> = ({
         sizeClasses[size]
       )}>
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Pivot Analysis</h2>
-        <p className="text-gray-600 text-sm mb-4">Interactive pivot table with configurable rows, columns and aggregation functions for data analysis.</p>
-        
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between m-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Pivot Analysis</h2>
+          <p className="text-gray-600 text-sm mt-1">Interactive pivot table with configurable rows, columns and aggregation functions for data analysis.</p>
+          <div className="flex items-center gap-2 mt-2">
             {localRows.length > 0 && (
               <Badge variant="primary" size="sm">
                 Rows: {localRows.length}
@@ -285,29 +285,25 @@ const PivotTable: React.FC<PivotTableProps> = ({
               </Badge>
             )}
           </div>
-
-          <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setConfigMode(!configMode)}
-              iconLeft={<Icon name="settings" />}
-              className="text-gray-700 border-gray-300 hover:bg-gray-50"
-            >
-              Configure
-            </Button>
-            {exportable && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setShowExportModal(true)}
-                iconLeft={<Icon name="download" />}
-                className="text-gray-700 border-gray-300 hover:bg-gray-50"
-              >
-                Export
-              </Button>
-            )}
-          </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          {exportable && <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setShowExportModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+          >
+            Export
+          </Button>}
+          {configurable && <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setConfigMode(!configMode)}
+            iconLeft={<Icon name="settings" />}
+            className="text-gray-700 border-gray-300 hover:bg-gray-50"
+          >
+            Configure
+          </Button>}
         </div>
       </div>
 
@@ -404,7 +400,7 @@ const PivotTable: React.FC<PivotTableProps> = ({
       {/* Loading State */}
       <LoadingState loading={loading}>
         {/* Pivot Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto m-6">
           {pivotStructure.rows.length > 0 && pivotStructure.columns.length > 0 ? (
             <table className="min-w-full border-collapse">
               <thead className="bg-gray-50">

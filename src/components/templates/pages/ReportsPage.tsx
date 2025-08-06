@@ -462,9 +462,14 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({
     >
       <div className="py-8">
         <div className={`mx-auto px-6 ${sizeClasses[size]}`}>
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-            <p className="mt-2 text-sm text-gray-600">{description}</p>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+              <p className="mt-2 text-sm text-gray-600">{description}</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              {/* Action Buttons */}
+            </div>
           </div>
 
           {renderFiltersAndControls()}

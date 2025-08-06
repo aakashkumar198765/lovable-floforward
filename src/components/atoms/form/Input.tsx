@@ -1,5 +1,5 @@
 import React, { forwardRef, useState, useEffect } from 'react';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { sizeClasses, variantClasses, statusClasses } from '../../../utils/tailwindClassMaps';
 import { CleanInputProps } from '../../../types';
 

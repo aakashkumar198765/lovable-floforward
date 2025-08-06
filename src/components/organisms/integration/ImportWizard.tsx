@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { ImportWizardProps, ImportStep } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import Button from '../../atoms/form/Button';
 import FileUpload from '../../atoms/form/FileUpload';
 import Select from '../../atoms/form/Select';
@@ -31,6 +31,8 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
   showProgress = true,
   allowSkipSteps = false,
   className = '',
+  exportable = true,
+  importable = true,
   style = {},
   onFileUpload,
   onFieldMapping,
@@ -503,7 +505,21 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
       <div className="border-b bg-gray-50 p-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">{title}</h2>
-          <div className="flex gap-2">
+          <div className="flex items-center space-x-2">
+            {exportable && <Button
+              variant="primary"
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+            >
+              Export
+            </Button>}
+            {importable && <Button
+              variant="primary"
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white border-green-600"
+            >
+              Import
+            </Button>}
             {allowSkipSteps && currentStep?.optional && (
               <Button variant="ghost" size="sm" onClick={skipStep}>
                 Skip Step

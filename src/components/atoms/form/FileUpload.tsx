@@ -1,6 +1,6 @@
 import React, { forwardRef, useState, useEffect, useRef } from 'react';
 import { FileUploadProps, CommerceState } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 import { Upload, File, X } from 'lucide-react';
 
 const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(

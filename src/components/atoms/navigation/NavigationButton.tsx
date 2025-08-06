@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import { NavigationButtonProps } from '../../../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../../utils/utils';
 
 const NavigationButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, NavigationButtonProps>(
   (
