@@ -1,4 +1,5 @@
 import React, { forwardRef } from 'react';
+import { Loader2 } from 'lucide-react';
 import { NavigationButtonProps } from '../../../types';
 import { cn } from '../../../utils/cn';
 
@@ -20,16 +21,6 @@ const NavigationButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, Navig
       onClick,
       onFocus,
       onBlur,
-      commerceState = 'none',
-      workflowContext,
-      aiConfig,
-      schema,
-      allowedActions = [],
-      userRole,
-      data,
-      onUpdate,
-      auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-      encryptionLevel = 'none',
       className = '',
       style = {},
       ...props
@@ -43,25 +34,8 @@ const NavigationButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, Navig
         return;
       }
 
-      // Audit trail logging
-      if (auditTrail && typeof auditTrail === 'object' && auditTrail.enabled && auditTrail.logUserActions) {
-        console.log('Navigation button click tracked:', {
-          action: 'navigation_button_click',
-          variant,
-          href,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          userRole
-        });
-      }
-
       if (onClick && typeof onClick === 'function') {
         onClick(event);
-      }
-
-      if (onUpdate && typeof onUpdate === 'function') {
-        onUpdate('navigation_button_clicked');
       }
     };
 
@@ -103,15 +77,6 @@ const NavigationButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, Navig
       }
     };
 
-    // Commerce state classes
-    const commerceStateClasses = {
-      initiation: 'ring-primary-300',
-      agreement: 'ring-warning-300',
-      execution: 'ring-primary-500',
-      settlement: 'ring-gray-400',
-      completion: 'ring-success-300',
-      none: 'ring-0'
-    };
 
     // Build button classes
     const buttonClasses = cn(
@@ -125,16 +90,12 @@ const NavigationButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, Navig
       variant !== 'link' && variant !== 'text' && 'border rounded-md',
       fullWidth && 'w-full',
       loading && 'cursor-wait',
-      commerceState && commerceStateClasses[commerceState] ? `ring-2 ${commerceStateClasses[commerceState]}` : '',
       className
     );
 
     // Loading spinner
     const loadingSpinner = (
-      <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
+      <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
     );
 
     // Render icon
@@ -179,24 +140,6 @@ const NavigationButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, Navig
           {iconPosition === 'left' && renderIcon()}
           {children}
           {iconPosition === 'right' && renderIcon()}
-          
-          {/* Commerce state indicator */}
-          {/* {commerceState && commerceState !== 'initiation' && (
-            <div className={cn(
-              'absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white',
-              commerceState === 'agreement' && 'bg-warning-500',
-              commerceState === 'execution' && 'bg-primary-600',
-              commerceState === 'settlement' && 'bg-gray-500',
-              commerceState === 'completion' && 'bg-success-500'
-            )} />
-          )} */}
-
-          {/* AI Config Display (development only) */}
-          {process.env.NODE_ENV === 'development' && aiConfig && (
-            <div className="absolute -top-8 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-              AI Config: {JSON.stringify(aiConfig.layout || 'default')}
-            </div>
-          )}
         </a>
       );
     }
@@ -211,24 +154,6 @@ const NavigationButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, Navig
         {iconPosition === 'left' && renderIcon()}
         {children}
         {iconPosition === 'right' && renderIcon()}
-        
-        {/* Commerce state indicator */}
-        {/* {commerceState && commerceState !== 'initiation' && (
-          <div className={cn(
-            'absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white',
-            commerceState === 'agreement' && 'bg-warning-500',
-            commerceState === 'execution' && 'bg-primary-600',
-            commerceState === 'settlement' && 'bg-gray-500',
-            commerceState === 'completion' && 'bg-success-500'
-          )} />
-        )} */}
-
-        {/* AI Config Display (development only) */}
-        {process.env.NODE_ENV === 'development' && aiConfig && (
-          <div className="absolute -top-8 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-            AI Config: {JSON.stringify(aiConfig.layout || 'default')}
-          </div>
-        )}
       </button>
     );
   }

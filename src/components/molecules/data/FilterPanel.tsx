@@ -6,6 +6,7 @@ import Select from '../../atoms/form/Select';
 import Input from '../../atoms/form/Input';
 import Checkbox from '../../atoms/form/Checkbox';
 import DatePicker from '../../atoms/form/DatePicker';
+import { ChevronDown } from 'lucide-react';
 
 const FilterPanel: React.FC<FilterPanelProps> = ({
   id = 'filter-panel',
@@ -28,16 +29,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   debounceMs = 300,
   size = 'md',
   variant = 'default',
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
-  allowedActions = [],
-  userRole,
-  data,
-  onUpdate = () => {},
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
   className = '',
   style = {},
   onApply = () => {},
@@ -53,9 +44,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Handle commerce state based behavior
-  const isReadonly = commerceState === 'completion';
-  const isDisabled = commerceState === 'settlement' && !allowedActions.includes('filter');
 
   // Update internal values when external values change
   useEffect(() => {
@@ -82,46 +70,16 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     setInternalValues(newValues);
     setHasChanges(true);
 
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.trackChanges) {
-      console.log('Filter changed:', {
-        action: 'filter_change',
-        filterKey: key,
-        oldValue: internalValues[key],
-        newValue: value,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
-
     // Call callbacks
     onFilterChange(key, value);
     onChange(newValues);
-    
-    if (onUpdate) {
-      onUpdate(newValues);
-    }
-  }, [internalValues, onFilterChange, onChange, onUpdate, auditTrail, commerceState, workflowContext, userRole]);
+  }, [internalValues, onFilterChange, onChange]);
 
   // Handle apply filters
   const handleApply = useCallback(() => {
     onApply(internalValues);
     setHasChanges(false);
-
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.logUserActions) {
-      console.log('Filters applied:', {
-        action: 'filters_apply',
-        filters: internalValues,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
-  }, [internalValues, onApply, auditTrail, commerceState, workflowContext, userRole]);
+  }, [internalValues, onApply]);
 
   // Handle clear filters
   const handleClear = useCallback(() => {
@@ -138,18 +96,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     setHasChanges(false);
     onClear();
     onChange(clearedValues);
-
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.logUserActions) {
-      console.log('Filters cleared:', {
-        action: 'filters_clear',
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
-  }, [filters, onClear, onChange, auditTrail, commerceState, workflowContext, userRole]);
+  }, [filters, onClear, onChange]);
 
   // Handle reset filters
   const handleReset = useCallback(() => {
@@ -157,19 +104,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     setHasChanges(false);
     onReset();
     onChange(defaultValues);
-
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.logUserActions) {
-      console.log('Filters reset:', {
-        action: 'filters_reset',
-        defaultValues,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
-  }, [defaultValues, onReset, onChange, auditTrail, commerceState, workflowContext, userRole]);
+  }, [defaultValues, onReset, onChange]);
 
   // Handle toggle collapse
   const handleToggleCollapse = useCallback(() => {
@@ -184,13 +119,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     const inputProps = {
       id: `${id}-${filter.key}`,
       name: filter.key,
-      disabled: isDisabled || filter.disabled,
-      readonly: isReadonly,
+      disabled: filter.disabled,
       size,
-      commerceState,
-      allowedActions,
-      userRole,
-      auditTrail,
     };
 
     switch (filter.type) {
@@ -298,7 +228,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     'filter-panel bg-white border border-gray-200 rounded-lg overflow-hidden',
     variant === 'outlined' && 'border-2',
     variant === 'filled' && 'bg-gray-50',
-    commerceState === 'completion' && 'opacity-75',
     className
   );
 
@@ -325,14 +254,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
 
   // Collapse icon
   const CollapseIcon = () => (
-    <svg
-      className={cn('w-5 h-5 transition-transform', collapsed && 'rotate-180')}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-    </svg>
+    <ChevronDown className={cn('w-5 h-5 transition-transform', collapsed && 'rotate-180')} />
   );
 
   return (
@@ -346,11 +268,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           <h3 className="text-lg font-medium text-gray-900">{title}</h3>
           {description && (
             <p className="text-sm text-gray-500 mt-1">{description}</p>
-          )}
-          {commerceState && (
-            <span className="inline-block mt-1 text-xs text-gray-500 uppercase bg-gray-100 px-2 py-1 rounded">
-              {commerceState}
-            </span>
           )}
         </div>
         
@@ -394,11 +311,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 variant="tertiary"
                 size={size}
                 onClick={handleClear}
-                disabled={isDisabled}
-                commerceState={commerceState}
-                allowedActions={allowedActions}
-                userRole={userRole}
-                auditTrail={auditTrail}
               >
                 {clearButtonText}
               </Button>
@@ -409,11 +321,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 variant="secondary"
                 size={size}
                 onClick={handleReset}
-                disabled={isDisabled}
-                commerceState={commerceState}
-                allowedActions={allowedActions}
-                userRole={userRole}
-                auditTrail={auditTrail}
               >
                 {resetButtonText}
               </Button>
@@ -424,11 +331,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 variant="primary"
                 size={size}
                 onClick={handleApply}
-                disabled={isDisabled || !hasChanges}
-                commerceState={commerceState}
-                allowedActions={allowedActions}
-                userRole={userRole}
-                auditTrail={auditTrail}
+                disabled={!hasChanges}
               >
                 {applyButtonText}
               </Button>
@@ -436,13 +339,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           </div>
         )}
       </div>
-
-      {/* AI Config Display (development only) */}
-      {process.env.NODE_ENV === 'development' && aiConfig && (
-        <div className="absolute -top-6 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-          AI: {JSON.stringify(aiConfig.layout)}
-        </div>
-      )}
     </div>
   );
 };

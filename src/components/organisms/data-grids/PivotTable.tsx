@@ -23,20 +23,11 @@ const PivotTable: React.FC<PivotTableProps> = ({
   size = 'md',
   showTotals = true,
   showSubtotals = true,
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
-  allowedActions = [],
-  userRole,
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
   className = '',
   style = {},
   onCellClick,
   onDrillDown,
   onExport,
-  onUpdate = () => {},
 }) => {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [showExportModal, setShowExportModal] = useState(false);
@@ -48,27 +39,6 @@ const PivotTable: React.FC<PivotTableProps> = ({
   const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' | 'info' }>({
     show: false, message: '', type: 'info'
   });
-
-  // Audit logging utility
-  const logAuditEvent = useCallback((action: string, details: any) => {
-    if (auditTrail.enabled) {
-      console.log(`[AUDIT] ${action}:`, {
-        timestamp: new Date().toISOString(),
-        user: userRole?.id || 'unknown',
-        component: 'PivotTable',
-        action,
-        details,
-        commerceState,
-        workflowContext,
-      });
-      onUpdate?.({
-        type: 'audit',
-        action,
-        details,
-        timestamp: new Date().toISOString(),
-      });
-    }
-  }, [auditTrail, userRole, commerceState, workflowContext, onUpdate]);
 
   // Show toast notification
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -220,29 +190,21 @@ const PivotTable: React.FC<PivotTableProps> = ({
 
   // Handle cell click
   const handleCellClick = useCallback((cellValue: any, rowData: any, columnData: any) => {
-    logAuditEvent('cell_click', { cellValue, rowData, columnData });
     onCellClick?.(cellValue, rowData, columnData);
-  }, [logAuditEvent, onCellClick]);
+  }, [onCellClick]);
 
   // Handle drill down
   const handleDrillDown = useCallback((field: string, value: any) => {
-    logAuditEvent('drill_down', { field, value });
     onDrillDown?.(field, value);
     showToast(`Drilling down on ${field}: ${value}`, 'info');
-  }, [logAuditEvent, onDrillDown, showToast]);
+  }, [onDrillDown, showToast]);
 
   // Handle export
   const handleExport = useCallback((format: string) => {
-    logAuditEvent('pivot_export', { 
-      format, 
-      rows: localRows.length, 
-      columns: localColumns.length,
-      dataPoints: Object.keys(pivotStructure.cells).length 
-    });
     onExport?.(format);
     setShowExportModal(false);
     showToast(`Pivot table exported as ${format.toUpperCase()}`, 'success');
-  }, [localRows, localColumns, pivotStructure.cells, logAuditEvent, onExport, showToast]);
+  }, [localRows, localColumns, pivotStructure.cells, onExport, showToast]);
 
   // Format cell value
   const formatCellValue = useCallback((value: any, valueConfig: any) => {
@@ -282,22 +244,6 @@ const PivotTable: React.FC<PivotTableProps> = ({
     }));
   }, [data]);
 
-  // Component styling based on commerce state
-  const getStateStyles = () => {
-    switch (commerceState) {
-      case 'completion':
-        return 'border-green-200';
-      case 'settlement':
-        return 'border-blue-200';
-      case 'execution':
-        return 'border-orange-200';
-      case 'agreement':
-        return 'border-yellow-200';
-      default:
-        return 'border-gray-300';
-    }
-  };
-
   const sizeClasses = {
     sm: 'text-xs',
     md: 'text-sm',
@@ -311,11 +257,9 @@ const PivotTable: React.FC<PivotTableProps> = ({
         className
       )}
       style={style}
-      data-commerce-state={commerceState}
     >
       <div className={cn(
         'bg-white rounded-lg border shadow-sm',
-        getStateStyles(),
         sizeClasses[size]
       )}>
       {/* Header */}

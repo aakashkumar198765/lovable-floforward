@@ -26,16 +26,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       label = '',
       helperText = '',
       errorMessage = '',
-      commerceState = 'none',
-      workflowContext,
-      aiConfig,
-      schema,
-      allowedActions = [],
-      userRole,
-      data,
-      onUpdate = () => {},
-      auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-      encryptionLevel = 'none',
       className = '',
       style = {},
       onChange = () => {},
@@ -52,9 +42,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     );
     const [isFocused, setIsFocused] = useState(false);
 
-    // Handle commerce state based behavior
-    const isReadonly = readonly || commerceState === 'completion';
-    const isDisabled = disabled || (commerceState === 'settlement' && allowedActions && Array.isArray(allowedActions) && !allowedActions.includes('edit'));
 
     // Update internal value when external value changes
     useEffect(() => {
@@ -68,27 +55,9 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       const newValue = event.target.value;
       setInternalValue(newValue);
       
-      // Audit trail logging
-      if (auditTrail && typeof auditTrail === 'object' && auditTrail.enabled && auditTrail.trackChanges) {
-        // Log change event (in real implementation, this would go to audit service)
-        console.log('Textarea change tracked:', {
-          field: (name && name !== '') ? name : (id && id !== '') ? id : 'unnamed-textarea',
-          oldValue: internalValue,
-          newValue: newValue,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext
-        });
-      }
-      
       // Call external onChange
       if (onChange && typeof onChange === 'function') {
         onChange(event);
-      }
-      
-      // Call update callback for enterprise integration
-      if (onUpdate && typeof onUpdate === 'function') {
-        onUpdate(newValue);
       }
     };
 
@@ -128,15 +97,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       success: 'border-success-500 focus:border-success-500 focus:ring-success-500'
     };
 
-    // Commerce state styling
-    const commerceStateClasses = {
-      initiation: 'border-primary-300',
-      agreement: 'border-warning-300',
-      execution: 'border-primary-500',
-      settlement: 'border-gray-400',
-      completion: 'border-gray-300 dark:bg-transparent bg-gray-50',
-      none: 'ring-0'
-    };
 
     // Resize classes
     const resizeClasses = {
@@ -156,7 +116,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       sizeClasses[size] || sizeClasses.md,
       variantClasses[variant] || variantClasses.default,
       status && status !== 'default' && statusClasses[status] ? statusClasses[status] : statusClasses.default,
-      commerceState && commerceStateClasses[commerceState] ? commerceStateClasses[commerceState] : '',
       resizeClasses[resize] || resizeClasses.vertical,
       className || ''
     );
@@ -164,8 +123,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     // Label classes
     const labelClasses = cn(
       'block text-sm font-medium dark:text-white text-gray-700 mb-1',
-      required && 'after:content-["*"] after:text-error-500 after:ml-1',
-      commerceState === 'completion' && 'dark:text-white text-gray-500'
+      required && 'after:content-["*"] after:text-error-500 after:ml-1'
     );
 
     // Helper text classes
@@ -187,11 +145,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && label !== '' && (
           <label htmlFor={id || ''} className={labelClasses}>
             {label}
-            {commerceState && commerceState !== 'none' && (
-              <span className="ml-2 text-xs dark:text-white text-gray-500 uppercase">
-                {commerceState}
-              </span>
-            )}
           </label>
         )}
         
@@ -202,8 +155,8 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             name={name || ''}
             placeholder={placeholder || ''}
             value={internalValue}
-            disabled={isDisabled}
-            readOnly={isReadonly}
+            disabled={disabled}
+            readOnly={readonly}
             required={required}
             autoComplete={autoComplete || 'off'}
             autoFocus={autoFocus}

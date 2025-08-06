@@ -277,12 +277,6 @@ const ApprovalWorkflowExample: React.FC = () => {
             name: 'Current User',
             permissions: ['approve_steps']
           }}
-          auditTrail={{
-            enabled: true,
-            level: 'detailed',
-            trackChanges: true,
-            logUserActions: true
-          }}
           onStepAction={handleStepAction}
           onWorkflowComplete={handleWorkflowComplete}
           onDelegate={handleDelegate}

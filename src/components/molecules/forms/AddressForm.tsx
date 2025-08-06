@@ -42,16 +42,9 @@ const AddressForm: React.FC<AddressFormProps> = ({
     { value: 'business', label: 'Business Address' },
   ],
   validation = {},
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
   allowedActions = [],
-  userRole,
-  data,
-  onUpdate = () => {},
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
+  isDisabled = false,
+  isReadonly = false,
   className = '',
   style = {},
   onChange = () => {},
@@ -67,9 +60,6 @@ const AddressForm: React.FC<AddressFormProps> = ({
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
 
-  // Handle commerce state based behavior
-  const isReadonly = commerceState === 'completion';
-  const isDisabled = commerceState === 'settlement' && !allowedActions.includes('edit_address');
 
   // Update internal data when external value changes
   useEffect(() => {
@@ -148,26 +138,9 @@ const AddressForm: React.FC<AddressFormProps> = ({
       [fieldName]: error,
     }));
 
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.trackChanges) {
-      console.log('Address field changed:', {
-        action: 'address_field_change',
-        field: fieldName,
-        oldValue: addressData[fieldName],
-        newValue: fieldValue,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
-
     // Call callbacks
     onChange(newData);
-    if (onUpdate) {
-      onUpdate(newData);
-    }
-  }, [addressData, validateField, onChange, onUpdate, auditTrail, commerceState, workflowContext, userRole]);
+  }, [addressData, validateField, onChange]);
 
   // Handle blur events
   const handleFieldBlur = useCallback((fieldName: keyof AddressData) => {
@@ -200,10 +173,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
     required: isRequired || defaultValidation.required?.includes(fieldName),
     status: errors[fieldName] && touched[fieldName] ? 'error' as const : 'default' as const,
     errorMessage: errors[fieldName] && touched[fieldName] ? errors[fieldName] : '',
-    commerceState,
     allowedActions,
-    userRole,
-    auditTrail,
     onBlur: () => handleFieldBlur(fieldName),
   });
 
@@ -213,11 +183,6 @@ const AddressForm: React.FC<AddressFormProps> = ({
       {showTitle && (
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-          {commerceState && (
-            <span className="text-xs text-gray-500 uppercase bg-gray-100 px-2 py-1 rounded">
-              {commerceState}
-            </span>
-          )}
         </div>
       )}
 
@@ -350,10 +315,6 @@ const AddressForm: React.FC<AddressFormProps> = ({
             checked={addressData.isDefault || false}
             disabled={isDisabled}
             size={size}
-            commerceState={commerceState}
-            allowedActions={allowedActions}
-            userRole={userRole}
-            auditTrail={auditTrail}
             onChange={(checked) => handleFieldChange('isDefault', checked)}
           />
         )}
@@ -366,21 +327,10 @@ const AddressForm: React.FC<AddressFormProps> = ({
             checked={addressData.isBusinessAddress || false}
             disabled={isDisabled}
             size={size}
-            commerceState={commerceState}
-            allowedActions={allowedActions}
-            userRole={userRole}
-            auditTrail={auditTrail}
             onChange={(checked) => handleFieldChange('isBusinessAddress', checked)}
           />
         )}
       </div>
-
-      {/* AI Config Display (development only) */}
-      {process.env.NODE_ENV === 'development' && aiConfig && (
-        <div className="absolute -top-6 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-          AI: {JSON.stringify(aiConfig.layout)}
-        </div>
-      )}
     </div>
   );
 };

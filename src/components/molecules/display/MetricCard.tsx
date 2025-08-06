@@ -4,6 +4,7 @@ import { cn } from '../../../utils/cn';
 import Badge from '../../atoms/display/Badge';
 import Button from '../../atoms/form/Button';
 import Tooltip from '../../atoms/display/Tooltip';
+import { TrendingUp, TrendingDown, Minus, RefreshCw } from 'lucide-react';
 
 const MetricCard: React.FC<MetricCardProps> = ({
   id = 'metric-card',
@@ -31,16 +32,8 @@ const MetricCard: React.FC<MetricCardProps> = ({
   variant = 'default',
   color = 'primary',
   layout = 'vertical',
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
-  allowedActions = [],
-  userRole,
-  data,
-  onUpdate = () => {},
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
+  isDisabled = false,
+  isReadonly = false,
   className = '',
   style = {},
   onClick = () => {},
@@ -49,9 +42,6 @@ const MetricCard: React.FC<MetricCardProps> = ({
 }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Handle commerce state based behavior
-  const isReadonly = commerceState === 'completion';
-  const isDisabled = commerceState === 'settlement' && !allowedActions.includes('metric_actions');
 
   // Auto-detect status based on threshold and target
   useEffect(() => {
@@ -91,22 +81,9 @@ const MetricCard: React.FC<MetricCardProps> = ({
   const handleCardClick = useCallback(() => {
     if (clickable && !isDisabled && !loading) {
       onClick();
-      
-      // Audit trail logging
-      if (auditTrail.enabled && auditTrail.logUserActions) {
-        console.log('Metric card clicked:', {
-          action: 'metric_card_click',
-          cardId: id,
-          title,
-          metricValue: metric?.value,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          userRole
-        });
-      }
+
     }
-  }, [clickable, isDisabled, loading, onClick, auditTrail, id, title, metric?.value, commerceState, workflowContext, userRole]);
+  }, [clickable, isDisabled, loading, onClick, id, title, metric?.value]);
 
   // Handle refresh
   const handleRefresh = useCallback(async () => {
@@ -116,48 +93,17 @@ const MetricCard: React.FC<MetricCardProps> = ({
     
     try {
       await onRefresh();
-      
-      // Audit trail logging
-      if (auditTrail.enabled && auditTrail.logUserActions) {
-        console.log('Metric card refreshed:', {
-          action: 'metric_card_refresh',
-          cardId: id,
-          title,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          userRole
-        });
-      }
     } finally {
       setIsRefreshing(false);
     }
-  }, [refreshable, isRefreshing, isDisabled, onRefresh, auditTrail, id, title, commerceState, workflowContext, userRole]);
+  }, [refreshable, isRefreshing, isDisabled, onRefresh, id, title]);
 
   // Handle action click
   const handleActionClick = useCallback((actionKey: string) => {
     if (!isDisabled) {
       onAction(actionKey);
-      
-      // Audit trail logging
-      if (auditTrail.enabled && auditTrail.logUserActions) {
-        console.log('Metric card action:', {
-          action: 'metric_card_action',
-          actionKey,
-          cardId: id,
-          title,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          userRole
-        });
-      }
-
-      if (onUpdate) {
-        onUpdate({ action: actionKey, metricData: { id, title, value: metric?.value } });
-      }
     }
-  }, [isDisabled, onAction, onUpdate, auditTrail, id, title, metric?.value, commerceState, workflowContext, userRole]);
+  }, [onAction, id, title, metric?.value]);
 
   // Get status color classes
   const getStatusColors = () => {
@@ -209,7 +155,6 @@ const MetricCard: React.FC<MetricCardProps> = ({
     clickable && !isDisabled && !loading && 'cursor-pointer hover:shadow-md hover:scale-105',
     isDisabled && 'opacity-60 cursor-not-allowed',
     loading && 'animate-pulse',
-    commerceState === 'completion' && 'border-gray-300 bg-gray-50',
     className
   );
 
@@ -250,43 +195,19 @@ const MetricCard: React.FC<MetricCardProps> = ({
     );
 
     if (direction === 'up') {
-      return (
-        <svg className={iconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17l5-5 5 5M7 7l5-5 5 5" />
-        </svg>
-      );
+      return <TrendingUp className={iconClass} />;
     }
     
     if (direction === 'down') {
-      return (
-        <svg className={iconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 7l-5 5-5-5M17 17l-5 5-5-5" />
-        </svg>
-      );
+      return <TrendingDown className={iconClass} />;
     }
     
-    return (
-      <svg className={iconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14" />
-      </svg>
-    );
+    return <Minus className={iconClass} />;
   };
 
   // Refresh icon
   const RefreshIcon = () => (
-    <svg
-      className={cn('w-4 h-4', isRefreshing && 'animate-spin')}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-      />
-    </svg>
+    <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} />
   );
 
   // Progress bar for target
@@ -471,12 +392,6 @@ const MetricCard: React.FC<MetricCardProps> = ({
           {showLastUpdated && lastUpdated && (
             <span>Updated {formatLastUpdated(lastUpdated)}</span>
           )}
-          
-          {commerceState && commerceState !== 'initiation' && (
-            <Badge variant="secondary" size="sm" className="ml-2">
-              {commerceState}
-            </Badge>
-          )}
         </div>
 
         {/* Actions */}
@@ -506,13 +421,6 @@ const MetricCard: React.FC<MetricCardProps> = ({
       {loading && (
         <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600" />
-        </div>
-      )}
-
-      {/* AI Config Display (development only) */}
-      {process.env.NODE_ENV === 'development' && aiConfig && (
-        <div className="absolute -top-6 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-          AI: {JSON.stringify(aiConfig.layout)}
         </div>
       )}
     </div>

@@ -3,6 +3,7 @@ import { SortControlProps, SortOption, SortCriteria } from '../../../types';
 import { cn } from '../../../utils/cn';
 import Button from '../../atoms/form/Button';
 import Select from '../../atoms/form/Select';
+import { ChevronUp, ChevronDown, X } from 'lucide-react';
 
 const SortControl: React.FC<SortControlProps> = ({
   id = 'sort-control',
@@ -22,16 +23,8 @@ const SortControl: React.FC<SortControlProps> = ({
   size = 'md',
   variant = 'default',
   layout = 'vertical',
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
-  allowedActions = [],
-  userRole,
-  data,
-  onUpdate = () => {},
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
+  isDisabled = false,
+  isReadonly = false,
   className = '',
   style = {},
   onChange = () => {},
@@ -43,9 +36,6 @@ const SortControl: React.FC<SortControlProps> = ({
     value || defaultValue || []
   );
 
-  // Handle commerce state based behavior
-  const isReadonly = commerceState === 'completion';
-  const isDisabled = commerceState === 'settlement' && !allowedActions.includes('sort');
 
   // Update internal sorts when external value changes
   useEffect(() => {
@@ -74,28 +64,11 @@ const SortControl: React.FC<SortControlProps> = ({
     }
 
     setInternalSorts(newSorts);
-    
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.trackChanges) {
-      console.log('Sort changed:', {
-        action: 'sort_change',
-        index,
-        key,
-        direction: direction || newSorts[index]?.direction,
-        sorts: newSorts,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
+
 
     // Call callbacks
     onChange(newSorts);
-    if (onUpdate) {
-      onUpdate(newSorts);
-    }
-  }, [internalSorts, options, onChange, onUpdate, auditTrail, commerceState, workflowContext, userRole]);
+  }, [internalSorts, options, onChange]);
 
   // Handle add sort
   const handleAddSort = useCallback(() => {
@@ -113,79 +86,31 @@ const SortControl: React.FC<SortControlProps> = ({
       
       const newSorts = [...internalSorts, newSort];
       setInternalSorts(newSorts);
-      
-      // Audit trail logging
-      if (auditTrail.enabled && auditTrail.logUserActions) {
-        console.log('Sort added:', {
-          action: 'sort_add',
-          sort: newSort,
-          sorts: newSorts,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          userRole
-        });
-      }
 
       // Call callbacks
       onAdd();
       onChange(newSorts);
-      if (onUpdate) {
-        onUpdate(newSorts);
-      }
     }
-  }, [internalSorts, maxSorts, options, onAdd, onChange, onUpdate, auditTrail, commerceState, workflowContext, userRole]);
+  }, [internalSorts, maxSorts, options, onAdd, onChange]);
 
   // Handle remove sort
   const handleRemoveSort = useCallback((index: number) => {
     const newSorts = internalSorts.filter((_, i) => i !== index);
     setInternalSorts(newSorts);
-    
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.logUserActions) {
-      console.log('Sort removed:', {
-        action: 'sort_remove',
-        index,
-        removedSort: internalSorts[index],
-        sorts: newSorts,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
 
     // Call callbacks
     onRemove(index);
     onChange(newSorts);
-    if (onUpdate) {
-      onUpdate(newSorts);
-    }
-  }, [internalSorts, onRemove, onChange, onUpdate, auditTrail, commerceState, workflowContext, userRole]);
+  }, [internalSorts, onRemove, onChange]);
 
   // Handle clear all sorts
   const handleClearAll = useCallback(() => {
     setInternalSorts([]);
-    
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.logUserActions) {
-      console.log('Sorts cleared:', {
-        action: 'sorts_clear',
-        clearedSorts: internalSorts,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
 
     // Call callbacks
     onClear();
     onChange([]);
-    if (onUpdate) {
-      onUpdate([]);
-    }
-  }, [internalSorts, onClear, onChange, onUpdate, auditTrail, commerceState, workflowContext, userRole]);
+  }, [internalSorts, onClear, onchange]);
 
   // Toggle sort direction
   const handleToggleDirection = useCallback((index: number) => {
@@ -197,10 +122,7 @@ const SortControl: React.FC<SortControlProps> = ({
     
     setInternalSorts(newSorts);
     onChange(newSorts);
-    if (onUpdate) {
-      onUpdate(newSorts);
-    }
-  }, [internalSorts, onChange, onUpdate]);
+  }, [internalSorts, onChange]);
 
   // Get available options for select
   const getAvailableOptions = (currentIndex: number) => {
@@ -241,20 +163,12 @@ const SortControl: React.FC<SortControlProps> = ({
 
   // Direction icons
   const DirectionIcon = ({ direction }: { direction: 'asc' | 'desc' }) => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      {direction === 'asc' ? (
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 14l5-5 5 5" />
-      ) : (
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 10l-5 5-5-5" />
-      )}
-    </svg>
+    direction === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
   );
 
   // Remove icon
   const RemoveIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-    </svg>
+    <X className="w-4 h-4" />
   );
 
   return (
@@ -264,11 +178,6 @@ const SortControl: React.FC<SortControlProps> = ({
         <div className="flex items-center justify-between mb-2">
           <label className="block text-sm font-medium text-gray-700">
             {label}
-            {commerceState && (
-              <span className="ml-2 text-xs text-gray-500 uppercase">
-                {commerceState}
-              </span>
-            )}
           </label>
           
           {showClearButton && internalSorts.length > 0 && (
@@ -382,13 +291,6 @@ const SortControl: React.FC<SortControlProps> = ({
         >
           {clearButtonText}
         </Button>
-      )}
-
-      {/* AI Config Display (development only) */}
-      {process.env.NODE_ENV === 'development' && aiConfig && (
-        <div className="absolute -top-6 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-          AI: {JSON.stringify(aiConfig.layout)}
-        </div>
       )}
     </div>
   );

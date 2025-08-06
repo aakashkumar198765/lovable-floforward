@@ -3,6 +3,7 @@ import { CommerceState, SummaryItem, SummaryPanelProps } from '../../../types';
 import { cn } from '../../../utils/cn';
 import Badge from '../../atoms/display/Badge';
 import Button from '../../atoms/form/Button';
+import { RefreshCw, Download, ChevronDown, Copy } from 'lucide-react';
 
 const SummaryPanel: React.FC<SummaryPanelProps> = ({
   id = 'summary-panel',
@@ -24,16 +25,8 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
   exportable = false,
   refreshable = false,
   loading = false,
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
-  allowedActions = [],
-  userRole,
-  data,
-  onUpdate = () => {},
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
+  isDisabled = false,
+  isReadonly = false,
   className = '',
   style = {},
   onSectionToggle = () => {},
@@ -53,9 +46,6 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Handle commerce state based behavior
-  const isReadonly = commerceState === 'completion';
-  const isDisabled = commerceState === 'settlement' && !allowedActions.includes('summary_actions');
 
   // Format value based on format type
   const formatValue = (value: string | number | React.ReactNode, format?: string) => {
@@ -90,62 +80,21 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
     }));
     
     onSectionToggle(sectionKey, newCollapsed);
-    
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.logUserActions) {
-      console.log('Summary section toggled:', {
-        action: 'summary_section_toggle',
-        sectionKey,
-        collapsed: newCollapsed,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
-  }, [collapsedSections, onSectionToggle, auditTrail, commerceState, workflowContext, userRole]);
+
+  }, [collapsedSections, onSectionToggle]);
 
   // Handle section action
   const handleSectionAction = useCallback((sectionKey: string, actionKey: string) => {
     onSectionAction(sectionKey, actionKey);
-    
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.logUserActions) {
-      console.log('Summary section action:', {
-        action: 'summary_section_action',
-        sectionKey,
-        actionKey,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
-
-    if (onUpdate) {
-      onUpdate({ sectionKey, actionKey });
-    }
-  }, [onSectionAction, onUpdate, auditTrail, commerceState, workflowContext, userRole]);
+  }, [onSectionAction]);
 
   // Handle item click
   const handleItemClick = useCallback((sectionKey: string, itemKey: string, item: SummaryItem) => {
     if (item.clickable && !isDisabled) {
       onItemClick(sectionKey, itemKey);
       
-      // Audit trail logging
-      if (auditTrail.enabled && auditTrail.logUserActions) {
-        console.log('Summary item clicked:', {
-          action: 'summary_item_click',
-          sectionKey,
-          itemKey,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          userRole
-        });
-      }
     }
-  }, [isDisabled, onItemClick, auditTrail, commerceState, workflowContext, userRole]);
+  }, [isDisabled, onItemClick]);
 
   // Handle copy to clipboard
   const handleCopy = useCallback(async (value: string | number) => {
@@ -166,20 +115,11 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
     try {
       await onRefresh();
       
-      // Audit trail logging
-      if (auditTrail.enabled && auditTrail.logUserActions) {
-        console.log('Summary panel refreshed:', {
-          action: 'summary_refresh',
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          userRole
-        });
-      }
+
     } finally {
       setIsRefreshing(false);
     }
-  }, [refreshable, isRefreshing, isDisabled, onRefresh, auditTrail, commerceState, workflowContext, userRole]);
+  }, [refreshable, isRefreshing, isDisabled, onRefresh]);
 
   // Filter sections and items based on search
   const filteredSections = sections
@@ -210,7 +150,6 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
     spacing === 'normal' && 'space-y-4',
     spacing === 'relaxed' && 'space-y-6',
     loading && 'animate-pulse',
-    commerceState === 'completion' && 'border-gray-300 bg-gray-50',
     className
   );
 
@@ -237,27 +176,19 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
   // Icons
   const RefreshIcon = () => (
-    <svg className={cn('w-4 h-4', isRefreshing && 'animate-spin')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-    </svg>
+    <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} />
   );
 
   const ExportIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
+    <Download className="w-4 h-4" />
   );
 
   const CollapseIcon = ({ collapsed }: { collapsed: boolean }) => (
-    <svg className={cn('w-4 h-4 transition-transform', collapsed && 'rotate-180')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-    </svg>
+    <ChevronDown className={cn('w-4 h-4 transition-transform', collapsed && 'rotate-180')} />
   );
 
   const CopyIcon = () => (
-    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-    </svg>
+    <Copy className="w-3 h-3" />
   );
 
   return (
@@ -279,12 +210,6 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
             
             {subtitle && (
               <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
-            )}
-            
-            {commerceState && commerceState !== 'initiation' && (
-              <Badge variant="secondary" size="sm" className="mt-2">
-                {commerceState}
-              </Badge>
             )}
           </div>
 
@@ -472,13 +397,6 @@ const SummaryPanel: React.FC<SummaryPanelProps> = ({
       {loading && (
         <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
-        </div>
-      )}
-
-      {/* AI Config Display (development only) */}
-      {process.env.NODE_ENV === 'development' && aiConfig && (
-        <div className="absolute -top-6 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-          AI: {JSON.stringify(aiConfig.layout)}
         </div>
       )}
     </div>

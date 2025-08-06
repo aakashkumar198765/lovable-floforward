@@ -2,6 +2,7 @@ import React, { forwardRef, useState, useEffect, useCallback } from 'react';
 import { PaymentFormProps, PaymentData } from '../../../types';
 import { cn } from '../../../utils/cn';
 import { Input, Select, Checkbox, Button, Radio } from '../../atoms/form';
+import { Lock } from 'lucide-react';
 // import CreditCardInput from '../../atoms/form/CreditCardInput';
 
 const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
@@ -66,15 +67,7 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
       onChange,
       onValidation,
       onSubmit,
-      commerceState = 'none',
-      workflowContext,
-      aiConfig,
-      schema,
-      allowedActions = [],
-      userRole,
-      data,
-      onUpdate,
-      auditTrail = { enabled: true, level: 'comprehensive', trackChanges: true, logUserActions: true },
+      
       encryptionLevel = 'high',
       ...props
     },
@@ -209,28 +202,11 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
         [key]: fieldErrors.length > 0 ? fieldErrors[0] : ''
       }));
 
-      // Audit trail logging
-      if (auditTrail.enabled && auditTrail.trackChanges) {
-        console.log('Payment form field change tracked:', {
-          field: key,
-          hasValue: !!fieldValue,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          encryptionLevel
-        });
-      }
-
       // Call external onChange
       if (onChange) {
         onChange(newValue);
       }
-
-      // Call update callback
-      if (onUpdate) {
-        onUpdate(newValue);
-      }
-    }, [internalValue, validateField, auditTrail, commerceState, workflowContext, encryptionLevel, onChange, onUpdate]);
+    }, [internalValue, validateField, onChange, encryptionLevel]);
 
     // Handle form submission
     const handleSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => {
@@ -238,22 +214,9 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
       
       const valid = validateForm();
       if (valid && onSubmit) {
-        // Audit trail for submission
-        if (auditTrail.enabled && auditTrail.logUserActions) {
-          console.log('Payment form submitted:', {
-            action: 'payment_form_submit',
-            method: internalValue.method,
-            hasCard: !!(internalValue.cardNumber),
-            timestamp: new Date(),
-            commerceState,
-            workflowContext,
-            encryptionLevel
-          });
-        }
-        
         onSubmit(internalValue as PaymentData);
       }
-    }, [validateForm, onSubmit, internalValue, auditTrail, commerceState, workflowContext, encryptionLevel]);
+    }, [validateForm, onSubmit, internalValue]);
 
     // Filtered payment methods based on allowed methods
     const filteredPaymentMethods = paymentMethods.filter(method => 
@@ -317,7 +280,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
                   errorMessage={touched.cardNumber ? errors.cardNumber : ''}
                   encryptionLevel={encryptionLevel}
                   size={size}
-                  commerceState={commerceState}
                   onChange={(e) => handleFieldChange('cardNumber', e.target.value)}
                 />
 
@@ -332,7 +294,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
                   errorMessage={touched.cardHolderName ? errors.cardHolderName : ''}
                   autoComplete="cc-name"
                   size={size}
-                  commerceState={commerceState}
                   onChange={(e) => handleFieldChange('cardHolderName', e.target.value)}
                 />
               </div>
@@ -351,7 +312,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
                     label: String(i + 1).padStart(2, '0')
                   }))}
                   size={size}
-                  commerceState={commerceState}
                   onChange={(value) => handleFieldChange('expiryMonth', value)}
                 />
 
@@ -369,7 +329,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
                     return { value: shortYear, label: shortYear };
                   })}
                   size={size}
-                  commerceState={commerceState}
                   onChange={(value) => handleFieldChange('expiryYear', value)}
                 />
 
@@ -386,8 +345,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
                   maxLength={4}
                   autoComplete="cc-csc"
                   size={size}
-                  encryptionLevel={encryptionLevel}
-                  commerceState={commerceState}
                   onChange={(e) => handleFieldChange('cvv', e.target.value)}
                 />
               </div>
@@ -407,7 +364,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
                 status={errors.bankName ? 'error' : 'default'}
                 errorMessage={touched.bankName ? errors.bankName : ''}
                 size={size}
-                commerceState={commerceState}
                 onChange={(e) => handleFieldChange('bankName', e.target.value)}
               />
 
@@ -420,9 +376,7 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
                 required={validation.required?.includes('accountNumber')}
                 status={errors.accountNumber ? 'error' : 'default'}
                 errorMessage={touched.accountNumber ? errors.accountNumber : ''}
-                encryptionLevel={encryptionLevel}
                 size={size}
-                commerceState={commerceState}
                 onChange={(e) => handleFieldChange('accountNumber', e.target.value)}
               />
 
@@ -436,7 +390,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
                 status={errors.routingNumber ? 'error' : 'default'}
                 errorMessage={touched.routingNumber ? errors.routingNumber : ''}
                 size={size}
-                commerceState={commerceState}
                 onChange={(e) => handleFieldChange('routingNumber', e.target.value)}
               />
             </div>
@@ -456,7 +409,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
               errorMessage={touched.paypalEmail ? errors.paypalEmail : ''}
               autoComplete="email"
               size={size}
-              commerceState={commerceState}
               onChange={(e) => handleFieldChange('paypalEmail', e.target.value)}
             />
           );
@@ -474,7 +426,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
                 errorMessage={touched.cryptoType ? errors.cryptoType : ''}
                 options={cryptoTypes}
                 size={size}
-                commerceState={commerceState}
                 onChange={(value) => handleFieldChange('cryptoType', value)}
               />
 
@@ -489,7 +440,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
                 errorMessage={touched.cryptoWallet ? errors.cryptoWallet : ''}
                 encryptionLevel={encryptionLevel}
                 size={size}
-                commerceState={commerceState}
                 onChange={(e) => handleFieldChange('cryptoWallet', e.target.value)}
               />
             </div>
@@ -516,7 +466,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
               placeholder="123 Main Street"
               value={internalValue.billingAddress?.addressLine1 || ''}
               size={size}
-              commerceState={commerceState}
               onChange={(e) => handleFieldChange('billingAddress', {
                 ...internalValue.billingAddress,
                 addressLine1: e.target.value
@@ -530,7 +479,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
               placeholder="Apt, Suite, etc. (Optional)"
               value={internalValue.billingAddress?.addressLine2 || ''}
               size={size}
-              commerceState={commerceState}
               onChange={(e) => handleFieldChange('billingAddress', {
                 ...internalValue.billingAddress,
                 addressLine2: e.target.value
@@ -544,7 +492,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
               placeholder="New York"
               value={internalValue.billingAddress?.city || ''}
               size={size}
-              commerceState={commerceState}
               onChange={(e) => handleFieldChange('billingAddress', {
                 ...internalValue.billingAddress,
                 city: e.target.value
@@ -558,7 +505,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
               value={internalValue.billingAddress?.state || ''}
               options={states}
               size={size}
-              commerceState={commerceState}
               onChange={(value) => handleFieldChange('billingAddress', {
                 ...internalValue.billingAddress,
                 state: value
@@ -572,7 +518,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
               placeholder="10001"
               value={internalValue.billingAddress?.postalCode || ''}
               size={size}
-              commerceState={commerceState}
               onChange={(e) => handleFieldChange('billingAddress', {
                 ...internalValue.billingAddress,
                 postalCode: e.target.value
@@ -586,7 +531,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
               value={internalValue.billingAddress?.country || ''}
               options={countries}
               size={size}
-              commerceState={commerceState}
               onChange={(value) => handleFieldChange('billingAddress', {
                 ...internalValue.billingAddress,
                 country: value
@@ -612,9 +556,7 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
             <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
             {encryptionLevel !== 'none' && (
               <div className="flex items-center mt-2 text-sm text-green-600">
-                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                </svg>
+                <Lock className="w-4 h-4 mr-1" />
                 Secure encrypted payment processing
               </div>
             )}
@@ -632,7 +574,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
             value={internalValue.method || ''}
             orientation="vertical"
             size={size}
-            commerceState={commerceState}
             onChange={(value) => handleFieldChange('method', value)}
           />
         </div>
@@ -656,7 +597,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
               label="Save payment method for future use"
               checked={internalValue.savePaymentMethod || false}
               size={size}
-              commerceState={commerceState}
               onChange={(checked) => handleFieldChange('savePaymentMethod', checked)}
             />
 
@@ -667,7 +607,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
               checked={internalValue.setAsDefault || false}
               disabled={!internalValue.savePaymentMethod}
               size={size}
-              commerceState={commerceState}
               onChange={(checked) => handleFieldChange('setAsDefault', checked)}
             />
           </div>
@@ -682,10 +621,8 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
               label="I agree to the Terms and Conditions and Privacy Policy"
               checked={internalValue.agreeToTerms || false}
               required={true}
-              status={errors.agreeToTerms ? 'error' : 'default'}
               errorMessage={touched.agreeToTerms ? errors.agreeToTerms : ''}
               size={size}
-              commerceState={commerceState}
               onChange={(checked) => handleFieldChange('agreeToTerms', checked)}
             />
           </div>
@@ -699,7 +636,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
             size={size}
             fullWidth={layout === 'vertical'}
             disabled={!isValid}
-            commerceState={commerceState}
           >
             Complete Payment
           </Button>
@@ -714,20 +650,6 @@ const PaymentForm = forwardRef<HTMLFormElement, PaymentFormProps>(
                 error && <li key={field}>• {error}</li>
               ))}
             </ul>
-          </div>
-        )}
-
-        {/* Commerce State Indicator */}
-        {commerceState && commerceState !== 'initiation' && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-              <span className="text-sm text-blue-700">
-                Commerce State: <strong className="capitalize">{commerceState}</strong>
-              </span>
-            </div>
           </div>
         )}
       </form>

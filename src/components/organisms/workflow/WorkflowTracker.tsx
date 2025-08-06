@@ -18,11 +18,6 @@ export const WorkflowTracker: React.FC<WorkflowTrackerProps> = ({
   onFilterChange,
   className = '',
   style = {},
-  commerceState = 'execution',
-  allowedActions = [],
-  userRole,
-  encryptionLevel = 'none',
-  auditTrail,
 }) => {
   const [localFilters, setLocalFilters] = useState(filters);
   const [selectedWorkflows, setSelectedWorkflows] = useState<string[]>([]);
@@ -300,7 +295,7 @@ export const WorkflowTracker: React.FC<WorkflowTrackerProps> = ({
           </div>
           
           <div className="flex space-x-2">
-            {allowedActions.includes('pause') && workflow.status === 'active' && (
+            {workflow.status === 'active' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -312,7 +307,7 @@ export const WorkflowTracker: React.FC<WorkflowTrackerProps> = ({
                 ⏸️
               </button>
             )}
-            {allowedActions.includes('resume') && workflow.status === 'paused' && (
+            {workflow.status === 'paused' && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -324,7 +319,7 @@ export const WorkflowTracker: React.FC<WorkflowTrackerProps> = ({
                 ▶️
               </button>
             )}
-            {allowedActions.includes('cancel') && ['active', 'paused'].includes(workflow.status) && (
+            {['active', 'paused'].includes(workflow.status) && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -496,14 +491,6 @@ export const WorkflowTracker: React.FC<WorkflowTrackerProps> = ({
         renderContent()
       )}
 
-      {/* Audit trail logging */}
-      {auditTrail?.enabled && commerceState && (
-        <div className="sr-only">
-          Workflow tracker viewed - Commerce State: {commerceState}, 
-          Total Workflows: {filteredWorkflows.length}, 
-          User: {userRole?.name || 'Unknown'}
-        </div>
-      )}
     </div>
   );
 };

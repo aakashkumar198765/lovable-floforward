@@ -14,16 +14,6 @@ const Switch = forwardRef<HTMLInputElement, SwitchProps>(
       label = '',
       description = '',
       labelPosition = 'right',
-      commerceState = 'none',
-      workflowContext,
-      aiConfig,
-      schema,
-      allowedActions = [],
-      userRole,
-      data,
-      onUpdate,
-      auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-      encryptionLevel = 'none',
       className = '',
       style = {},
       onChange,
@@ -37,9 +27,6 @@ const Switch = forwardRef<HTMLInputElement, SwitchProps>(
       checked !== undefined ? checked : defaultChecked !== undefined ? defaultChecked : false
     );
 
-    // Handle commerce state based behavior
-    const isReadonly = readonly || commerceState === 'completion';
-    const isDisabled = disabled || (commerceState === 'settlement' && allowedActions && Array.isArray(allowedActions) && !allowedActions.includes('edit'));
 
     // Update internal checked state when external checked changes
     useEffect(() => {
@@ -50,32 +37,13 @@ const Switch = forwardRef<HTMLInputElement, SwitchProps>(
 
     // Handle switch changes with audit trail
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (isDisabled || isReadonly) return;
+      if (disabled || readonly) return;
 
       const newChecked = event.target.checked;
       setInternalChecked(newChecked);
-
-      // Audit trail logging
-      if (auditTrail && typeof auditTrail === 'object' && auditTrail.enabled && auditTrail.trackChanges) {
-        console.log('Switch change tracked:', {
-          field: 'switch-toggle',
-          oldValue: internalChecked,
-          newValue: newChecked,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          userRole
-        });
-      }
-
       // Call external onChange
       if (onChange && typeof onChange === 'function') {
         onChange(newChecked, event);
-      }
-
-      // Call update callback for enterprise integration
-      if (onUpdate && typeof onUpdate === 'function') {
-        onUpdate(newChecked);
       }
     };
 
@@ -119,15 +87,6 @@ const Switch = forwardRef<HTMLInputElement, SwitchProps>(
       danger: 'bg-error-600 focus:ring-error-500'
     };
 
-    // Commerce state classes
-    const commerceStateClasses = {
-      initiation: 'ring-primary-300',
-      agreement: 'ring-warning-300',
-      execution: 'ring-primary-500',
-      settlement: 'ring-gray-400',
-      completion: 'ring-gray-300 bg-gray-50',
-      none: 'ring-0'
-    };
 
     const currentSize = sizeClasses[size] || sizeClasses.md;
 
@@ -138,8 +97,7 @@ const Switch = forwardRef<HTMLInputElement, SwitchProps>(
       'font-work-sans',
       currentSize.track,
       internalChecked ? (colorClasses[color] || colorClasses.primary) : 'bg-gray-200',
-      commerceState && commerceStateClasses[commerceState] ? commerceStateClasses[commerceState] : '',
-      (isDisabled || isReadonly) && 'cursor-not-allowed opacity-50',
+      (disabled || readonly) && 'cursor-not-allowed opacity-50',
       !internalChecked && 'focus:ring-gray-500'
     );
 
@@ -153,8 +111,7 @@ const Switch = forwardRef<HTMLInputElement, SwitchProps>(
     // Label classes
     const labelClasses = cn(
       'text-sm font-medium text-gray-700 cursor-pointer select-none',
-      (isDisabled || isReadonly) && 'cursor-not-allowed opacity-50',
-      commerceState === 'completion' && 'text-gray-500'
+      (disabled || readonly) && 'cursor-not-allowed opacity-50'
     );
 
     // Description classes
@@ -183,10 +140,10 @@ const Switch = forwardRef<HTMLInputElement, SwitchProps>(
             type="button"
             role="switch"
             aria-checked={internalChecked}
-            disabled={isDisabled}
+            disabled={disabled}
             className={trackClasses}
             onClick={() => {
-              if (!isDisabled && !isReadonly) {
+              if (!disabled && !readonly) {
                 const event = {
                   target: { checked: !internalChecked },
                   currentTarget: { checked: !internalChecked }
@@ -202,8 +159,8 @@ const Switch = forwardRef<HTMLInputElement, SwitchProps>(
               ref={ref}
               type="checkbox"
               checked={internalChecked}
-              disabled={isDisabled}
-              readOnly={isReadonly}
+              disabled={disabled}
+              readOnly={readonly}
               onChange={handleChange}
               onFocus={handleFocus}
               onBlur={handleBlur}
@@ -212,17 +169,6 @@ const Switch = forwardRef<HTMLInputElement, SwitchProps>(
               {...props}
             /> */}
           </button>
-          
-          {/* Commerce state indicator */}
-          {commerceState && commerceState !== 'initiation' && commerceState !== 'none' && (
-            <div className={cn(
-              'w-1.5 h-1.5 rounded-full mt-1',
-              commerceState === 'agreement' && 'bg-warning-500',
-              commerceState === 'execution' && 'bg-primary-600',
-              commerceState === 'settlement' && 'bg-gray-500',
-              commerceState === 'completion' && 'bg-success-500'
-            )} />
-          )}
         </div>
         
         {(label || description) && (
@@ -230,11 +176,6 @@ const Switch = forwardRef<HTMLInputElement, SwitchProps>(
             {label && label !== '' && (
               <label className={labelClasses}>
                 {label}
-                {commerceState && commerceState !== 'initiation' && (
-                  <span className="ml-2 text-xs text-gray-500 uppercase">
-                    {commerceState}
-                  </span>
-                )}
               </label>
             )}
             
@@ -243,13 +184,6 @@ const Switch = forwardRef<HTMLInputElement, SwitchProps>(
                 {description}
               </div>
             )}
-          </div>
-        )}
-
-        {/* AI Config Display (development only) */}
-        {process.env.NODE_ENV === 'development' && aiConfig && (
-          <div className="absolute -top-8 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-            AI Config: {JSON.stringify(aiConfig, null, 2)}
           </div>
         )}
       </div>

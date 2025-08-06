@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { BulkActionsProps, BulkAction } from '../../../types';
 import { cn } from '../../../utils/cn';
+import { sizeClasses, layoutClasses, animationClasses } from '../../../utils/tailwindClassMaps';
 import Button from '../../atoms/form/Button';
 import Select from '../../atoms/form/Select';
 import Checkbox from '../../atoms/form/Checkbox';
@@ -22,16 +23,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({
   size = 'md',
   variant = 'default',
   position = 'top',
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
-  allowedActions = [],
-  userRole,
-  data,
-  onUpdate = () => {},
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
+  isDisabled = false,
   className = '',
   style = {},
   onAction = () => {},
@@ -42,27 +34,20 @@ const BulkActions: React.FC<BulkActionsProps> = ({
   const [confirmAction, setConfirmAction] = useState<BulkAction | null>(null);
   const [isAllSelected, setIsAllSelected] = useState(false);
 
-  // Handle commerce state based behavior
-  const isReadonly = commerceState === 'completion';
-  const isDisabled = commerceState === 'settlement' && !allowedActions.includes('bulk_actions');
 
   // Update all selected state
   useEffect(() => {
     setIsAllSelected(selectedItems.length === totalItems && totalItems > 0);
   }, [selectedItems.length, totalItems]);
 
-  // Filter available actions based on permissions and state
+  // Filter available actions based on state
   const availableActions = actions.filter(action => {
-    if (action.disabled || isDisabled || isReadonly) return false;
-    if (action.permissions && action.permissions.length > 0) {
-      return action.permissions.some(permission => allowedActions.includes(permission));
-    }
-    return true;
+    return !action.disabled;
   });
 
   // Check if action is enabled based on selection
   const isActionEnabled = useCallback((action: BulkAction) => {
-    if (action.disabled || isDisabled || isReadonly) return false;
+    if (action.disabled || isDisabled) return false;
     
     if (action.requiresSelection !== false && selectedItems.length === 0) return false;
     
@@ -71,57 +56,24 @@ const BulkActions: React.FC<BulkActionsProps> = ({
     if (action.maxSelection && selectedItems.length > action.maxSelection) return false;
     
     return true;
-  }, [selectedItems.length, isDisabled, isReadonly]);
+  }, [selectedItems.length, isDisabled]);
 
   // Handle action execution
   const handleAction = useCallback((action: BulkAction) => {
     if (!isActionEnabled(action)) return;
-
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.logUserActions) {
-      console.log('Bulk action initiated:', {
-        action: 'bulk_action_initiated',
-        actionKey: action.key,
-        selectedItems,
-        selectedCount: selectedItems.length,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
 
     if (action.confirmRequired) {
       setConfirmAction(action);
     } else {
       executeAction(action);
     }
-  }, [selectedItems, isActionEnabled, auditTrail, commerceState, workflowContext, userRole]);
+  }, [selectedItems, isActionEnabled]);
 
   // Execute action after confirmation
   const executeAction = useCallback((action: BulkAction) => {
     action.key && onAction(action.key, selectedItems);
-    
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.logUserActions) {
-      console.log('Bulk action executed:', {
-        action: 'bulk_action_executed',
-        actionKey: action.key,
-        selectedItems,
-        selectedCount: selectedItems.length,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
-
-    if (onUpdate) {
-      onUpdate({ action: action.key, selectedItems });
-    }
-
     setConfirmAction(null);
-  }, [selectedItems, onAction, onUpdate, auditTrail, commerceState, workflowContext, userRole]);
+  }, [selectedItems, onAction]);
 
   // Handle select all
   const handleSelectAll = useCallback(() => {
@@ -131,20 +83,7 @@ const BulkActions: React.FC<BulkActionsProps> = ({
     } else {
       onSelectAll();
     }
-
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.logUserActions) {
-      console.log('Bulk selection changed:', {
-        action: isAllSelected ? 'deselect_all' : 'select_all',
-        previousSelection: selectedItems.length,
-        newSelection: isAllSelected ? 0 : totalItems,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
-  }, [isAllSelected, selectedItems.length, totalItems, onSelectAll, onDeselectAll, onSelectionChange, auditTrail, commerceState, workflowContext, userRole]);
+  }, [isAllSelected, onSelectAll, onDeselectAll, onSelectionChange]);
 
   // Handle dropdown action selection
   const handleDropdownAction = useCallback((actionKey: string) => {
@@ -156,23 +95,25 @@ const BulkActions: React.FC<BulkActionsProps> = ({
 
   // Build container classes
   const containerClasses = cn(
-    'bulk-actions flex items-center gap-3',
+    'bulk-actions',
+    layoutClasses.flex.between,
+    'gap-3',
     layout === 'toolbar' && 'bg-white border border-gray-200 rounded-lg p-3 shadow-sm',
     layout === 'horizontal' && 'flex-wrap',
     variant === 'outlined' && 'border border-gray-200 rounded-lg p-2',
     variant === 'minimal' && 'border-0 p-0',
     position === 'sticky' && 'sticky top-0 z-10 bg-white border-b border-gray-200',
-    size === 'sm' && 'text-sm gap-2',
-    size === 'lg' && 'text-lg gap-4',
+    size === 'sm' && `${sizeClasses.text.sm} gap-2`,
+    size === 'lg' && `${sizeClasses.text.lg} gap-4`,
     selectedItems.length === 0 && 'opacity-75',
     className
   );
 
   // Build action button classes
   const actionButtonClasses = cn(
-    'transition-all duration-200',
-    size === 'sm' && 'text-xs',
-    size === 'lg' && 'text-base'
+    animationClasses.transition.default,
+    size === 'sm' && sizeClasses.text.xs,
+    size === 'lg' && sizeClasses.text.lg
   );
 
   // Render action buttons for horizontal layout
@@ -254,22 +195,11 @@ const BulkActions: React.FC<BulkActionsProps> = ({
             onChange={handleSelectAll}
             label={isAllSelected ? deselectAllText : selectAllText}
             size={size}
-            commerceState={commerceState}
-            allowedActions={allowedActions}
-            userRole={userRole}
-            auditTrail={auditTrail}
           />
         )}
 
         {/* Selection Info */}
         {selectedItems.length > 0 && <SelectionInfo />}
-
-        {/* Commerce State Indicator */}
-        {commerceState && commerceState !== 'initiation' && (
-          <span className="inline-block text-xs text-gray-500 uppercase bg-gray-100 px-2 py-1 rounded">
-            {commerceState}
-          </span>
-        )}
 
         {/* Actions */}
         {selectedItems.length > 0 && (
@@ -284,12 +214,6 @@ const BulkActions: React.FC<BulkActionsProps> = ({
           </>
         )}
 
-        {/* AI Config Display (development only) */}
-        {process.env.NODE_ENV === 'development' && aiConfig && (
-          <div className="absolute -top-6 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-            AI: {JSON.stringify(aiConfig.layout)}
-          </div>
-        )}
       </div>
 
       {/* Confirmation Modal */}

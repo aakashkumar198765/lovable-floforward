@@ -25,11 +25,7 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
   onTemplateUpdate,
   className = '',
   style = {},
-  commerceState = 'execution',
   allowedActions = [],
-  userRole,
-  encryptionLevel = 'none',
-  auditTrail,
 }) => {
   const [selectedFormat, setSelectedFormat] = useState(formats[0]?.key || '');
   const [selectedFields, setSelectedFields] = useState<string[]>(fields.map(f => f.key!).filter(Boolean));
@@ -103,25 +99,13 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
 
       await onExport(selectedFormat, options);
       setExportProgress(100);
-      
-      // Log audit trail
-      if (auditTrail?.enabled) {
-        console.log('Export completed:', {
-          format: selectedFormat,
-          recordCount: total,
-          user: userRole?.name,
-          commerceState,
-          timestamp: new Date().toISOString()
-        });
-      }
-      
     } catch (error) {
       console.error('Export failed:', error);
     } finally {
       setIsExporting(false);
       setTimeout(() => setExportProgress(0), 2000);
     }
-  }, [selectedFormat, exportFields, localFilters, selectedTemplate, batchSize, filteredData, onExport, auditTrail, userRole, commerceState]);
+  }, [selectedFormat, exportFields, localFilters, selectedTemplate, batchSize, filteredData, onExport]);
 
   const handlePreview = useCallback(async () => {
     const dataToPreview = Array.isArray(filteredData) ? filteredData : await filteredData;
@@ -522,16 +506,6 @@ export const ExportManager: React.FC<ExportManagerProps> = ({
               Showing first 10 rows of {Array.isArray(filteredData) ? filteredData.length : 0} total records
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Audit trail logging */}
-      {auditTrail?.enabled && commerceState && (
-        <div className="sr-only">
-          Export manager accessed - Commerce State: {commerceState}, 
-          Selected Format: {selectedFormat}, 
-          Selected Fields: {selectedFields.length},
-          User: {userRole?.name || 'Unknown'}
         </div>
       )}
     </div>

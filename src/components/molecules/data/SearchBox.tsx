@@ -3,6 +3,7 @@ import { SearchBoxProps } from '../../../types';
 import { cn } from '../../../utils/cn';
 import Input from '../../atoms/form/Input';
 import Button from '../../atoms/form/Button';
+import { Search, X } from 'lucide-react';
 
 const SearchBox: React.FC<SearchBoxProps> = ({
   id = 'search-box',
@@ -24,16 +25,6 @@ const SearchBox: React.FC<SearchBoxProps> = ({
   errorMessage = '',
   searchIcon,
   clearIcon,
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
-  allowedActions = [],
-  userRole,
-  data,
-  onUpdate = () => {},
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
   className = '',
   style = {},
   onSearch = () => {},
@@ -47,9 +38,6 @@ const SearchBox: React.FC<SearchBoxProps> = ({
   );
   const debounceRef = useRef<NodeJS.Timeout>({} as NodeJS.Timeout);
 
-  // Handle commerce state based behavior
-  const isReadonly = readonly || commerceState === 'completion';
-  const isDisabled = disabled || (commerceState === 'settlement' && !allowedActions.includes('search'));
 
   // Update internal value when external value changes
   useEffect(() => {
@@ -70,25 +58,9 @@ const SearchBox: React.FC<SearchBoxProps> = ({
           onSearch(searchValue);
         }
 
-        // Audit trail logging
-        if (auditTrail.enabled && auditTrail.logUserActions) {
-          console.log('Search performed:', {
-            action: 'search',
-            value: searchValue,
-            timestamp: new Date(),
-            commerceState,
-            workflowContext,
-            userRole
-          });
-        }
-
-        // Call update callback
-        if (onUpdate) {
-          onUpdate(searchValue);
-        }
       }, debounceMs);
     },
-    [searchOnType, onSearch, onUpdate, debounceMs, auditTrail, commerceState, workflowContext, userRole]
+    [searchOnType, onSearch, debounceMs]
   );
 
   // Handle input change
@@ -110,18 +82,6 @@ const SearchBox: React.FC<SearchBoxProps> = ({
     if (onSearch) {
       onSearch(internalValue);
     }
-
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.logUserActions) {
-      console.log('Search button clicked:', {
-        action: 'search_button_click',
-        value: internalValue,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
   };
 
   // Handle clear button click
@@ -136,17 +96,6 @@ const SearchBox: React.FC<SearchBoxProps> = ({
     if (searchOnType && onSearch) {
       onSearch('');
     }
-
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.logUserActions) {
-      console.log('Search cleared:', {
-        action: 'search_clear',
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
   };
 
   // Handle key press for search
@@ -157,18 +106,10 @@ const SearchBox: React.FC<SearchBoxProps> = ({
   };
 
   // Default search icon
-  const defaultSearchIcon = (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
-  );
+  const defaultSearchIcon = <Search className="w-5 h-5" />;
 
   // Default clear icon
-  const defaultClearIcon = (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  );
+  const defaultClearIcon = <X className="w-4 h-4" />;
 
   // Build container classes
   const containerClasses = cn(
@@ -190,8 +131,8 @@ const SearchBox: React.FC<SearchBoxProps> = ({
           name={name}
           placeholder={placeholder}
           value={internalValue}
-          disabled={isDisabled}
-          readonly={isReadonly}
+          disabled={disabled}
+          readonly={readonly}
           size={size}
           variant={variant}
           status={status}
@@ -200,7 +141,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({
           errorMessage={errorMessage}
           leftIcon={searchIcon || defaultSearchIcon}
           rightIcon={
-            showClearButton && internalValue && !isDisabled && !isReadonly ? (
+            showClearButton && internalValue && !disabled && !readonly ? (
               <button
                 type="button"
                 onClick={handleClearClick}
@@ -211,16 +152,6 @@ const SearchBox: React.FC<SearchBoxProps> = ({
               </button>
             ) : undefined
           }
-          commerceState={commerceState}
-          workflowContext={workflowContext}
-          aiConfig={aiConfig}
-          schema={schema}
-          allowedActions={allowedActions}
-          userRole={userRole}
-          data={data}
-          onUpdate={onUpdate}
-          auditTrail={auditTrail}
-          encryptionLevel={encryptionLevel}
           onChange={handleInputChange}
           onFocus={onFocus}
           onBlur={onBlur}
@@ -231,11 +162,6 @@ const SearchBox: React.FC<SearchBoxProps> = ({
           {label && (
             <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
               {label}
-              {commerceState && (
-                <span className="ml-2 text-xs text-gray-500 uppercase">
-                  {commerceState}
-                </span>
-              )}
             </label>
           )}
           
@@ -251,8 +177,8 @@ const SearchBox: React.FC<SearchBoxProps> = ({
                 type="text"
                 placeholder={placeholder}
                 value={internalValue}
-                disabled={isDisabled}
-                readOnly={isReadonly}
+                disabled={disabled}
+                readOnly={readonly}
                 className={cn(
                   'w-full pl-10 pr-4 py-2 border-0 focus:outline-none bg-transparent',
                   size === 'sm' && 'text-sm py-1.5',
@@ -268,7 +194,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({
                 }
               />
               
-              {showClearButton && internalValue && !isDisabled && !isReadonly && (
+              {showClearButton && internalValue && !disabled && !readonly && (
                 <button
                   type="button"
                   onClick={handleClearClick}
@@ -283,12 +209,8 @@ const SearchBox: React.FC<SearchBoxProps> = ({
             <Button
               variant="primary"
               size={size}
-              disabled={isDisabled}
+              disabled={disabled}
               onClick={handleSearchClick}
-              commerceState={commerceState}
-              allowedActions={allowedActions}
-              userRole={userRole}
-              auditTrail={auditTrail}
               className="flex-shrink-0"
             >
               Search
@@ -309,13 +231,6 @@ const SearchBox: React.FC<SearchBoxProps> = ({
             </p>
           )}
         </>
-      )}
-
-      {/* AI Config Display (development only) */}
-      {process.env.NODE_ENV === 'development' && aiConfig && (
-        <div className="absolute -top-6 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-          AI: {JSON.stringify(aiConfig.layout)}
-        </div>
       )}
     </div>
   );

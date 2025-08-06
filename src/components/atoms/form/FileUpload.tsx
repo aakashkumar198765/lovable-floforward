@@ -1,6 +1,7 @@
 import React, { forwardRef, useState, useEffect, useRef } from 'react';
 import { FileUploadProps, CommerceState } from '../../../types';
 import { cn } from '../../../utils/cn';
+import { Upload, File, X } from 'lucide-react';
 
 const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
   (
@@ -27,16 +28,6 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
       uploadText = 'Choose files or drag and drop',
       uploadingText = 'Uploading...',
       successText = 'Upload successful',
-      commerceState = 'none',
-      workflowContext,
-      aiConfig,
-      schema,
-      allowedActions = [],
-      userRole,
-      data,
-      onUpdate = () => {},
-      auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-      encryptionLevel = 'none',
       className = '',
       style = {},
       files = [],
@@ -58,9 +49,6 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
     const [errors, setErrors] = useState<string[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Handle commerce state based behavior
-    const isReadonly = readonly || commerceState === 'completion';
-    const isDisabled = disabled || (commerceState === 'settlement' && allowedActions && Array.isArray(allowedActions) && !allowedActions.includes('edit'));
 
     // Update internal files when external files change
     useEffect(() => {
@@ -161,24 +149,8 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
         setInternalFiles(updatedFiles);
         setErrors(fileErrors);
         
-        // Audit trail logging
-        if (auditTrail && typeof auditTrail === 'object' && auditTrail.enabled && auditTrail.trackChanges) {
-          console.log('FileUpload change tracked:', {
-            field: (name && name !== '') ? name : (id && id !== '') ? id : 'unnamed-fileupload',
-            oldValue: internalFiles.map(f => f.name),
-            newValue: updatedFiles.map(f => f.name),
-            timestamp: new Date(),
-            commerceState,
-            workflowContext
-          });
-        }
-        
         if (onFilesChange && typeof onFilesChange === 'function') {
           onFilesChange(updatedFiles, validFiles);
-        }
-        
-        if (onUpdate && typeof onUpdate === 'function') {
-          onUpdate(updatedFiles);
         }
       } else {
         if (validFiles.length > 0) {
@@ -186,24 +158,8 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
           setInternalFiles([newFile]);
           setErrors(fileErrors);
           
-          // Audit trail logging
-          if (auditTrail && typeof auditTrail === 'object' && auditTrail.enabled && auditTrail.trackChanges) {
-            console.log('FileUpload change tracked:', {
-              field: (name && name !== '') ? name : (id && id !== '') ? id : 'unnamed-fileupload',
-              oldValue: internalFiles.map(f => f.name),
-              newValue: [newFile.name],
-              timestamp: new Date(),
-              commerceState,
-              workflowContext
-            });
-          }
-          
           if (onFilesChange && typeof onFilesChange === 'function') {
             onFilesChange([newFile], [newFile]);
-          }
-          
-          if (onUpdate && typeof onUpdate === 'function') {
-            onUpdate([newFile]);
           }
         }
       }
@@ -220,7 +176,7 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
     // Handle drag and drop
     const handleDragOver = (event: React.DragEvent) => {
       event.preventDefault();
-      if (!isDisabled && !isReadonly && dragAndDrop) {
+      if (!disabled && !readonly && dragAndDrop) {
         setIsDragOver(true);
       }
     };
@@ -234,7 +190,7 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
       event.preventDefault();
       setIsDragOver(false);
       
-      if (isDisabled || isReadonly || !dragAndDrop) return;
+      if (disabled || readonly || !dragAndDrop) return;
       
       const droppedFiles = event.dataTransfer.files;
       if (droppedFiles.length > 0) {
@@ -268,15 +224,11 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
       if (onFilesChange && typeof onFilesChange === 'function') {
         onFilesChange(updatedFiles, []);
       }
-      
-      if (onUpdate && typeof onUpdate === 'function') {
-        onUpdate(updatedFiles);
-      }
     };
 
     // Handle click to browse
     const handleBrowseClick = () => {
-      if (!isDisabled && !isReadonly && fileInputRef.current) {
+      if (!disabled && !readonly && fileInputRef.current) {
         fileInputRef.current.click();
       }
     };
@@ -303,15 +255,6 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
       success: 'border-success-500'
     };
 
-    // Commerce state styling
-    const commerceStateClasses = {
-      initiation: 'border-primary-300',
-      agreement: 'border-warning-300',
-      execution: 'border-primary-500',
-      settlement: 'border-gray-400',
-      completion: 'border-gray-300 bg-gray-50',
-      none: 'ring-0'
-    };
 
     // Upload area classes
     const uploadAreaClasses = cn(
@@ -322,17 +265,15 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
       sizeClasses[size] || sizeClasses.md,
       variantClasses[variant] || variantClasses.default,
       status && status !== 'default' && statusClasses[status] ? statusClasses[status] : statusClasses.default,
-      commerceState && commerceStateClasses[commerceState] ? commerceStateClasses[commerceState] : '',
       isDragOver && 'border-primary-500 bg-primary-50',
-      isDisabled && 'cursor-not-allowed opacity-50',
+      disabled && 'cursor-not-allowed opacity-50',
       className || ''
     );
 
     // Label classes
     const labelClasses = cn(
       'block text-sm font-medium text-gray-700 mb-2',
-      required && 'after:content-["*"] after:text-error-500 after:ml-1',
-      commerceState === 'completion' && 'text-gray-500'
+      required && 'after:content-["*"] after:text-error-500 after:ml-1'
     );
 
     // Helper text classes
@@ -345,23 +286,17 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
 
     // Upload icon
     const UploadIcon = () => (
-      <svg className="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-      </svg>
+      <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
     );
 
     // File icon
     const FileIcon = () => (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
+      <File className="w-5 h-5" />
     );
 
     // Remove icon
     const RemoveIcon = () => (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-      </svg>
+      <X className="w-4 h-4" />
     );
 
     return (
@@ -369,11 +304,6 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
         {label && label !== '' && (
           <label className={labelClasses}>
             {label}
-            {commerceState && (
-              <span className="ml-2 text-xs text-gray-500 uppercase">
-                {commerceState}
-              </span>
-            )}
           </label>
         )}
         
@@ -391,8 +321,8 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
             type="file"
             multiple={multiple}
             accept={accept}
-            disabled={isDisabled}
-            readOnly={isReadonly}
+            disabled={disabled}
+            readOnly={readonly}
             required={required}
             className="hidden"
             onChange={handleInputChange}
@@ -441,7 +371,7 @@ const FileUpload = forwardRef<HTMLInputElement, FileUploadProps>(
                     </div>
                   )}
                 </div>
-                {!isDisabled && !isReadonly && (
+                {!disabled && !readonly && (
                   <button
                     type="button"
                     onClick={(e) => {

@@ -1,8 +1,11 @@
 import React, { forwardRef, useState, useEffect } from 'react';
-import { InputProps, CommerceState } from '../../../types';
 import { cn } from '../../../utils/cn';
+import { sizeClasses, variantClasses, statusClasses } from '../../../utils/tailwindClassMaps';
+import { CleanInputProps } from '../../../types';
 
-const Input = forwardRef<HTMLInputElement, InputProps>(
+// Component uses the CleanInputProps interface from types file
+
+const Input = forwardRef<HTMLInputElement, CleanInputProps>(
   (
     {
       id = '',
@@ -19,6 +22,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       maxLength,
       minLength,
       pattern = '',
+      min,
+      max,
+      step,
       size = 'md',
       variant = 'default',
       status = 'default',
@@ -27,16 +33,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       errorMessage = '',
       leftIcon = null,
       rightIcon = null,
-      commerceState = 'none',
-      workflowContext,
-      aiConfig,
-      schema,
-      allowedActions = [],
-      userRole,
-      data,
-      onUpdate = () => {},
-      auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-      encryptionLevel = 'none',
       className = '',
       style = {},
       onChange = () => {},
@@ -44,6 +40,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       onFocus = () => {},
       onKeyDown = () => {},
       onKeyUp = () => {},
+      encryptionLevel = 'field', // Default to field-level encryption
       ...props
     },
     ref
@@ -53,10 +50,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     );
     const [isFocused, setIsFocused] = useState(false);
 
-    // Handle commerce state based behavior
-    const isReadonly = readonly || commerceState === 'completion';
-    const isDisabled = disabled || (commerceState === 'settlement' && allowedActions && Array.isArray(allowedActions) && !allowedActions.includes('edit'));
-
     // Update internal value when external value changes
     useEffect(() => {
       if (value !== undefined) {
@@ -64,7 +57,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       }
     }, [value]);
 
-    // Handle value changes with audit trail
+    // Handle value changes
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = event.target.value;
       setInternalValue(newValue);
@@ -74,27 +67,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         event.target.setCustomValidity('');
       }
       
-      // Audit trail logging
-      if (auditTrail && typeof auditTrail === 'object' && auditTrail.enabled && auditTrail.trackChanges) {
-        // Log change event (in real implementation, this would go to audit service)
-        console.log('Input change tracked:', {
-          field: (name && name !== '') ? name : (id && id !== '') ? id : 'unnamed-input',
-          oldValue: internalValue,
-          newValue: newValue,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext
-        });
-      }
-      
       // Call external onChange
       if (onChange && typeof onChange === 'function') {
         onChange(event);
-      }
-      
-      // Call update callback for enterprise integration
-      if (onUpdate && typeof onUpdate === 'function') {
-        onUpdate(newValue);
       }
     };
 
@@ -112,38 +87,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       }
     };
 
-    // Size classes
-    const sizeClasses = {
-      sm: 'px-3 py-2 text-sm',
-      md: 'px-4 py-3 text-base',
-      lg: 'px-5 py-4 text-lg'
-    };
-
-    // Variant classes
-    const variantClasses = {
-      default: 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800',
-      outlined: 'border-2 border-gray-300 dark:border-gray-600 bg-transparent dark:bg-transparent',
-      filled: 'border-0 bg-gray-100 dark:bg-gray-700'
-    };
-
-    // Status classes
-    const statusClasses = {
-      default: 'border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-primary-500 dark:focus:ring-primary-400',
-      error: 'border-error-500 dark:border-error-400 focus:border-error-500 dark:focus:border-error-400 focus:ring-error-500 dark:focus:ring-error-400',
-      warning: 'border-warning-500 dark:border-warning-400 focus:border-warning-500 dark:focus:border-warning-400 focus:ring-warning-500 dark:focus:ring-warning-400',
-      success: 'border-success-500 dark:border-success-400 focus:border-success-500 dark:focus:border-success-400 focus:ring-success-500 dark:focus:ring-success-400'
-    };
-
-    // Commerce state styling
-    const commerceStateClasses = {
-      initiation: 'border-primary-300 dark:border-primary-600',
-      agreement: 'border-warning-300 dark:border-warning-600',
-      execution: 'border-primary-500 dark:border-primary-400',
-      settlement: 'border-gray-400 dark:border-gray-500',
-      completion: 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-750',
-      none: 'ring-0'
-    };
-
     // Build input classes
     const inputClasses = cn(
       'w-full rounded-md transition-colors duration-200',
@@ -153,10 +96,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       'focus:outline-none focus:ring-2 focus:ring-opacity-50',
       'disabled:cursor-not-allowed disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-400',
       'readonly:bg-gray-50 dark:readonly:bg-gray-800 readonly:cursor-default',
-      sizeClasses[size] || sizeClasses.md,
-      variantClasses[variant] || variantClasses.default,
-      status && status !== 'default' && statusClasses[status] ? statusClasses[status] : statusClasses.default,
-      commerceState && commerceStateClasses[commerceState] ? commerceStateClasses[commerceState] : '',
+      sizeClasses.input[size] || sizeClasses.input.md,
+      variantClasses.input[variant] || variantClasses.input.default,
+      status && status !== 'default' && statusClasses.input[status] ? statusClasses.input[status] : statusClasses.input.default,
       leftIcon && 'pl-10',
       rightIcon && 'pr-10',
       className || ''
@@ -165,8 +107,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     // Label classes
     const labelClasses = cn(
       'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-200',
-      required && 'after:content-["*"] after:text-error-500 dark:after:text-error-400 after:ml-1',
-      commerceState === 'completion' && 'text-gray-500 dark:text-gray-400'
+      required && 'after:content-["*"] after:text-error-500 dark:after:text-error-400 after:ml-1'
     );
 
     // Helper text classes
@@ -194,11 +135,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && label !== '' && (
           <label htmlFor={id || ''} className={labelClasses}>
             {label}
-            {commerceState && (
-              <span className="ml-2 text-xs text-gray-500 dark:text-gray-400 uppercase transition-colors duration-200">
-                {commerceState}
-              </span>
-            )}
           </label>
         )}
         
@@ -216,8 +152,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             type={type || 'text'}
             placeholder={placeholder || ''}
             value={internalValue}
-            disabled={isDisabled}
-            readOnly={isReadonly}
+            disabled={disabled}
+            readOnly={readonly}
+            min={min}
+            max={max}
+            step={step}
             required={required}
             autoComplete={autoComplete}
             autoFocus={autoFocus}

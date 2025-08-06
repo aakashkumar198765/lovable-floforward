@@ -67,16 +67,6 @@ const ApprovalForm: React.FC<ApprovalFormProps> = ({
     { level: 4, name: 'Executive Approval', approvers: ['ceo'] },
   ],
   validation = {},
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
-  allowedActions = [],
-  userRole,
-  data,
-  onUpdate = () => {},
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
   className = '',
   style = {},
   onChange = () => {},
@@ -101,12 +91,11 @@ const ApprovalForm: React.FC<ApprovalFormProps> = ({
   const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
   const [actionComments, setActionComments] = useState('');
 
-  // Handle commerce state and approval flow behavior
-  const isReadonly = commerceState === 'completion' || mode === 'view';
-  const isDisabled = commerceState === 'settlement' && !allowedActions.includes('edit_approval');
-  const canApprove = mode === 'review' && allowedActions.includes('approve');
-  const canReject = mode === 'review' && allowedActions.includes('reject');
-  const canDelegate = mode === 'review' && allowedActions.includes('delegate');
+  // Handle form state
+  const isReadonly = mode === 'view';
+  const canApprove = mode === 'review';
+  const canReject = mode === 'review';
+  const canDelegate = mode === 'review';
   const canWithdraw = mode === 'create' && approvalData.status === 'pending' && approvalData.requestedBy === currentUser;
 
   // Update internal data when external value changes
@@ -204,45 +193,13 @@ const ApprovalForm: React.FC<ApprovalFormProps> = ({
       [fieldName]: error,
     }));
 
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.trackChanges) {
-      console.log('Approval field changed:', {
-        action: 'approval_field_change',
-        field: fieldName,
-        oldValue: approvalData[fieldName],
-        newValue: fieldValue,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
-
     // Call callbacks
     onChange(newData);
-    if (onUpdate) {
-      onUpdate(newData);
-    }
-  }, [approvalData, validateField, onChange, onUpdate, showAmount, auditTrail, commerceState, workflowContext, userRole]);
+  }, [approvalData, validateField, onChange, showAmount]);
 
   // Handle approval actions
   const handleApprovalAction = useCallback((action: 'approve' | 'reject' | 'delegate' | 'withdraw', delegateUser?: string) => {
     const actionData = { ...approvalData, comments: actionComments };
-    
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.logUserActions) {
-      console.log('Approval action:', {
-        action: `approval_${action}`,
-        requestId: approvalData.id,
-        currentUser,
-        comments: actionComments,
-        delegateUser,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
 
     switch (action) {
       case 'approve':
@@ -262,7 +219,7 @@ const ApprovalForm: React.FC<ApprovalFormProps> = ({
     }
     
     setActionComments('');
-  }, [approvalData, actionComments, currentUser, onApprove, onReject, onDelegate, onWithdraw, auditTrail, commerceState, workflowContext, userRole]);
+  }, [approvalData, actionComments, onApprove, onReject, onDelegate, onWithdraw]);
 
   // Build container classes
   const containerClasses = cn(
@@ -285,15 +242,11 @@ const ApprovalForm: React.FC<ApprovalFormProps> = ({
   // Common input props
   const getInputProps = (fieldName: string, isRequired = false) => ({
     size,
-    disabled: isDisabled || isReadonly,
+    disabled: isReadonly,
     readonly: isReadonly,
     required: isRequired || getRequiredFields().includes(fieldName),
     status: errors[fieldName] && touched[fieldName] ? 'error' as const : 'default' as const,
     errorMessage: errors[fieldName] && touched[fieldName] ? errors[fieldName] : '',
-    commerceState,
-    allowedActions,
-    userRole,
-    auditTrail,
     onBlur: () => setTouched(prev => ({ ...prev, [fieldName]: true })),
   });
 
@@ -335,11 +288,6 @@ const ApprovalForm: React.FC<ApprovalFormProps> = ({
               <Badge variant={getPriorityVariant(approvalData.priority)}>
                 {approvalData.priority.charAt(0).toUpperCase() + approvalData.priority.slice(1)} Priority
               </Badge>
-            )}
-            {commerceState && (
-              <span className="text-xs text-gray-500 uppercase bg-gray-100 px-2 py-1 rounded">
-                {commerceState}
-              </span>
             )}
           </div>
         </div>
@@ -464,12 +412,8 @@ const ApprovalForm: React.FC<ApprovalFormProps> = ({
             name="requiresSignature"
             label="This request requires digital signature"
             checked={approvalData.requiresSignature || false}
-            disabled={isDisabled || isReadonly}
+            disabled={isReadonly}
             size={size}
-            commerceState={commerceState}
-            allowedActions={allowedActions}
-            userRole={userRole}
-            auditTrail={auditTrail}
             onChange={(checked) => handleFieldChange('requiresSignature', checked)}
           />
         )}
@@ -480,12 +424,8 @@ const ApprovalForm: React.FC<ApprovalFormProps> = ({
             name="urgentApproval"
             label="Request urgent approval (may skip approval levels)"
             checked={approvalData.urgentApproval || false}
-            disabled={isDisabled || isReadonly}
+            disabled={isReadonly}
             size={size}
-            commerceState={commerceState}
-            allowedActions={allowedActions}
-            userRole={userRole}
-            auditTrail={auditTrail}
             onChange={(checked) => handleFieldChange('urgentApproval', checked)}
           />
         )}
@@ -495,12 +435,8 @@ const ApprovalForm: React.FC<ApprovalFormProps> = ({
           name="notifyOnDecision"
           label="Notify me when a decision is made"
           checked={approvalData.notifyOnDecision !== false}
-          disabled={isDisabled || isReadonly}
+          disabled={isReadonly}
           size={size}
-          commerceState={commerceState}
-          allowedActions={allowedActions}
-          userRole={userRole}
-          auditTrail={auditTrail}
           onChange={(checked) => handleFieldChange('notifyOnDecision', checked)}
         />
       </div>
@@ -560,7 +496,7 @@ const ApprovalForm: React.FC<ApprovalFormProps> = ({
             value={actionComments}
             rows={3}
             size={size}
-            disabled={isDisabled}
+            disabled={isReadonly}
             required
             onChange={(e) => setActionComments(e.target.value)}
           />
@@ -609,7 +545,7 @@ const ApprovalForm: React.FC<ApprovalFormProps> = ({
             variant="primary"
             size={size}
             onClick={() => onSubmit(approvalData as ApprovalData)}
-            disabled={isDisabled || Object.keys(errors).length > 0}
+            disabled={Object.keys(errors).length > 0}
           >
             Submit Request
           </Button>
@@ -626,12 +562,6 @@ const ApprovalForm: React.FC<ApprovalFormProps> = ({
         </div>
       )}
 
-      {/* AI Config Display (development only) */}
-      {process.env.NODE_ENV === 'development' && aiConfig && (
-        <div className="absolute -top-6 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-          AI: {JSON.stringify(aiConfig.layout)}
-        </div>
-      )}
     </div>
   );
 };

@@ -21,20 +21,11 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
   showRanking = true,
   highlightBest = true,
   exportable = true,
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
-  allowedActions = [],
-  userRole,
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
   className = '',
   style = {},
   onItemSelect,
   onCompare,
   onExport,
-  onUpdate = () => {},
 }) => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
@@ -46,26 +37,6 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
     show: false, message: '', type: 'info'
   });
 
-  // Audit logging utility
-  const logAuditEvent = useCallback((action: string, details: any) => {
-    if (auditTrail.enabled) {
-      console.log(`[AUDIT] ${action}:`, {
-        timestamp: new Date().toISOString(),
-        user: userRole?.id || 'unknown',
-        component: 'ComparisonTable',
-        action,
-        details,
-        commerceState,
-        workflowContext,
-      });
-      onUpdate?.({
-        type: 'audit',
-        action,
-        details,
-        timestamp: new Date().toISOString(),
-      });
-    }
-  }, [auditTrail, userRole, commerceState, workflowContext, onUpdate]);
 
   // Show toast notification
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -137,26 +108,23 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
     const item = items.find(i => i.id === itemId);
     if (!item) return;
 
-    logAuditEvent('item_select', { itemId, itemName: item.name });
     onItemSelect?.(item);
     showToast(`Selected: ${item.name}`, 'success');
-  }, [items, logAuditEvent, onItemSelect, showToast]);
+  }, [items, onItemSelect, showToast]);
 
   // Handle comparison
   const handleCompare = useCallback((itemIds: string[]) => {
     const compareItems = items.filter(item => itemIds.includes(item.id!));
-    logAuditEvent('compare_items', { itemIds, itemCount: compareItems.length });
     onCompare?.(compareItems);
     showToast(`Comparing ${compareItems.length} items`, 'info');
-  }, [items, logAuditEvent, onCompare, showToast]);
+  }, [items, onCompare, showToast]);
 
   // Handle export
   const handleExport = useCallback((format: string) => {
-    logAuditEvent('comparison_export', { format, itemCount: items.length });
     onExport?.(format);
     setShowExportModal(false);
     showToast(`Comparison exported as ${format.toUpperCase()}`, 'success');
-  }, [items, logAuditEvent, onExport, showToast]);
+  }, [items, onExport, showToast]);
 
   // Format cell value based on criterion type
   const formatValue = useCallback((value: any, criterion: any) => {
@@ -236,22 +204,6 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
     }
   }, [bestValues, highlightBest]);
 
-  // Component styling based on commerce state
-  const getStateStyles = () => {
-    switch (commerceState) {
-      case 'completion':
-        return 'border-green-200';
-      case 'settlement':
-        return 'border-blue-200';
-      case 'execution':
-        return 'border-orange-200';
-      case 'agreement':
-        return 'border-yellow-200';
-      default:
-        return 'border-gray-300';
-    }
-  };
-
   const sizeClasses = {
     sm: 'text-xs',
     md: 'text-sm',
@@ -263,12 +215,10 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
       <div 
         className={cn(
           'rounded-lg border p-4',
-          getStateStyles(),
           sizeClasses[size],
           className
         )}
         style={style}
-        data-commerce-state={commerceState}
       >
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
@@ -347,11 +297,9 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
         className
       )}
       style={style}
-      data-commerce-state={commerceState}
     >
       <div className={cn(
         'bg-white rounded-lg border shadow-sm',
-        getStateStyles(),
         sizeClasses[size]
       )}>
       {/* Header */}

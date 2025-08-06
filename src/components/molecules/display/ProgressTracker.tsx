@@ -4,6 +4,7 @@ import { cn } from '../../../utils/cn';
 import Badge from '../../atoms/display/Badge';
 import Button from '../../atoms/form/Button';
 import Tooltip from '../../atoms/display/Tooltip';
+import { Check, X, RefreshCw, ArrowRight, ChevronDown } from 'lucide-react';
 
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   id = 'progress-tracker',
@@ -31,16 +32,8 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   animateProgress = true,
   showEstimates = false,
   showOverallStats = false,
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
-  allowedActions = [],
-  userRole,
-  data,
-  onUpdate = () => {},
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
+  isDisabled = false,
+  isReadonly = false,
   className = '',
   style = {},
   onStepClick = () => {},
@@ -50,9 +43,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   const [collapsedSteps, setCollapsedSteps] = useState<{ [key: string]: boolean }>({});
   const [animatedProgress, setAnimatedProgress] = useState(0);
 
-  // Handle commerce state based behavior
-  const isReadonly = commerceState === 'completion';
-  const isDisabled = commerceState === 'settlement' && !allowedActions.includes('progress_actions');
 
   // Calculate overall progress if not provided
   const calculatedProgress = overallProgress ?? (() => {
@@ -99,43 +89,13 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   const handleStepClick = useCallback((stepKey: string, step: ProgressStep) => {
     if ((clickableSteps || allowStepNavigation) && !isDisabled) {
       onStepClick(stepKey);
-      
-      // Audit trail logging
-      if (auditTrail.enabled && auditTrail.logUserActions) {
-        console.log('Progress step clicked:', {
-          action: 'progress_step_click',
-          stepKey,
-          stepStatus: step.status,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          userRole
-        });
-      }
     }
-  }, [clickableSteps, allowStepNavigation, isDisabled, onStepClick, auditTrail, commerceState, workflowContext, userRole]);
+  }, [clickableSteps, allowStepNavigation, isDisabled, onStepClick]);
 
   // Handle step action
   const handleStepAction = useCallback((stepKey: string, actionKey: string) => {
     onStepAction(stepKey, actionKey);
-    
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.logUserActions) {
-      console.log('Progress step action:', {
-        action: 'progress_step_action',
-        stepKey,
-        actionKey,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
-
-    if (onUpdate) {
-      onUpdate({ stepKey, actionKey });
-    }
-  }, [onStepAction, onUpdate, auditTrail, commerceState, workflowContext, userRole]);
+  }, [onStepAction]);
 
   // Handle step collapse toggle
   const handleStepToggle = useCallback((stepKey: string) => {
@@ -185,7 +145,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
     variant === 'outlined' && 'bg-transparent border-2 border-gray-300 rounded-lg',
     variant === 'filled' && 'bg-gray-50 border border-gray-200 rounded-lg',
     variant === 'minimal' && 'bg-transparent border-0',
-    commerceState === 'completion' && 'border-gray-300 bg-gray-50',
     className
   );
 
@@ -203,29 +162,13 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
     
     switch (step.status) {
       case 'completed':
-        return (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        );
+        return <Check className="w-5 h-5" />;
       case 'failed':
-        return (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        );
+        return <X className="w-5 h-5" />;
       case 'in_progress':
-        return (
-          <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-        );
+        return <RefreshCw className="w-5 h-5 animate-spin" />;
       case 'skipped':
-        return (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        );
+        return <ArrowRight className="w-5 h-5" />;
       default:
         return (
           <div className="w-3 h-3 rounded-full bg-current" />
@@ -270,12 +213,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
               
               {subtitle && (
                 <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
-              )}
-              
-              {commerceState && commerceState !== 'initiation' && (
-                <Badge variant="secondary" size="sm" className="mt-2">
-                  {commerceState}
-                </Badge>
               )}
             </div>
 
@@ -404,9 +341,7 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                             }}
                             className="text-gray-400 hover:text-gray-600"
                           >
-                            <svg className={cn('w-4 h-4 transition-transform', isCollapsed && 'rotate-180')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
+                            <ChevronDown className={cn('w-4 h-4 transition-transform', isCollapsed && 'rotate-180')} />
                           </button>
                         )}
                       </div>
@@ -520,13 +455,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({
           </div>
         )}
       </div>
-
-      {/* AI Config Display (development only) */}
-      {process.env.NODE_ENV === 'development' && aiConfig && (
-        <div className="absolute -top-6 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-          AI: {JSON.stringify(aiConfig.layout)}
-        </div>
-      )}
     </div>
   );
 };

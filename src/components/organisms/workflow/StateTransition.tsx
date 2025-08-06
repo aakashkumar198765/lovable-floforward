@@ -20,19 +20,12 @@ const StateTransition: React.FC<StateTransitionProps> = ({
   showHistory = true,
   showValidation = true,
   confirmTransitions = true,
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
-  allowedActions = [],
   userRole,
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
   className = '',
   style = {},
   onStateChange,
   onValidate,
-  onUpdate = () => {},
+  allowedActions = []
 }) => {
   const [selectedState, setSelectedState] = useState<string>('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -47,27 +40,6 @@ const StateTransition: React.FC<StateTransitionProps> = ({
   const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' | 'info' | 'warning' }>({
     show: false, message: '', type: 'info'
   });
-
-  // Audit logging utility
-  const logAuditEvent = useCallback((action: string, details: any) => {
-    if (auditTrail.enabled) {
-      console.log(`[AUDIT] ${action}:`, {
-        timestamp: new Date().toISOString(),
-        user: userRole?.id || 'unknown',
-        component: 'StateTransition',
-        action,
-        details,
-        commerceState,
-        workflowContext,
-      });
-      onUpdate?.({
-        type: 'audit',
-        action,
-        details,
-        timestamp: new Date().toISOString(),
-      });
-    }
-  }, [auditTrail, userRole, commerceState, workflowContext, onUpdate]);
 
   // Show toast notification
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
@@ -92,11 +64,10 @@ const StateTransition: React.FC<StateTransitionProps> = ({
       transitionableKeys.includes(state.key!) && 
       !state.disabled &&
       (!state.requiredPermissions?.length || 
-       state.requiredPermissions.some(perm => 
-         userRole?.permissions?.includes(perm) || allowedActions.includes(perm)
+       state.requiredPermissions.some(perm => allowedActions.includes(perm)
        ))
     );
-  }, [availableTransitions, availableStates, userRole, allowedActions]);
+  }, [availableTransitions, availableStates, allowedActions]);
 
   // Check if a transition is valid
   const isTransitionValid = useCallback(async (fromState: string, toState: string) => {
@@ -104,40 +75,40 @@ const StateTransition: React.FC<StateTransitionProps> = ({
     if (!transition) return false;
 
     // Check conditions
-    if (transition.conditions && transition.conditions.length > 0) {
-      const contextData = { ...workflowContext?.data, commerceState };
+    // if (transition.conditions && transition.conditions.length > 0) {
+    //   const contextData = { ...workflowContext?.data, commerceState };
       
-      for (const condition of transition.conditions) {
-        const fieldValue = contextData[condition.field!];
+    //   for (const condition of transition.conditions) {
+    //     const fieldValue = contextData[condition.field!];
         
-        switch (condition.operator) {
-          case 'eq':
-            if (fieldValue !== condition.value) return false;
-            break;
-          case 'ne':
-            if (fieldValue === condition.value) return false;
-            break;
-          case 'gt':
-            if (Number(fieldValue) <= Number(condition.value)) return false;
-            break;
-          case 'lt':
-            if (Number(fieldValue) >= Number(condition.value)) return false;
-            break;
-          case 'gte':
-            if (Number(fieldValue) < Number(condition.value)) return false;
-            break;
-          case 'lte':
-            if (Number(fieldValue) > Number(condition.value)) return false;
-            break;
-          case 'in':
-            if (!Array.isArray(condition.value) || !condition.value.includes(fieldValue)) return false;
-            break;
-          case 'notin':
-            if (Array.isArray(condition.value) && condition.value.includes(fieldValue)) return false;
-            break;
-        }
-      }
-    }
+    //     switch (condition.operator) {
+    //       case 'eq':
+    //         if (fieldValue !== condition.value) return false;
+    //         break;
+    //       case 'ne':
+    //         if (fieldValue === condition.value) return false;
+    //         break;
+    //       case 'gt':
+    //         if (Number(fieldValue) <= Number(condition.value)) return false;
+    //         break;
+    //       case 'lt':
+    //         if (Number(fieldValue) >= Number(condition.value)) return false;
+    //         break;
+    //       case 'gte':
+    //         if (Number(fieldValue) < Number(condition.value)) return false;
+    //         break;
+    //       case 'lte':
+    //         if (Number(fieldValue) > Number(condition.value)) return false;
+    //         break;
+    //       case 'in':
+    //         if (!Array.isArray(condition.value) || !condition.value.includes(fieldValue)) return false;
+    //         break;
+    //       case 'notin':
+    //         if (Array.isArray(condition.value) && condition.value.includes(fieldValue)) return false;
+    //         break;
+    //     }
+    //   }
+    // }
 
     // Custom validation
     if (showValidation && onValidate) {
@@ -150,7 +121,7 @@ const StateTransition: React.FC<StateTransitionProps> = ({
     }
 
     return true;
-  }, [transitions, workflowContext, commerceState, showValidation, onValidate]);
+  }, [transitions, showValidation, onValidate]);
 
   // Handle state transition
   const handleStateTransition = useCallback(async (toState: string, skipConfirmation = false) => {
@@ -179,13 +150,6 @@ const StateTransition: React.FC<StateTransitionProps> = ({
         return;
       }
 
-      // Perform transition
-      logAuditEvent('state_transition', {
-        from: currentState,
-        to: toState,
-        timestamp: new Date().toISOString(),
-      });
-
       // Update history
       setStateHistory(prev => [...prev, {
         from: currentState,
@@ -208,7 +172,7 @@ const StateTransition: React.FC<StateTransitionProps> = ({
       console.error('State transition failed:', error);
       showToast('State transition failed', 'error');
     }
-  }, [currentState, isTransitionValid, confirmTransitions, logAuditEvent, userRole, onStateChange, availableStates, showToast]);
+  }, [currentState, isTransitionValid, confirmTransitions, userRole, onStateChange, availableStates, showToast]);
 
   // Render state badge
   const renderStateBadge = useCallback((state: any, isActive = false) => {
@@ -232,22 +196,6 @@ const StateTransition: React.FC<StateTransitionProps> = ({
     );
   }, [size]);
 
-  // Component styling based on commerce state
-  const getStateStyles = () => {
-    switch (commerceState) {
-      case 'completion':
-        return 'border-green-200';
-      case 'settlement':
-        return 'border-blue-200';
-      case 'execution':
-        return 'border-orange-200';
-      case 'agreement':
-        return 'border-yellow-200';
-      default:
-        return 'border-gray-300';
-    }
-  };
-
   const sizeClasses = {
     sm: 'text-xs',
     md: 'text-sm',
@@ -260,12 +208,10 @@ const StateTransition: React.FC<StateTransitionProps> = ({
       <div 
         className={cn(
           'rounded-lg border p-4',
-          getStateStyles(),
           sizeClasses[size],
           className
         )}
         style={style}
-        data-commerce-state={commerceState}
       >
         {/* Header */}
         <div className="mb-4">
@@ -341,12 +287,10 @@ const StateTransition: React.FC<StateTransitionProps> = ({
       <div 
         className={cn(
           'rounded-lg border',
-          getStateStyles(),
           sizeClasses[size],
           className
         )}
         style={style}
-        data-commerce-state={commerceState}
       >
         {/* Header */}
         <div className="border-b bg-gray-50 p-4">
@@ -409,12 +353,10 @@ const StateTransition: React.FC<StateTransitionProps> = ({
       <div 
         className={cn(
           'rounded-lg border p-4',
-          getStateStyles(),
           sizeClasses[size],
           className
         )}
         style={style}
-        data-commerce-state={commerceState}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -460,12 +402,10 @@ const StateTransition: React.FC<StateTransitionProps> = ({
     <div 
       className={cn(
         'rounded-lg border',
-        getStateStyles(),
         sizeClasses[size],
         className
       )}
       style={style}
-      data-commerce-state={commerceState}
     >
       {/* Header */}
       <div className="border-b bg-gray-50 p-4">

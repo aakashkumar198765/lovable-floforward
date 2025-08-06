@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, Sun, Moon, Code, Home, ChevronRight } from 'lucide-react';
 
 // Import component showcase pages
 import ComponentShowcase from './ComponentShowcase';
@@ -327,9 +328,7 @@ const Header = ({ sidebarOpen, setSidebarOpen, darkMode, setDarkMode }) => {
                     onClick={() => setSidebarOpen(!sidebarOpen)}
                     className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 lg:hidden transition-all duration-200"
                 >
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
+                    <Menu className="h-5 w-5" />
                 </button>
 
                 {/* Library Name */}
@@ -338,6 +337,7 @@ const Header = ({ sidebarOpen, setSidebarOpen, darkMode, setDarkMode }) => {
                         <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
+                        <Code className="w-4 h-4 text-white" />
                     </div>
                     <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                         <span className="hidden sm:inline">Re-usable Components Library</span>
@@ -354,13 +354,9 @@ const Header = ({ sidebarOpen, setSidebarOpen, darkMode, setDarkMode }) => {
                     title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
                 >
                     {darkMode ? (
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
+                        <Sun className="h-5 w-5" />
                     ) : (
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                        </svg>
+                        <Moon className="h-5 w-5" />
                     )}
                 </button>
             </div>
@@ -413,7 +409,7 @@ const DesktopSidebar = () => {
                             className="w-full flex items-center justify-between px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
                         >
                             <div className="flex items-center space-x-3">
-                                {/* <Icon name={section.icon} size="w-4 h-4" /> */}
+                                {/* Category icons could be added here if needed */}
                                 <span>{section.category}</span>
                             </div>
                             <svg
@@ -425,6 +421,10 @@ const DesktopSidebar = () => {
                             >
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
+                            <ChevronRight
+                                className={`w-4 h-4 text-gray-400 transition-transform ${expandedCategories[section.category] ? 'rotate-90' : ''
+                                    }`}
+                            />
                         </button>
 
                         {/* Category Items */}
@@ -526,7 +526,7 @@ const Sidebar = ({ isOpen }) => {
                             className="w-full flex items-center justify-between px-3 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
                         >
                             <div className="flex items-center space-x-3">
-                                <Icon name={section.icon} size="w-4 h-4" />
+                                {/* Category icon would go here */}
                                 <span>{section.category}</span>
                             </div>
                             <svg
@@ -538,6 +538,10 @@ const Sidebar = ({ isOpen }) => {
                             >
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
+                            <ChevronRight
+                                className={`w-4 h-4 text-gray-400 transition-transform ${expandedCategories[section.category] ? 'rotate-90' : ''
+                                    }`}
+                            />
                         </button>
 
                         {/* Category Items */}

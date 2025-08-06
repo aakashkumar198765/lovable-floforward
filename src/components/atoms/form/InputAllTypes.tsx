@@ -79,7 +79,6 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
         placeholder="Enter some text..."
         value={inputValue}
         onChange={handleInputChange}
-        commerceState={commerceState}
         helperText=""
       />
 
@@ -90,21 +89,21 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           label="Small Size"
           placeholder="Small input"
           size="sm"
-          commerceState={commerceState}
+
         />
         <Input
           id="medium-input"
           label="Medium Size"
           placeholder="Medium input"
           size="md"
-          commerceState={commerceState}
+
         />
         <Input
           id="large-input"
           label="Large Size"
           placeholder="Large input"
           size="lg"
-          commerceState={commerceState}
+
         />
       </div>
 
@@ -116,7 +115,7 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           placeholder="Error input"
           status="error"
           errorMessage="This field has an error"
-          commerceState={commerceState}
+
         />
         <Input
           id="success-input"
@@ -124,7 +123,7 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           placeholder="Success input"
           status="success"
           helperText="This field is valid"
-          commerceState={commerceState}
+
         />
         <Input
           id="warning-input"
@@ -132,7 +131,7 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           placeholder="Warning input"
           status="warning"
           helperText="This field has a warning"
-          commerceState={commerceState}
+
         />
       </div>
 
@@ -143,21 +142,21 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           label="Default Variant"
           placeholder="Default"
           variant="default"
-          commerceState={commerceState}
+
         />
         <Input
           id="outlined-variant outlined-variant-input"
           label="Outlined Variant"
           placeholder="Outlined"
           variant="outlined"
-          commerceState={commerceState}
+
         />
         <Input
           id="filled-variant filled-variant-input"
           label="Filled Variant"
           placeholder="Filled"
           variant="filled"
-          commerceState={commerceState}
+
         />
       </div>
 
@@ -168,28 +167,27 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           label="Email Input"
           placeholder="Enter email"
           type="email"
-          commerceState={commerceState}
         />
         <Input
           id="number-input"
           label="Number Input"
           placeholder="Enter number"
           type="number"
-          commerceState={commerceState}
+
         />
         <Input
           id="password-input"
           label="Password Input"
           placeholder="Enter password"
           type="password"
-          commerceState={commerceState}
+
         />
         <Input
           id="search-input"
           label="Search Input"
           placeholder="Search..."
           type="search"
-          commerceState={commerceState}
+
         />
       </div>
 
@@ -200,7 +198,7 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           label="Left Icon"
           placeholder="Search..."
           leftIcon={<span>🔍</span>}
-          commerceState={commerceState}
+
         />
         <Input
           id="right-icon-input"
@@ -208,7 +206,7 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           placeholder="Password"
           type="password"
           rightIcon={<span>👁️</span>}
-          commerceState={commerceState}
+
         />
         <Input
           id="both-icons-input"
@@ -216,7 +214,7 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           placeholder="Username"
           leftIcon={<span>👤</span>}
           rightIcon={<span>✓</span>}
-          commerceState={commerceState}
+
         />
       </div>
 
@@ -227,7 +225,7 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           label="Disabled Input"
           placeholder="Disabled"
           disabled
-          commerceState={commerceState}
+
         />
         <Input
           id="readonly-input"
@@ -235,7 +233,7 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           placeholder="Readonly"
           readonly
           value="This is readonly"
-          commerceState={commerceState}
+
         />
       </div>
 
@@ -246,7 +244,7 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           label="Required Input"
           placeholder="Required field"
           required
-          commerceState={commerceState}
+
         />
         <Input
           id="pattern-input"
@@ -254,7 +252,7 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           placeholder="Enter 3 digits"
           pattern="[0-9]{3}"
           helperText="Must be exactly 3 digits"
-          commerceState={commerceState}
+
         />
       </div>
 
@@ -266,7 +264,7 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           placeholder="Min 5 characters"
           minLength={5}
           helperText="Minimum 5 characters"
-          commerceState={commerceState}
+
         />
         <Input
           id="max-length-input"
@@ -274,7 +272,7 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           placeholder="Max 10 characters"
           maxLength={10}
           helperText="Maximum 10 characters"
-          commerceState={commerceState}
+
         />
       </div>
 
@@ -283,13 +281,6 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
         id="ai-config-input"
         label="AI Configured Input"
         placeholder="AI managed input"
-        commerceState={commerceState}
-        aiConfig={{
-          layout: 'compact',
-          features: ['autocomplete', 'validation'],
-          customization: { theme: 'enterprise' },
-          hints: ['Use for critical data entry']
-        }}
         helperText="This input has AI configuration (check console in dev mode)"
       />
 
@@ -299,20 +290,13 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
           id="audit-trail-input"
           label="Audit Trail Input"
           placeholder="Changes are tracked"
-          commerceState={commerceState}
-          auditTrail={{
-            enabled: true,
-            level: 'detailed',
-            trackChanges: true,
-            logUserActions: true
-          }}
           helperText="All changes are logged"
         />
         <Input
           id="encrypted-input"
           label="Encrypted Input"
           placeholder="Encrypted data"
-          commerceState={commerceState}
+
           encryptionLevel="field"
           helperText="Field-level encryption enabled"
         />
@@ -328,14 +312,12 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
             id="initiation-example"
             label="Initiation State Example"
             placeholder="Full editing capabilities"
-            commerceState="initiation"
             helperText="All features available"
           />
           <Input
             id="completion-example"
             label="Completion State Example"
             placeholder="Read-only mode"
-            commerceState="completion"
             value="Completed transaction"
             helperText="Read-only in completion state"
           />
@@ -343,15 +325,12 @@ const InputAllTypes: React.FC<InputAllTypesProps> = ({
             id="settlement-example"
             label="Settlement State Example"
             placeholder="Restricted editing"
-            commerceState="settlement"
-            allowedActions={[]} // No edit permissions
             helperText="Limited editing based on permissions"
           />
           <Input
             id="execution-example"
             label="Execution State Example"
             placeholder="Active processing"
-            commerceState="execution"
             helperText="Active state with full features"
           />
         </div>

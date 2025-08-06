@@ -28,6 +28,8 @@ const ContactForm: React.FC<ContactFormProps> = ({
   columns = 2,
   size = 'md',
   variant = 'default',
+  isDisabled = false,
+  isReadonly = false,
   prefixes = [
     { value: 'Mr', label: 'Mr.' },
     { value: 'Mrs', label: 'Mrs.' },
@@ -63,16 +65,6 @@ const ContactForm: React.FC<ContactFormProps> = ({
     { value: 'UTC', label: 'UTC' },
   ],
   validation = {},
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
-  allowedActions = [],
-  userRole,
-  data,
-  onUpdate = () => {},
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
   className = '',
   style = {},
   onChange = () => {},
@@ -88,9 +80,6 @@ const ContactForm: React.FC<ContactFormProps> = ({
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
 
-  // Handle commerce state based behavior
-  const isReadonly = commerceState === 'completion';
-  const isDisabled = commerceState === 'settlement' && !allowedActions.includes('edit_contact');
 
   // Update internal data when external value changes
   useEffect(() => {
@@ -171,26 +160,9 @@ const ContactForm: React.FC<ContactFormProps> = ({
       [fieldName]: error,
     }));
 
-    // Audit trail logging
-    if (auditTrail.enabled && auditTrail.trackChanges) {
-      console.log('Contact field changed:', {
-        action: 'contact_field_change',
-        field: fieldName,
-        oldValue: contactData[fieldName],
-        newValue: fieldValue,
-        timestamp: new Date(),
-        commerceState,
-        workflowContext,
-        userRole
-      });
-    }
-
     // Call callbacks
     onChange(newData);
-    if (onUpdate) {
-      onUpdate(newData);
-    }
-  }, [contactData, validateField, onChange, onUpdate, auditTrail, commerceState, workflowContext, userRole]);
+  }, [contactData, validateField, onChange]);
 
   // Handle blur events
   const handleFieldBlur = useCallback((fieldName: keyof ContactData) => {
@@ -223,10 +195,6 @@ const ContactForm: React.FC<ContactFormProps> = ({
     required: isRequired || defaultValidation.required?.includes(fieldName),
     status: errors[fieldName] && touched[fieldName] ? 'error' as const : 'default' as const,
     errorMessage: errors[fieldName] && touched[fieldName] ? errors[fieldName] : '',
-    commerceState,
-    allowedActions,
-    userRole,
-    auditTrail,
     onBlur: () => handleFieldBlur(fieldName),
   });
 
@@ -236,11 +204,6 @@ const ContactForm: React.FC<ContactFormProps> = ({
       {showTitle && (
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-          {commerceState && (
-            <span className="text-xs text-gray-500 uppercase bg-gray-100 px-2 py-1 rounded">
-              {commerceState}
-            </span>
-          )}
         </div>
       )}
 
@@ -497,10 +460,6 @@ const ContactForm: React.FC<ContactFormProps> = ({
             checked={contactData.isPrimary || false}
             disabled={isDisabled}
             size={size}
-            commerceState={commerceState}
-            allowedActions={allowedActions}
-            userRole={userRole}
-            auditTrail={auditTrail}
             onChange={(checked) => handleFieldChange('isPrimary', checked)}
           />
 
@@ -511,19 +470,8 @@ const ContactForm: React.FC<ContactFormProps> = ({
             checked={contactData.isActive !== false}
             disabled={isDisabled}
             size={size}
-            commerceState={commerceState}
-            allowedActions={allowedActions}
-            userRole={userRole}
-            auditTrail={auditTrail}
             onChange={(checked) => handleFieldChange('isActive', checked)}
           />
-        </div>
-      )}
-
-      {/* AI Config Display (development only) */}
-      {process.env.NODE_ENV === 'development' && aiConfig && (
-        <div className="absolute -top-6 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-          AI: {JSON.stringify(aiConfig.layout)}
         </div>
       )}
     </div>

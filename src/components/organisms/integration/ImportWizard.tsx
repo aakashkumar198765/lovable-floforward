@@ -30,14 +30,6 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
   size = 'md',
   showProgress = true,
   allowSkipSteps = false,
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
-  allowedActions = [],
-  userRole,
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
   className = '',
   style = {},
   onFileUpload,
@@ -46,7 +38,6 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
   onImport,
   onComplete,
   onCancel,
-  onUpdate = () => {},
 }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -58,27 +49,6 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
   const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' | 'info' | 'warning' }>({
     show: false, message: '', type: 'info'
   });
-
-  // Audit logging utility
-  const logAuditEvent = useCallback((action: string, details: any) => {
-    if (auditTrail.enabled) {
-      console.log(`[AUDIT] ${action}:`, {
-        timestamp: new Date().toISOString(),
-        user: userRole?.id || 'unknown',
-        component: 'ImportWizard',
-        action,
-        details,
-        commerceState,
-        workflowContext,
-      });
-      onUpdate?.({
-        type: 'audit',
-        action,
-        details,
-        timestamp: new Date().toISOString(),
-      });
-    }
-  }, [auditTrail, userRole, commerceState, workflowContext, onUpdate]);
 
   // Show toast notification
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
@@ -127,13 +97,6 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
 
       setUploadedFile(file);
       setParsedData(data);
-      
-      logAuditEvent('file_upload', {
-        fileName: file.name,
-        fileSize: file.size,
-        recordCount: data.length,
-      });
-
       onFileUpload?.(file);
       showToast(`File uploaded successfully. ${data.length} records found.`, 'success');
       
@@ -147,7 +110,7 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
     } finally {
       setProcessing(false);
     }
-  }, [supportedFormats, maxFileSize, logAuditEvent, onFileUpload, showToast]);
+  }, [supportedFormats, maxFileSize, onFileUpload, showToast]);
 
   // Simple CSV parser
   const parseCSV = useCallback((csvText: string) => {
@@ -189,11 +152,6 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
       });
 
       setParsedData(mappedData);
-      
-      logAuditEvent('field_mapping', {
-        mappingConfig,
-        recordCount: mappedData.length,
-      });
 
       onFieldMapping?.(Object.entries(mappingConfig).map(([source, target]) => ({ source, target })));
       showToast('Field mapping applied successfully', 'success');
@@ -208,7 +166,7 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
     } finally {
       setProcessing(false);
     }
-  }, [mappingConfig, parsedData, fieldMapping, logAuditEvent, onFieldMapping, showToast]);
+  }, [mappingConfig, parsedData, fieldMapping, onFieldMapping, showToast]);
 
   // Handle validation
   const handleValidation = useCallback(async () => {
@@ -225,12 +183,6 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
       setValidationResults(results);
       
       const errorCount = results.filter((r: any) => r.errors?.length > 0).length;
-      
-      logAuditEvent('data_validation', {
-        totalRecords: results.length,
-        errorCount,
-        validRecords: results.length - errorCount,
-      });
 
       if (errorCount === 0) {
         showToast('All data validated successfully', 'success');
@@ -247,7 +199,7 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
     } finally {
       setProcessing(false);
     }
-  }, [parsedData, onValidation, logAuditEvent, showToast]);
+  }, [parsedData, onValidation, showToast]);
 
   // Handle import
   const handleImport = useCallback(async () => {
@@ -266,13 +218,6 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
         skipErrors: true,
         mapping: mappingConfig,
       });
-
-      logAuditEvent('data_import', {
-        totalRecords: validData.length,
-        importedRecords: result?.imported || validData.length,
-        failedRecords: result?.failed || 0,
-      });
-
       showToast(`Import completed. ${result?.imported || validData.length} records imported.`, 'success');
       
       // Complete the wizard
@@ -286,7 +231,7 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
     } finally {
       setProcessing(false);
     }
-  }, [parsedData, validationResults, mappingConfig, batchProcessing, onImport, logAuditEvent, showToast, steps.length, onComplete]);
+  }, [parsedData, validationResults, mappingConfig, batchProcessing, onImport, showToast, steps.length, onComplete]);
 
   // Handle step navigation
   const goToStep = useCallback((stepIndex: number) => {
@@ -299,13 +244,12 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
   const skipStep = useCallback(() => {
     if (!allowSkipSteps || !currentStep?.optional) return;
     
-    logAuditEvent('step_skip', { stepId: currentStep.id, stepName: currentStep.name });
     showToast(`Skipped ${currentStep.name}`, 'info');
     
     if (currentStepIndex < steps.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1);
     }
-  }, [allowSkipSteps, currentStep, currentStepIndex, steps.length, logAuditEvent, showToast]);
+  }, [allowSkipSteps, currentStep, currentStepIndex, steps.length, showToast]);
 
   // Get available source fields
   const sourceFields = useMemo(() => {
@@ -317,22 +261,6 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
   const targetFields = useMemo(() => {
     return fieldMapping.map(m => ({ value: m.target!, label: m.target! }));
   }, [fieldMapping]);
-
-  // Component styling based on commerce state
-  const getStateStyles = () => {
-    switch (commerceState) {
-      case 'completion':
-        return 'border-green-200 bg-green-50';
-      case 'settlement':
-        return 'border-blue-200 bg-blue-50';
-      case 'execution':
-        return 'border-orange-200 bg-orange-50';
-      case 'agreement':
-        return 'border-yellow-200 bg-yellow-50';
-      default:
-        return 'border-gray-200 bg-white';
-    }
-  };
 
   const sizeClasses = {
     sm: 'text-xs',
@@ -566,12 +494,10 @@ const ImportWizard: React.FC<ImportWizardProps> = ({
     <div 
       className={cn(
         'rounded-lg border',
-        getStateStyles(),
         sizeClasses[size],
         className
       )}
       style={style}
-      data-commerce-state={commerceState}
     >
       {/* Header */}
       <div className="border-b bg-gray-50 p-4">

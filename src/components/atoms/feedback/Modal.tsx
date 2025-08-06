@@ -1,6 +1,7 @@
 import React, { forwardRef, useEffect, useRef } from 'react';
 import { ModalProps } from '../../../types';
 import { cn } from '../../../utils/cn';
+import { X, Loader2 } from 'lucide-react';
 
 const Modal = forwardRef<HTMLDivElement, ModalProps>(
   (
@@ -28,16 +29,6 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
       onOpen,
       onAfterOpen,
       onAfterClose,
-      commerceState = 'none',
-      workflowContext,
-      aiConfig,
-      schema,
-      allowedActions = [],
-      userRole,
-      data,
-      onUpdate,
-      auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-      encryptionLevel = 'none',
       className = '',
       style = {},
       children,
@@ -73,20 +64,6 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
           }, 100);
         }
 
-        // Audit trail logging
-        if (auditTrail && typeof auditTrail === 'object' && auditTrail.enabled && auditTrail.logUserActions) {
-          console.log('Modal open tracked:', {
-            action: 'modal_open',
-            title,
-            size,
-            variant,
-            position,
-            timestamp: new Date(),
-            commerceState,
-            workflowContext,
-            userRole
-          });
-        }
 
         if (onOpen && typeof onOpen === 'function') {
           onOpen();
@@ -130,25 +107,9 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
 
     // Handle close
     const handleClose = () => {
-      // Audit trail logging
-      if (auditTrail && typeof auditTrail === 'object' && auditTrail.enabled && auditTrail.logUserActions) {
-        console.log('Modal close tracked:', {
-          action: 'modal_close',
-          title,
-          variant,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          userRole
-        });
-      }
 
       if (onClose && typeof onClose === 'function') {
         onClose();
-      }
-
-      if (onUpdate && typeof onUpdate === 'function') {
-        onUpdate('modal_closed');
       }
     };
 
@@ -226,15 +187,6 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
       }
     };
 
-    // Commerce state classes
-    const commerceStateClasses = {
-      initiation: 'ring-primary-300',
-      agreement: 'ring-warning-300',
-      execution: 'ring-primary-500',
-      settlement: 'ring-gray-400',
-      completion: 'ring-success-300',
-      none: 'ring-0'
-    };
 
     // Don't render if not open
     if (!isOpen) {
@@ -287,7 +239,6 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
                 className={cn(
                   'relative w-full transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-xl dark:shadow-2xl transition-all duration-300 ease-in-out font-work-sans',
                   modalSizeClasses[size],
-                  commerceState && commerceStateClasses[commerceState] ? `ring-2 ${commerceStateClasses[commerceState]}` : '',
                   'scale-100',
                   className
                 )}
@@ -318,9 +269,7 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
                             className="ml-3 flex-shrink-0 p-1 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors duration-200"
                             aria-label="Close modal"
                           >
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                            <X className="w-6 h-6" />
                           </button>
                         )}
                       </div>
@@ -332,10 +281,7 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
                 <div className="px-6 py-4 text-gray-900 dark:text-gray-100 transition-colors duration-200">
                   {loading ? (
                     <div className="flex items-center justify-center py-8">
-                      <svg className="animate-spin h-8 w-8 text-primary-600 dark:text-primary-400" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
+                      <Loader2 className="animate-spin h-8 w-8 text-primary-600 dark:text-primary-400" />
                     </div>
                   ) : (
                     children
@@ -412,7 +358,6 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
                 sliderConfig.height,
                 slideDirection === 'left' || slideDirection === 'right' ? sliderSizeClasses[size] : 'w-full',
                 'translate-x-0 translate-y-0',
-                commerceState && commerceStateClasses[commerceState] ? `ring-2 ${commerceStateClasses[commerceState]}` : '',
                 className
               )}
               style={{
@@ -442,9 +387,7 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
                           className="ml-3 flex-shrink-0 p-1 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors duration-200"
                           aria-label="Close slider"
                         >
-                          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
+                          <X className="w-6 h-6" />
                         </button>
                       )}
                     </div>
@@ -456,10 +399,7 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
               <div className="flex-1 overflow-y-auto px-6 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors duration-200">
                 {loading ? (
                   <div className="flex items-center justify-center py-8">
-                    <svg className="animate-spin h-8 w-8 text-primary-600 dark:text-primary-400" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                    <Loader2 className="animate-spin h-8 w-8 text-primary-600 dark:text-primary-400" />
                   </div>
                 ) : (
                   children
@@ -472,17 +412,6 @@ const Modal = forwardRef<HTMLDivElement, ModalProps>(
                   {footer}
                 </div>
               )}
-
-              {/* Commerce state indicator */}
-              {/* {commerceState && commerceState !== 'initiation' && (
-                <div className={cn(
-                  'absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white',
-                  commerceState === 'agreement' && 'bg-warning-500',
-                  commerceState === 'execution' && 'bg-primary-600',
-                  commerceState === 'settlement' && 'bg-gray-500',
-                  commerceState === 'completion' && 'bg-success-500'
-                )} />
-              )} */}
             </div>
           </div>
         </>

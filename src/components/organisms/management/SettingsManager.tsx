@@ -30,14 +30,6 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
   showSaveButton = true,
   autoSave = false,
   validation = true,
-  commerceState = 'none',
-  workflowContext,
-  aiConfig,
-  schema,
-  allowedActions = [],
-  userRole,
-  auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-  encryptionLevel = 'none',
   className = '',
   style = {},
   onSettingChange,
@@ -45,7 +37,6 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
   onReset,
   onImport,
   onExport,
-  onUpdate = () => {},
 }) => {
   const [activeCategory, setActiveCategory] = useState(categories[0]?.id || '');
   const [settingValues, setSettingValues] = useState<Record<string, any>>(() => {
@@ -68,27 +59,6 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
   const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' | 'info' | 'warning' }>({
     show: false, message: '', type: 'info'
   });
-
-  // Audit logging utility
-  const logAuditEvent = useCallback((action: string, details: any) => {
-    if (auditTrail.enabled) {
-      console.log(`[AUDIT] ${action}:`, {
-        timestamp: new Date().toISOString(),
-        user: userRole?.id || 'unknown',
-        component: 'SettingsManager',
-        action,
-        details,
-        commerceState,
-        workflowContext,
-      });
-      onUpdate?.({
-        type: 'audit',
-        action,
-        details,
-        timestamp: new Date().toISOString(),
-      });
-    }
-  }, [auditTrail, userRole, commerceState, workflowContext, onUpdate]);
 
   // Show toast notification
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
@@ -178,15 +148,6 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
     // Track changed settings
     setChangedSettings(prev => new Set(prev).add(settingId));
 
-    // Log the change
-    logAuditEvent('setting_change', {
-      settingId,
-      categoryId,
-      oldValue: settingValues[settingId],
-      newValue: value,
-      encrypted: setting.sensitive && encryptionLevel !== 'none',
-    });
-
     // Call external handler
     onSettingChange?.(settingId, value, categoryId);
 
@@ -194,7 +155,7 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
     if (autoSave && !error && Object.keys(validationErrors).length === 0) {
       handleSave();
     }
-  }, [categories, validation, validateSetting, settingValues, validationErrors, changedSettings, logAuditEvent, onSettingChange, encryptionLevel, autoSave]);
+  }, [categories, validation, validateSetting, settingValues, validationErrors, changedSettings, onSettingChange, autoSave]);
 
   // Handle save
   const handleSave = useCallback(async () => {
@@ -231,7 +192,6 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
       await onSave(changedSettingValues);
       
       setChangedSettings(new Set());
-      logAuditEvent('settings_save', { changedCount: changedSettings.size });
       showToast('Settings saved successfully', 'success');
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -239,7 +199,7 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
     } finally {
       setSaving(false);
     }
-  }, [categories, settingValues, validateSetting, changedSettings, onSave, logAuditEvent, showToast]);
+  }, [categories, settingValues, validateSetting, changedSettings, onSave, showToast]);
 
   // Handle reset
   const handleReset = useCallback((categoryId?: string) => {
@@ -258,11 +218,10 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
     setValidationErrors({});
     setChangedSettings(new Set());
 
-    logAuditEvent('settings_reset', { categoryId, settingsCount: Object.keys(settingsToReset).length });
     onReset?.(categoryId);
     showToast(categoryId ? 'Category reset successfully' : 'All settings reset successfully', 'info');
     setShowResetModal(false);
-  }, [categories, logAuditEvent, onReset, showToast]);
+  }, [categories, onReset, showToast]);
 
   // Handle import
   const handleImport = useCallback(() => {
@@ -286,8 +245,6 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
 
       setSettingValues(prev => ({ ...prev, ...validSettings }));
       setChangedSettings(new Set(Object.keys(validSettings)));
-
-      logAuditEvent('settings_import', { importedCount: Object.keys(validSettings).length });
       onImport?.(validSettings);
       showToast(`Imported ${Object.keys(validSettings).length} settings`, 'success');
       
@@ -296,14 +253,11 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
     } catch (error) {
       showToast('Invalid import format', 'error');
     }
-  }, [importData, categories, validateSetting, logAuditEvent, onImport, showToast]);
+  }, [importData, categories, validateSetting, onImport, showToast]);
 
   // Handle export
   const handleExport = useCallback(() => {
     const exportData = { ...settingValues };
-    
-    // Remove sensitive data if encryption level is low
-    if (encryptionLevel === 'none' || encryptionLevel === 'field') {
       categories.forEach(category => {
         category.settings?.forEach(setting => {
           if (setting.sensitive && setting.id) {
@@ -311,7 +265,6 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
           }
         });
       });
-    }
 
     const dataStr = JSON.stringify(exportData, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
@@ -323,11 +276,9 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-
-    logAuditEvent('settings_export', { settingsCount: Object.keys(exportData).length });
     onExport?.();
     showToast('Settings exported successfully', 'success');
-  }, [settingValues, categories, encryptionLevel, logAuditEvent, onExport, showToast]);
+  }, [settingValues, categories, onExport, showToast]);
 
   // Filter categories by search query
   const filteredCategories = useMemo(() => {
@@ -497,22 +448,6 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
     );
   }, [renderSettingInput, changedSettings]);
 
-  // Component styling based on commerce state
-  const getStateStyles = () => {
-    switch (commerceState) {
-      case 'completion':
-        return 'border-green-200';
-      case 'settlement':
-        return 'border-blue-200';
-      case 'execution':
-        return 'border-orange-200';
-      case 'agreement':
-        return 'border-yellow-200';
-      default:
-        return 'border-gray-200';
-    }
-  };
-
   const sizeClasses = {
     sm: 'text-xs',
     md: 'text-sm',
@@ -524,12 +459,10 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
       <div 
         className={cn(
           'rounded-lg border',
-          getStateStyles(),
           sizeClasses[size],
           className
         )}
         style={style}
-        data-commerce-state={commerceState}
       >
         {/* Header */}
         <div className="border-b bg-gray-50 p-4">
@@ -649,12 +582,10 @@ const SettingsManager: React.FC<SettingsManagerProps> = ({
     <div 
       className={cn(
         'rounded-lg border',
-        getStateStyles(),
         sizeClasses[size],
         className
       )}
       style={style}
-      data-commerce-state={commerceState}
     >
       {/* Header */}
       <div className="p-6 border-b border-gray-200">

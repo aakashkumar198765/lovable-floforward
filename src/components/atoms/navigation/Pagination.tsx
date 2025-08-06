@@ -1,4 +1,5 @@
 import React, { forwardRef, useState, useMemo } from 'react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { PaginationProps } from '../../../types';
 import { cn } from '../../../utils/cn';
 
@@ -21,16 +22,6 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
       onChange,
       onShowSizeChange,
       formatTotal,
-      commerceState = 'none',
-      workflowContext,
-      aiConfig,
-      schema,
-      allowedActions = [],
-      userRole,
-      data,
-      onUpdate,
-      auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-      encryptionLevel = 'none',
       className = '',
       style = {},
       ...props
@@ -52,27 +43,9 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
     const handlePageChange = (page: number) => {
       if (page < 1 || page > totalPages || page === current || disabled) return;
 
-      // Audit trail logging
-      if (auditTrail && typeof auditTrail === 'object' && auditTrail.enabled && auditTrail.logUserActions) {
-        console.log('Pagination change tracked:', {
-          action: 'pagination_change',
-          previousPage: current,
-          newPage: page,
-          pageSize: currentPageSize,
-          total,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          userRole
-        });
-      }
 
       if (onChange && typeof onChange === 'function') {
         onChange(page, currentPageSize);
-      }
-
-      if (onUpdate && typeof onUpdate === 'function') {
-        onUpdate({ page, pageSize: currentPageSize });
       }
     };
 
@@ -149,15 +122,6 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
       }
     };
 
-    // Commerce state classes
-    const commerceStateClasses = {
-      initiation: 'ring-primary-300',
-      agreement: 'ring-warning-300',
-      execution: 'ring-primary-500',
-      settlement: 'ring-gray-400',
-      completion: 'ring-success-300',
-      none: 'ring-0'
-    };
 
     // Button classes
     const getButtonClasses = (isActive = false, isDisabled = false) => {
@@ -191,7 +155,6 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
           ref={ref}
           className={cn(
             'flex items-center justify-center space-x-2 font-work-sans',
-            commerceState && commerceStateClasses[commerceState] ? `ring-2 ${commerceStateClasses[commerceState]} rounded-lg p-3` : '',
             className
           )}
           style={style}
@@ -207,9 +170,7 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
             )}
             aria-label="Previous page"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            <ChevronLeft className="w-4 h-4" />
           </button>
 
           {/* Page info */}
@@ -233,9 +194,7 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
             )}
             aria-label="Next page"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       );
@@ -247,7 +206,6 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
         ref={ref}
         className={cn(
           'flex items-center justify-between space-x-4 font-work-sans',
-          commerceState && commerceStateClasses[commerceState] ? `ring-2 ${commerceStateClasses[commerceState]} rounded-lg p-3` : '',
           className
         )}
         style={style}
@@ -296,9 +254,7 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
               className={cn(getButtonClasses(false, current <= 1 || disabled), 'rounded-l-md')}
               aria-label="First page"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-              </svg>
+              <ChevronsLeft className="w-4 h-4" />
             </button>
           )}
 
@@ -313,9 +269,7 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
               )}
               aria-label="Previous page"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
+              <ChevronLeft className="w-4 h-4" />
             </button>
           )}
 
@@ -352,9 +306,7 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
               )}
               aria-label="Next page"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              <ChevronRight className="w-4 h-4" />
             </button>
           )}
 
@@ -366,9 +318,7 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
               className={cn(getButtonClasses(false, current >= totalPages || disabled), 'rounded-r-md')}
               aria-label="Last page"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-              </svg>
+              <ChevronsRight className="w-4 h-4" />
             </button>
           )}
         </div>
@@ -407,24 +357,6 @@ const Pagination = forwardRef<HTMLDivElement, PaginationProps>(
             </>
           )}
         </div>
-
-        {/* Commerce state indicator */}
-        {/* {commerceState && commerceState !== 'initiation' && (
-          <div className={cn(
-            'absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white z-10',
-            commerceState === 'agreement' && 'bg-warning-500',
-            commerceState === 'execution' && 'bg-primary-600',
-            commerceState === 'settlement' && 'bg-gray-500',
-            commerceState === 'completion' && 'bg-success-500'
-          )} />
-        )} */}
-
-        {/* AI Config Display (development only) */}
-        {process.env.NODE_ENV === 'development' && aiConfig && (
-          <div className="absolute -top-8 left-0 p-1 bg-blue-50 rounded text-xs text-blue-600 z-50 opacity-0 hover:opacity-100 transition-opacity">
-            AI Config: {JSON.stringify(aiConfig.layout || 'default')}
-          </div>
-        )}
       </div>
     );
   }

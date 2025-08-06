@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { DashboardLayoutProps } from '../../../types';
+import { ChevronRight, Menu, Bell } from 'lucide-react';
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   id,
@@ -27,11 +28,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   className = '',
   style = {},
   children,
-  commerceState = 'execution',
   allowedActions = [],
-  userRole,
-  encryptionLevel = 'none',
-  auditTrail,
 }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -94,9 +91,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           {breadcrumbItems.map((item, index) => (
             <li key={index} className="inline-flex items-center">
               {index > 0 && (
-                <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                </svg>
+                <ChevronRight className="w-6 h-6 text-gray-400" />
               )}
               {item.href ? (
                 <a
@@ -180,9 +175,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             aria-label="Toggle sidebar"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            <Menu className="w-6 h-6" />
           </button>
         )}
         <h1 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h1>
@@ -196,9 +189,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               onClick={() => setShowNotifications(!showNotifications)}
               className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white relative"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-5-5 5-5h-5m-6 10v-10a6 6 0 1112 0v10" />
-              </svg>
+              <Bell className="w-6 h-6" />
               {notifications.filter(n => !n.read).length > 0 && (
                 <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                   {notifications.filter(n => !n.read).length}
@@ -300,14 +291,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
           onClick={handleSidebarToggle}
         />
-      )}
-
-      {/* Audit trail logging */}
-      {auditTrail?.enabled && commerceState && (
-        <div className="sr-only">
-          Dashboard layout rendered - Commerce State: {commerceState}, 
-          User: {userRole?.name || 'Unknown'}
-        </div>
       )}
     </div>
   );

@@ -107,7 +107,52 @@ export interface EnterpriseComponentProps {
   children?: React.ReactNode;
 }
 
-// Input Component Specific Types
+// Clean Input Component Types (Business Logic Removed)
+export interface CleanInputProps {
+  // Basic HTML input props
+  id?: string;
+  name?: string;
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | 'date';
+  placeholder?: string;
+  value?: string | number;
+  defaultValue?: string;
+  disabled?: boolean;
+  readonly?: boolean;
+  required?: boolean;
+  autoComplete?: string;
+  autoFocus?: boolean;
+  maxLength?: number;
+  minLength?: number;
+  pattern?: string;
+  min?: string | number;
+  max?: string | number;
+  step?: string | number;
+  encryptionLevel?: EncryptionLevel; // Encryption level for sensitive data
+  // Styling props
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'outlined' | 'filled';
+  status?: 'default' | 'error' | 'warning' | 'success';
+  className?: string;
+  style?: React.CSSProperties;
+  
+  // Label and helper text
+  label?: string;
+  helperText?: string;
+  errorMessage?: string;
+  
+  // Icons
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  
+  // Event handlers
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  onKeyUp?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+}
+
+// Legacy Input Component Types (for backward compatibility)
 export interface InputProps extends EnterpriseComponentProps {
   id?: string;
   name?: string;
@@ -340,7 +385,38 @@ export interface ButtonProps extends EnterpriseComponentProps {
   onBlur?: (event: React.FocusEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
 }
 
-// Checkbox Types
+// Clean Checkbox Types
+export interface CleanCheckboxProps {
+  // Basic HTML checkbox props
+  id?: string;
+  checked?: boolean;
+  defaultChecked?: boolean;
+  indeterminate?: boolean;
+  value?: string;
+  name?: string;
+  disabled?: boolean;
+  readonly?: boolean;
+  required?: boolean;
+  
+  // Styling props
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'outlined' | 'filled';
+  className?: string;
+  style?: React.CSSProperties;
+  
+  // Label and description props
+  children?: React.ReactNode;
+  label?: string;
+  description?: string;
+  errorMessage?: string;
+  
+  // Event handlers
+  onChange?: (checked: boolean, event: React.ChangeEvent<HTMLInputElement>) => void;
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
+}
+
+// Legacy Checkbox Types (for backward compatibility)
 export interface CheckboxProps extends EnterpriseComponentProps {
   id?: string;
   checked?: boolean;
@@ -899,6 +975,8 @@ export interface SortControlProps extends EnterpriseComponentProps {
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'outlined' | 'compact';
   layout?: 'horizontal' | 'vertical' | 'inline';
+  isDisabled?: boolean;
+  isReadonly?: boolean;
   onChange?: (sorts: SortCriteria[]) => void;
   onAdd?: () => void;
   onRemove?: (index: number) => void;
@@ -938,6 +1016,7 @@ export interface BulkActionsProps extends EnterpriseComponentProps {
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'outlined' | 'minimal';
   position?: 'top' | 'bottom' | 'sticky';
+  isDisabled?: boolean;
   onAction?: (actionKey: string, selectedItems: string[] | number[]) => void;
   onSelectAll?: () => void;
   onDeselectAll?: () => void;
@@ -979,6 +1058,8 @@ export interface StatusCardProps extends EnterpriseComponentProps {
   clickable?: boolean;
   collapsible?: boolean;
   collapsed?: boolean;
+  isDisabled?: boolean;
+  isReadonly?: boolean;
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'outlined' | 'filled' | 'minimal';
   layout?: 'horizontal' | 'vertical' | 'compact';
@@ -1021,6 +1102,8 @@ export interface MetricCardProps extends EnterpriseComponentProps {
   comparison?: ComparisonData;
   description?: string;
   target?: number;
+  isDisabled?: boolean;
+  isReadonly?: boolean;
   threshold?: {
     warning?: number;
     critical?: number;
@@ -1108,6 +1191,8 @@ export interface SummaryPanelProps extends EnterpriseComponentProps {
   exportable?: boolean;
   refreshable?: boolean;
   loading?: boolean;
+  isDisabled?: boolean;
+  isReadonly?: boolean;
   onSectionToggle?: (sectionKey: string, collapsed: boolean) => void;
   onSectionAction?: (sectionKey: string, actionKey: string) => void;
   onItemClick?: (sectionKey: string, itemKey: string) => void;
@@ -1166,6 +1251,8 @@ export interface ProgressTrackerProps extends EnterpriseComponentProps {
   allowStepNavigation?: boolean;
   clickableSteps?: boolean;
   collapsibleSteps?: boolean;
+  isDisabled?: boolean;
+  isReadonly?: boolean;
   size?: 'xs' | 'sm' | 'md' | 'lg' | string;
   variant?: 'default' | 'outlined' | 'filled' | 'minimal';
   colorScheme?: 'primary' | 'success' | 'warning' | 'error' | 'info';
@@ -1206,6 +1293,8 @@ export interface AddressFormProps extends EnterpriseComponentProps {
   showCompany?: boolean;
   showDefaultCheckbox?: boolean;
   showBusinessCheckbox?: boolean;
+  isDisabled?: boolean;
+  isReadonly?: boolean;
   layout?: 'vertical' | 'horizontal' | 'compact';
   columns?: 1 | 2 | 3;
   size?: 'sm' | 'md' | 'lg';
@@ -1265,6 +1354,8 @@ export interface ContactFormProps extends EnterpriseComponentProps {
   showPreferences?: boolean;
   showNotes?: boolean;
   showStatusFlags?: boolean;
+  isDisabled?: boolean;
+  isReadonly?: boolean;
   layout?: 'vertical' | 'horizontal' | 'compact';
   columns?: 1 | 2 | 3;
   size?: 'sm' | 'md' | 'lg';
@@ -2199,4 +2290,327 @@ export interface WorkflowPageProps extends EnterpriseComponentProps {
   onTemplateSelect?: (template: any) => void;
   onStepEdit?: (stepId: string, data: any) => void;
   onConnectionEdit?: (connectionId: string, data: any) => void;
+}
+
+// =============================================================================
+// TAILWIND CLASS MAP TYPES
+// =============================================================================
+
+// Size Types
+export type TextSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
+export type ComponentSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
+export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export type BadgeSize = 'xs' | 'sm' | 'md' | 'lg';
+export type SpacingSize = 'sm' | 'md' | 'lg';
+
+// Variant Types
+export type ButtonVariant = 
+  | 'primary' 
+  | 'secondary' 
+  | 'tertiary' 
+  | 'outline' 
+  | 'outline-danger' 
+  | 'outline-success' 
+  | 'outline-warning' 
+  | 'danger' 
+  | 'success' 
+  | 'warning' 
+  | 'ghost' 
+  | 'link';
+
+export type InputVariant = 'default' | 'outlined' | 'filled';
+
+export type BadgeVariant = 'primary' | 'secondary' | 'success' | 'warning' | 'error';
+
+export type AlertVariant = 'info' | 'success' | 'warning' | 'error';
+
+// Status Types
+export type InputStatus = 'default' | 'error' | 'warning' | 'success';
+export type AvatarStatus = 'online' | 'offline' | 'away' | 'busy';
+export type IndicatorStatus = 'active' | 'inactive' | 'pending' | 'error' | 'warning';
+
+// Shape Types
+export type BorderRadius = 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
+export type AvatarShape = 'circle' | 'square' | 'rounded';
+
+// Position Types
+export type StatusPosition = 'top-right' | 'bottom-right' | 'top-left' | 'bottom-left';
+export type ModalPosition = 'center' | 'top' | 'bottom';
+export type ToastPosition = 
+  | 'top-right' 
+  | 'top-left' 
+  | 'bottom-right' 
+  | 'bottom-left' 
+  | 'top-center' 
+  | 'bottom-center';
+
+// Layout Types
+export type ContainerType = 'default' | 'fluid' | 'narrow';
+export type GridCols = 'cols1' | 'cols2' | 'cols3' | 'cols4';
+export type FlexLayout = 'center' | 'between' | 'start' | 'end' | 'col' | 'colCenter';
+
+// Animation Types
+export type TransitionSpeed = 'default' | 'fast' | 'slow' | 'colors' | 'opacity';
+export type LoadingAnimation = 'pulse' | 'spin' | 'bounce';
+export type HoverEffect = 'scale' | 'opacity' | 'shadow';
+
+// Focus Types
+export type FocusRing = 'default' | 'primary' | 'error' | 'success' | 'warning';
+
+// Shadow Types
+export type ShadowElevation = 'none' | 'sm' | 'md' | 'lg' | 'xl';
+
+// Border Types
+export type BorderWidth = 'none' | 'thin' | 'thick';
+export type BorderColor = 'default' | 'primary' | 'error' | 'success' | 'warning';
+
+// Class Map Interface Types
+export interface SizeClassMap {
+  text: Record<TextSize, string>;
+  button: Record<ComponentSize, string>;
+  input: Record<ComponentSize, string>;
+  avatar: Record<AvatarSize, string>;
+  icon: Record<IconSize, string>;
+  badge: Record<BadgeSize, string>;
+  spacing: Record<SpacingSize, string>;
+}
+
+export interface VariantClassMap {
+  button: Record<ButtonVariant, string>;
+  input: Record<InputVariant, string>;
+  badge: Record<BadgeVariant, string>;
+  alert: Record<AlertVariant, string>;
+}
+
+export interface StatusClassMap {
+  input: Record<InputStatus, string>;
+  avatar: Record<AvatarStatus, string>;
+  indicator: Record<IndicatorStatus, string>;
+}
+
+export interface ShapeClassMap {
+  rounded: Record<BorderRadius, string>;
+  avatar: Record<AvatarShape, string>;
+}
+
+export interface PositionClassMap {
+  status: Record<StatusPosition, string>;
+  modal: Record<ModalPosition, string>;
+  toast: Record<ToastPosition, string>;
+}
+
+export interface LayoutClassMap {
+  container: Record<ContainerType, string>;
+  grid: Record<GridCols, string>;
+  flex: Record<FlexLayout, string>;
+  size: Record<ComponentSize, string>;
+  variant: Record<LayoutVariant, string>;
+}
+
+export interface AnimationClassMap {
+  transition: Record<TransitionSpeed, string>;
+  loading: Record<LoadingAnimation, string>;
+  hover: Record<HoverEffect, string>;
+}
+
+export interface FocusClassMap {
+  ring: Record<FocusRing, string>;
+}
+
+export interface StateClassMap {
+  disabled: {
+    button: string;
+    input: string;
+    general: string;
+  };
+  loading: {
+    button: string;
+    overlay: string;
+  };
+  interactive: {
+    clickable: string;
+    hoverable: string;
+    selectable: string;
+  };
+}
+
+export interface ShadowClassMap {
+  elevation: Record<ShadowElevation, string>;
+}
+
+export interface BorderClassMap {
+  width: Record<BorderWidth, string>;
+  color: Record<BorderColor, string>;
+}
+
+// Navigation-specific Types
+export type TabVariant = 'default' | 'pills' | 'underline' | 'card';
+export type MenuVariant = 'default' | 'compact' | 'sidebar';
+export type MenuTrigger = 'hover' | 'click';
+export type MenuPlacement = 'top' | 'bottom' | 'left' | 'right';
+
+export interface NavigationClassMap {
+  tab: Record<TabVariant, {
+    container: string;
+    tab: string;
+    active: string;
+    inactive: string;
+    content: string;
+  }>;
+  menu: Record<MenuVariant, string>;
+  menuItem: {
+    default: string;
+    disabled: string;
+    submenu: string;
+    divider: string;
+  };
+  breadcrumb: {
+    container: string;
+    item: string;
+    current: string;
+    separator: string;
+    link: string;
+  };
+  pagination: {
+    container: string;
+    list: string;
+    item: string;
+    active: string;
+    disabled: string;
+    ellipsis: string;
+  };
+}
+
+// Form-specific Types
+export type FieldContainer = 'container' | 'wrapper';
+export type LabelVariant = 'default' | 'required' | 'optional' | 'disabled';
+export type HelperTextVariant = 'default' | 'error' | 'warning' | 'success';
+
+export interface FormClassMap {
+  field: {
+    container: string;
+    wrapper: string;
+    icon: string;
+    iconLeft: string;
+    iconRight: string;
+    iconFocused: string;
+  };
+  label: Record<LabelVariant, string>;
+  helperText: Record<HelperTextVariant, string>;
+  choice: {
+    container: string;
+    input: string;
+    label: string;
+    description: string;
+  };
+  switch: {
+    container: string;
+    track: {
+      off: string;
+      on: string;
+    };
+    thumb: string;
+    thumbPosition: {
+      off: string;
+      on: string;
+    };
+  };
+  fileUpload: {
+    dropzone: string;
+    dropzoneActive: string;
+    content: string;
+    icon: string;
+    text: string;
+    subtext: string;
+  };
+}
+
+// Display-specific Types
+export type CardVariant = 'default' | 'elevated' | 'outlined' | 'filled';
+export type BadgePosition = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+
+export interface DisplayClassMap {
+  card: Record<CardVariant, string>;
+  avatarGroup: {
+    container: string;
+    avatar: string;
+    more: string;
+  };
+  badgePosition: Record<BadgePosition, string>;
+  metric: {
+    container: string;
+    value: string;
+    label: string;
+    change: string;
+    changePositive: string;
+    changeNegative: string;
+    changeNeutral: string;
+  };
+}
+
+// Feedback-specific Types
+export type ToastContainer = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
+export type ToastVariant = 'info' | 'success' | 'warning' | 'error';
+
+export interface FeedbackClassMap {
+  toastContainer: Record<ToastContainer, string>;
+  toast: {
+    base: string;
+    info: string;
+    success: string;
+    warning: string;
+    error: string;
+  };
+  toastIcon: Record<ToastVariant, string>;
+  modal: {
+    backdrop: string;
+    container: string;
+    wrapper: string;
+    panel: string;
+    header: string;
+    title: string;
+    content: string;
+    actions: string;
+  };
+  progress: {
+    track: string;
+    bar: string;
+    label: string;
+    percentage: string;
+  };
+  loading: {
+    spinner: string;
+    overlay: string;
+    skeleton: string;
+  };
+}
+
+// Additional Class Map Types for component-specific classes
+export type SpinnerSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export type SpinnerColor = 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'muted' | 'white';
+export type LoadingStateSize = 'sm' | 'md' | 'lg';
+export type FormInputSize = 'sm' | 'md' | 'lg';
+export type FormInputVariant = 'default' | 'outlined' | 'filled';
+export type FormInputStatus = 'default' | 'error' | 'warning' | 'success';
+export type LayoutVariant = 'vertical' | 'horizontal' | 'compact';
+export type GridLayoutType = 'single-column' | 'two-column' | 'three-column';
+
+export interface SpinnerClassMap {
+  size: Record<SpinnerSize, string>;
+  color: Record<SpinnerColor, string>;
+}
+
+export interface LoadingStateClassMap {
+  size: Record<LoadingStateSize, {
+    text: string;
+    description: string;
+    spacing: string;
+  }>;
+}
+
+export interface FormInputClassMap {
+  size: Record<FormInputSize, string>;
+  variant: Record<FormInputVariant, string>;
+  status: Record<FormInputStatus, string>;
 }

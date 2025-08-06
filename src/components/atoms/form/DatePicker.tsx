@@ -1,6 +1,7 @@
 import React, { forwardRef, useState, useEffect, useRef } from 'react';
 import { DatePickerProps, CommerceState } from '../../../types';
 import { cn } from '../../../utils/cn';
+import { Calendar, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
   (
@@ -33,16 +34,6 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       showWeekNumbers = false,
       monthsToShow = 1,
       closeOnSelect = true,
-      commerceState = 'none',
-      workflowContext,
-      aiConfig,
-      schema,
-      allowedActions = [],
-      userRole,
-      data,
-      onUpdate = () => {},
-      auditTrail = { enabled: false, level: 'basic', trackChanges: false, logUserActions: false },
-      encryptionLevel = 'none',
       className = '',
       style = {},
       onChange = () => {},
@@ -69,9 +60,6 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Handle commerce state based behavior
-    const isReadonly = readonly || commerceState === 'completion';
-    const isDisabled = disabled || (commerceState === 'settlement' && allowedActions && Array.isArray(allowedActions) && !allowedActions.includes('edit'));
 
     // Determine display mode
     const isTimeOnly = timeOnly;
@@ -337,18 +325,6 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       const errors = validateDateTime(parsedResult.date, parsedResult.time || selectedTime, newValue);
       setInputErrors(errors);
       
-      // Audit trail logging
-      if (auditTrail && typeof auditTrail === 'object' && auditTrail.enabled && auditTrail.trackChanges) {
-        console.log('DatePicker change tracked:', {
-          field: (name && name !== '') ? name : (id && id !== '') ? id : 'unnamed-datepicker',
-          oldValue: internalValue,
-          newValue: newValue,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          isValid: errors.length === 0
-        });
-      }
       
       // Call external callbacks
       if (onChange && typeof onChange === 'function') {
@@ -357,10 +333,6 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       
       if (onDateChange && typeof onDateChange === 'function') {
         onDateChange(parsedResult.date, newValue);
-      }
-      
-      if (onUpdate && typeof onUpdate === 'function') {
-        onUpdate(newValue);
       }
     };
 
@@ -376,19 +348,6 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       // Validate the selected value
       const errors = validateDateTime(date, selectedTime, newValue);
       setInputErrors(errors);
-      
-      // Audit trail logging
-      if (auditTrail && typeof auditTrail === 'object' && auditTrail.enabled && auditTrail.trackChanges) {
-        console.log('DatePicker calendar selection:', {
-          field: (name && name !== '') ? name : (id && id !== '') ? id : 'unnamed-datepicker',
-          selectedDate: date,
-          dateString: newValue,
-          timestamp: new Date(),
-          commerceState,
-          workflowContext,
-          isValid: errors.length === 0
-        });
-      }
       
       // Close calendar if configured to do so and not showing time
       if (closeOnSelect && isDateOnly) {
@@ -433,10 +392,6 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       if (onDateChange && typeof onDateChange === 'function') {
         onDateChange(date, value);
       }
-      
-      if (onUpdate && typeof onUpdate === 'function') {
-        onUpdate(value);
-      }
     };
 
     const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
@@ -454,7 +409,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     };
 
     const handleCalendarToggle = () => {
-      if (isDisabled || isReadonly) return;
+      if (disabled || readonly) return;
       
       const newOpenState = !isCalendarOpen;
       setIsCalendarOpen(newOpenState);
@@ -585,15 +540,6 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       success: 'border-green-500 focus:border-green-500 focus:ring-green-500'
     };
 
-    // Commerce state styling
-    const commerceStateClasses = {
-      initiation: 'border-blue-300',
-      agreement: 'border-yellow-300',
-      execution: 'border-blue-500',
-      settlement: 'border-gray-400',
-      completion: 'border-gray-300 bg-gray-50',
-      none: 'ring-0'
-    };
 
     // Build input classes
     const inputClasses = cn(
@@ -606,15 +552,13 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       variantClasses[variant] || variantClasses.default,
       (inputErrors.length > 0 || status === 'error') ? statusClasses.error : 
       status !== 'default' && statusClasses[status] ? statusClasses[status] : statusClasses.default,
-      commerceState && commerceStateClasses[commerceState] ? commerceStateClasses[commerceState] : '',
       className || ''
     );
 
     // Label classes
     const labelClasses = cn(
       'block text-sm font-medium text-gray-700 mb-2',
-      required && 'after:content-["*"] after:text-red-500 after:ml-1',
-      commerceState === 'completion' && 'text-gray-500'
+      required && 'after:content-["*"] after:text-red-500 after:ml-1'
     );
 
     // Helper text classes
@@ -625,29 +569,21 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       status === 'success' && 'text-green-500'
     );
 
-    // Icons
+    // Icons using Lucide
     const CalendarIcon = ({ className = "w-5 h-5", ...props }) => (
-      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}>
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
+      <Calendar className={className} {...props} />
     );
 
     const ClockIcon = ({ className = "w-5 h-5", ...props }) => (
-      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}>
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
+      <Clock className={className} {...props} />
     );
 
     const ChevronLeftIcon = ({ className = "w-4 h-4", ...props }) => (
-      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}>
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-      </svg>
+      <ChevronLeft className={className} {...props} />
     );
 
     const ChevronRightIcon = ({ className = "w-4 h-4", ...props }) => (
-      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}>
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-      </svg>
+      <ChevronRight className={className} {...props} />
     );
 
     const monthNames = [
@@ -671,11 +607,6 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
         {label && label !== '' && (
           <label htmlFor={id || ''} className={labelClasses}>
             {label}
-            {commerceState && (
-              <span className="ml-2 text-xs text-gray-500 uppercase bg-gray-100 px-2 py-1 rounded">
-                {commerceState}
-              </span>
-            )}
           </label>
         )}
         
@@ -687,8 +618,8 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
             type="text"
             placeholder={placeholder || (isTimeOnly ? 'Select time' : isDateAndTime ? 'Select date and time' : 'Select date')}
             value={internalValue}
-            disabled={isDisabled}
-            readOnly={isReadonly}
+            disabled={disabled}
+            readOnly={readonly}
             required={required}
             autoComplete={autoComplete}
             autoFocus={autoFocus}
@@ -708,7 +639,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
           <button
             type="button"
             onClick={handleCalendarToggle}
-            disabled={isDisabled || isReadonly}
+            disabled={disabled || readonly}
             className={cn(
               'absolute right-3 top-1/2 transform -translate-y-1/2',
               'w-5 h-5 text-gray-400 hover:text-blue-500',
