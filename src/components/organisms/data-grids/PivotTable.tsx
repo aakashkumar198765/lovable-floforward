@@ -9,6 +9,7 @@ import Tooltip from '../../atoms/display/Tooltip';
 import Modal from '../../atoms/feedback/Modal';
 import Toast from '../../atoms/feedback/Toast';
 import LoadingState from '../../atoms/feedback/LoadingState';
+import { Label } from '../../atoms';
 
 const PivotTable: React.FC<PivotTableProps> = ({
   id = 'pivot-table',
@@ -312,7 +313,9 @@ const PivotTable: React.FC<PivotTableProps> = ({
         <div className="border-b border-gray-200 bg-gray-50 p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Row Fields</label>
+              <Label className="block text-sm font-medium mb-2">
+                Row Fields
+              </Label>
               <Select
                 multiple
                 value={localRows}
@@ -324,7 +327,9 @@ const PivotTable: React.FC<PivotTableProps> = ({
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-2">Column Fields</label>
+              <Label className="block text-sm font-medium mb-2">
+                Column Fields
+              </Label>
               <Select
                 multiple
                 value={localColumns}
@@ -336,7 +341,9 @@ const PivotTable: React.FC<PivotTableProps> = ({
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-2">Value Fields</label>
+              <Label className="block text-sm font-medium mb-2">
+                Value Fields
+              </Label>
               <div className="space-y-2">
                 {localValues.map((valueConfig, index) => (
                   <div key={index} className="flex gap-2">

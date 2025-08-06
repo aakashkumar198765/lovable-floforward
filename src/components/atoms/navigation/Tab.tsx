@@ -126,7 +126,7 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(
               const isActive = item.id === currentTab;
 
               return (
-                <button
+                <Button
                   key={item.id}
                   className={getTabClasses(item, isActive)}
                   role="tab"
@@ -188,7 +188,7 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(
                   {variant === "underline" && !isActive && (
                     <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-300 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full" />
                   )}
-                </button>
+                </Button>
               );
             })}
 
@@ -200,7 +200,7 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(
               onClick={handleAddTab}
               className={cn(
                 "border-2 border-dashed border-gray-300 hover:border-primary-400 hover:bg-primary-50",
-                "dark:text-white text-gray-500 hover:text-primary-600 min-w-[120px]"
+                "dark:text-white text-gray-500 hover:text-primary-600 min-w-[120px]",
               )}
               aria-label="Add new tab"
             >

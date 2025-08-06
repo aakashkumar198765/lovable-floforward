@@ -3,6 +3,8 @@ import { InputProps } from '../../../types';
 import { cn } from '../../../utils/utils';
 import { Lock } from 'lucide-react';
 import { formInputSizeClasses } from '../../../utils/tailwindClassMaps';
+import Input from './Input';
+import { Label } from '../display';
 
 interface CreditCardInputProps extends Omit<InputProps, 'type' | 'pattern'> {
   showCardType?: boolean;
@@ -164,101 +166,55 @@ const CreditCardInput = forwardRef<HTMLInputElement, CreditCardInputProps>(
 
     return (
       <div className="space-y-1">
-        {/* Label */}
-        {label && (
-          <label 
-            htmlFor={id} 
-            className={cn(
-              'block text-sm font-medium',
-              status === 'error' ? 'text-red-700' : 'text-gray-700',
-              required && "after:content-['*'] after:text-red-500 after:ml-1"
-            )}
-          >
-            {label}
-          </label>
-        )}
-
-        {/* Input Container */}
-        <div className="relative">
-          {/* Left Icon or Card Type */}
-          {(leftIcon || (showCardType && cardType && cardType !== 'unknown')) && (
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-              {leftIcon || (showCardType && (
-                <span className="text-lg" title={cardType}>
-                  {getCardIcon(cardType)}
-                </span>
-              ))}
-            </div>
+        <Input
+          ref={ref}
+          id={id}
+          name={name}
+          type="text"
+          placeholder={placeholder}
+          value={displayValue}
+          disabled={disabled}
+          readonly={readonly}
+          required={required}
+          size={size}
+          variant={variant}
+          status={status}
+          label={label}
+          helperText={helperText}
+          errorMessage={errorMessage}
+          leftIcon={leftIcon || (showCardType && cardType && cardType !== 'unknown' ? (
+            <span className="text-lg" title={cardType}>
+              {getCardIcon(cardType)}
+            </span>
+          ) : undefined)}
+          rightIcon={rightIcon}
+          className={cn(
+            inputClasses,
+            encryptionLevel !== 'none' && 'border-l-4 border-l-green-500',
+            className
           )}
-
-          {/* Input Field */}
-          <input
-            ref={ref}
-            id={id}
-            name={name}
-            type="text"
-            placeholder={placeholder}
-            value={displayValue}
-            disabled={disabled}
-            readOnly={readonly}
-            required={required}
-            autoComplete="cc-number"
-            inputMode="numeric"
-            pattern="[0-9\s]{13,19}"
-            maxLength={19}
-            className={cn(
-              inputClasses,
-              (leftIcon || (showCardType && cardType && cardType !== 'unknown')) && 'pl-10',
-              rightIcon && 'pr-10'
-            )}
-            style={style}
-            onChange={handleChange}
-            onBlur={onBlur}
-            onFocus={onFocus}
-            aria-invalid={status === 'error'}
-            aria-describedby={
-              (helperText || errorMessage) 
-                ? `${id}-description` 
-                : undefined
-            }
-            {...props}
-          />
-
-          {/* Right Icon */}
-          {rightIcon && (
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-              {rightIcon}
-            </div>
-          )}
-
-          {/* Encryption Indicator */}
-          {encryptionLevel !== 'none' && (
-            <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <div className="flex items-center space-x-1 text-green-600">
-                <Lock className="w-4 h-4" />
-                <span className="text-xs">Encrypted</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Helper Text or Error Message */}
-        {(helperText || errorMessage) && (
-          <div 
-            id={`${id}-description`}
-            className={cn(
-              'text-sm',
-              status === 'error' ? 'text-red-600' : 'text-gray-600'
-            )}
-          >
-            {errorMessage || helperText}
-          </div>
-        )}
+          style={style}
+          onChange={handleChange}
+          onBlur={onBlur}
+          onFocus={onFocus}
+          autoComplete="cc-number"
+          pattern="[0-9\s]{13,19}"
+          maxLength={19}
+          {...props}
+        />
 
         {/* Card Type Information */}
         {showCardType && cardType && cardType !== 'unknown' && (
           <div className="text-xs text-gray-500 capitalize">
             {cardType} detected
+          </div>
+        )}
+
+        {/* Encryption Indicator */}
+        {encryptionLevel !== 'none' && (
+          <div className="flex items-center space-x-1 text-green-600 text-xs mt-1">
+            <Lock className="w-3 h-3" />
+            <span>Encrypted</span>
           </div>
         )}
       </div>

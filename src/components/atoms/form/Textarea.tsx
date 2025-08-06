@@ -1,6 +1,7 @@
 import React, { forwardRef, useState, useEffect } from 'react';
 import { TextareaProps } from '../../../types';
 import { cn } from '../../../utils/utils';
+import { Label } from '../display';
 
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   (
@@ -143,9 +144,12 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className={containerClasses} style={style}>
         {label && label !== '' && (
-          <label htmlFor={id || ''} className={labelClasses}>
+          <Label
+            htmlFor={id || ''}
+            className={labelClasses}
+          >
             {label}
-          </label>
+          </Label>
         )}
         
         <div className="relative">
