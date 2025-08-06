@@ -2292,6 +2292,38 @@ export interface WorkflowPageProps extends EnterpriseComponentProps {
   onConnectionEdit?: (connectionId: string, data: any) => void;
 }
 
+export interface LoginPageProps extends EnterpriseComponentProps {
+  id?: string;
+  title?: string;
+  subtitle?: string;
+  logo?: string;
+  logoAlt?: string;
+  backgroundImage?: string;
+  showRememberMe?: boolean;
+  showForgotPassword?: boolean;
+  showSignUp?: boolean;
+  showSocialLogin?: boolean;
+  socialProviders?: Array<{
+    id: string;
+    name: string;
+    icon: string;
+    color: string;
+  }>;
+  otpLength?: number;
+  otpResendTime?: number;
+  showOtpResend?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  layout?: 'centered' | 'split' | 'minimal';
+  theme?: 'light' | 'dark' | 'auto';
+  onEmailSubmit?: (email: string) => Promise<boolean>;
+  onOtpSubmit?: (otp: string) => Promise<boolean>;
+  onSocialLogin?: (provider: string) => Promise<boolean>;
+  onForgotPassword?: (email: string) => Promise<boolean>;
+  onSignUp?: () => void;
+  onLoginSuccess?: (user: any) => void;
+  onLoginError?: (error: string) => void;
+}
+
 // =============================================================================
 // TAILWIND CLASS MAP TYPES
 // =============================================================================
