@@ -5,6 +5,13 @@ import { Routes, Route, NavLink, useLocation, useNavigate } from 'react-router-d
 import ComponentShowcase from './ComponentShowcase';
 import OverviewPage from './OverviewPage';
 import InstallationPage from './InstallationPage';
+import SampleListingPage from '../examples/SampleListingPage';
+import SampleDetailPage from '../examples/SampleDetailPage';
+import SampleDetailPage2 from '../examples/SampleDetailPage2';
+import ExportModalPage from '../examples/ExportModalPage';
+import ImportModalPage from '../examples/ImportModalPage';
+import CreatePage from '../examples/CreatePage';
+import CreateModalPage from '../examples/CreateModalPage';
 
 // Shared navigation configuration - Proper component architecture grouping with individual components
 const NAVIGATION_ITEMS = [
@@ -20,9 +27,9 @@ const NAVIGATION_ITEMS = [
         category: 'Atoms',
         icon: 'atom',
         items: [
-            { 
-                name: 'Display Components', 
-                path: 'atoms/display', 
+            {
+                name: 'Display Components',
+                path: 'atoms/display',
                 isCategory: true,
                 subItems: [
                     { name: 'Avatar', path: 'atoms/display/Avatar' },
@@ -33,9 +40,9 @@ const NAVIGATION_ITEMS = [
                     { name: 'Tooltip', path: 'atoms/display/Tooltip' }
                 ]
             },
-            { 
-                name: 'Form Components', 
-                path: 'atoms/form', 
+            {
+                name: 'Form Components',
+                path: 'atoms/form',
                 isCategory: true,
                 subItems: [
                     { name: 'Button', path: 'atoms/form/Button' },
@@ -47,9 +54,9 @@ const NAVIGATION_ITEMS = [
                     { name: 'Textarea', path: 'atoms/form/Textarea' }
                 ]
             },
-            { 
-                name: 'Feedback Components', 
-                path: 'atoms/feedback', 
+            {
+                name: 'Feedback Components',
+                path: 'atoms/feedback',
                 isCategory: true,
                 subItems: [
                     { name: 'Alert', path: 'atoms/feedback/Alert' },
@@ -58,9 +65,9 @@ const NAVIGATION_ITEMS = [
                     { name: 'Toast', path: 'atoms/feedback/Toast' }
                 ]
             },
-            { 
-                name: 'Navigation Components', 
-                path: 'atoms/navigation', 
+            {
+                name: 'Navigation Components',
+                path: 'atoms/navigation',
                 isCategory: true,
                 subItems: [
                     { name: 'Breadcrumb', path: 'atoms/navigation/Breadcrumb' },
@@ -74,9 +81,9 @@ const NAVIGATION_ITEMS = [
         category: 'Molecules',
         icon: 'molecule',
         items: [
-            { 
-                name: 'Data Components', 
-                path: 'molecules/data', 
+            {
+                name: 'Data Components',
+                path: 'molecules/data',
                 isCategory: true,
                 subItems: [
                     { name: 'SearchBox', path: 'molecules/data/SearchBox' },
@@ -85,9 +92,9 @@ const NAVIGATION_ITEMS = [
                     { name: 'BulkActions', path: 'molecules/data/BulkActions' }
                 ]
             },
-            { 
-                name: 'Display Components', 
-                path: 'molecules/display', 
+            {
+                name: 'Display Components',
+                path: 'molecules/display',
                 isCategory: true,
                 subItems: [
                     { name: 'MetricCard', path: 'molecules/display/MetricCard' },
@@ -96,9 +103,9 @@ const NAVIGATION_ITEMS = [
                     { name: 'SummaryPanel', path: 'molecules/display/SummaryPanel' }
                 ]
             },
-            { 
-                name: 'Form Components', 
-                path: 'molecules/forms', 
+            {
+                name: 'Form Components',
+                path: 'molecules/forms',
                 isCategory: true,
                 subItems: [
                     { name: 'AddressForm', path: 'molecules/forms/AddressForm' },
@@ -113,9 +120,9 @@ const NAVIGATION_ITEMS = [
         category: 'Organisms',
         icon: 'organism',
         items: [
-            { 
-                name: 'Data Grids', 
-                path: 'organisms/data-grids', 
+            {
+                name: 'Data Grids',
+                path: 'organisms/data-grids',
                 isCategory: true,
                 subItems: [
                     { name: 'ComparisonTable', path: 'organisms/data-grids/ComparisonTable' },
@@ -123,9 +130,9 @@ const NAVIGATION_ITEMS = [
                     { name: 'PivotTable', path: 'organisms/data-grids/PivotTable' }
                 ]
             },
-            { 
-                name: 'Integration', 
-                path: 'organisms/integration', 
+            {
+                name: 'Integration',
+                path: 'organisms/integration',
                 isCategory: true,
                 subItems: [
                     { name: 'APIConnector', path: 'organisms/integration/APIConnector' },
@@ -133,9 +140,9 @@ const NAVIGATION_ITEMS = [
                     { name: 'ImportWizard', path: 'organisms/integration/ImportWizard' }
                 ]
             },
-            { 
-                name: 'Management', 
-                path: 'organisms/management', 
+            {
+                name: 'Management',
+                path: 'organisms/management',
                 isCategory: true,
                 subItems: [
                     { name: 'RoleManager', path: 'organisms/management/RoleManager' },
@@ -143,9 +150,9 @@ const NAVIGATION_ITEMS = [
                     { name: 'UserManager', path: 'organisms/management/UserManager' }
                 ]
             },
-            { 
-                name: 'Workflow', 
-                path: 'organisms/workflow', 
+            {
+                name: 'Workflow',
+                path: 'organisms/workflow',
                 isCategory: true,
                 subItems: [
                     { name: 'ApprovalWorkflow', path: 'organisms/workflow/ApprovalWorkflow' },
@@ -159,9 +166,9 @@ const NAVIGATION_ITEMS = [
         category: 'Templates',
         icon: 'template',
         items: [
-            { 
-                name: 'Layouts', 
-                path: 'templates/layouts', 
+            {
+                name: 'Layouts',
+                path: 'templates/layouts',
                 isCategory: true,
                 subItems: [
                     { name: 'DashboardLayout', path: 'templates/layouts/DashboardLayout' },
@@ -169,23 +176,85 @@ const NAVIGATION_ITEMS = [
                     { name: 'ListDetailLayout', path: 'templates/layouts/ListDetailLayout' }
                 ]
             },
-            { 
-                name: 'Pages', 
-                path: 'templates/pages', 
+            {
+                name: 'Pages',
+                path: 'templates/pages',
                 isCategory: true,
                 subItems: [
                     { name: 'ReportsPage', path: 'templates/pages/ReportsPage' },
                     { name: 'SettingsPage', path: 'templates/pages/SettingsPage' },
-                    { name: 'WorkflowPage', path: 'templates/pages/WorkflowPage' }
+                    { name: 'WorkflowPage', path: 'templates/pages/WorkflowPage' },
+                    {
+                        name: 'Listing Page',
+                        path: 'templates/pages/listing-page'
+                    },
+                    {
+                        name: 'Detail Page',
+                        path: 'templates/pages/detail-page/ITEM-001'
+                    },
+                    {
+                        name: 'Detail Page 2 (Hardcoded)',
+                        path: 'templates/pages/detail-page-2/ITEM-001'
+                    },
+                    {
+                        name: 'Export Modal',
+                        path: 'templates/pages/export-modal'
+                    },
+                    {
+                        name: 'Import Modal',
+                        path: 'templates/pages/import-modal'
+                    },
+                    {
+                        name: 'Create Page',
+                        path: 'templates/pages/create-page'
+                    },
+                    {
+                        name: 'Create Modal',
+                        path: 'templates/pages/create-modal'
+                    }
                 ]
             }
         ]
-    }
+    },
+    // {
+    //     category: 'Sample Pages',
+    //     icon: 'pages',
+    //     items: [
+    //         { 
+    //             name: 'Listing Page', 
+    //             path: 'sample-pages/listing-page'
+    //         },
+    //         { 
+    //             name: 'Detail Page', 
+    //             path: 'sample-pages/detail-page/ITEM-001'
+    //         },
+    //         { 
+    //             name: 'Detail Page 2 (Hardcoded)', 
+    //             path: 'sample-pages/detail-page-2/ITEM-001'
+    //         },
+    //         { 
+    //             name: 'Export Modal', 
+    //             path: 'sample-pages/export-modal'
+    //         },
+    //         { 
+    //             name: 'Import Modal', 
+    //             path: 'sample-pages/import-modal'
+    //         },
+    //         { 
+    //             name: 'Create Page', 
+    //             path: 'sample-pages/create-page'
+    //         },
+    //         { 
+    //             name: 'Create Modal', 
+    //             path: 'sample-pages/create-modal'
+    //         }
+    //     ]
+    // }
 ];
 
 const LibraryTemplate = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    
+
     // Initialize theme from localStorage or system preference
     const [darkMode, setDarkMode] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -212,36 +281,36 @@ const LibraryTemplate = () => {
 
     return (
         // <Router>
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-                {/* Header */}
-                <Header 
-                    sidebarOpen={sidebarOpen} 
-                    setSidebarOpen={setSidebarOpen}
-                    darkMode={darkMode}
-                    setDarkMode={setDarkMode}
-                />
-                
-                <div className="flex">
-                    {/* Mobile Overlay */}
-                    {sidebarOpen && (
-                        <div 
-                            className="fixed inset-0 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70 z-20 lg:hidden"
-                            onClick={() => setSidebarOpen(false)}
-                        />
-                    )}
-                    
-                    {/* Desktop Sidebar - Always visible on desktop */}
-                    <div className="hidden lg:block">
-                        <DesktopSidebar />
-                    </div>
-                    
-                    {/* Mobile Sidebar */}
-                    <Sidebar isOpen={sidebarOpen} />
-                    
-                    {/* Main Content */}
-                    <MainContent sidebarOpen={sidebarOpen} />
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+            {/* Header */}
+            <Header
+                sidebarOpen={sidebarOpen}
+                setSidebarOpen={setSidebarOpen}
+                darkMode={darkMode}
+                setDarkMode={setDarkMode}
+            />
+
+            <div className="flex">
+                {/* Mobile Overlay */}
+                {sidebarOpen && (
+                    <div
+                        className="fixed inset-0 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70 z-20 lg:hidden"
+                        onClick={() => setSidebarOpen(false)}
+                    />
+                )}
+
+                {/* Desktop Sidebar - Always visible on desktop */}
+                <div className="hidden lg:block">
+                    <DesktopSidebar />
                 </div>
+
+                {/* Mobile Sidebar */}
+                <Sidebar isOpen={sidebarOpen} />
+
+                {/* Main Content */}
+                <MainContent sidebarOpen={sidebarOpen} />
             </div>
+        </div>
         // </Router>
     );
 };
@@ -267,7 +336,7 @@ const Header = ({ sidebarOpen, setSidebarOpen, darkMode, setDarkMode }) => {
                 <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate("/")}>
                     <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                         <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd"/>
+                            <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
                     </div>
                     <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
@@ -276,7 +345,7 @@ const Header = ({ sidebarOpen, setSidebarOpen, darkMode, setDarkMode }) => {
                     </h1>
                 </div>
             </div>
-            
+
             {/* Theme Toggle */}
             <div className="flex items-center">
                 <button
@@ -307,7 +376,8 @@ const DesktopSidebar = () => {
         'Atoms': false,
         'Molecules': false,
         'Organisms': false,
-        'Templates': false
+        'Templates': false,
+        'Sample Pages': false
     });
 
     const toggleCategory = (category) => {
@@ -316,17 +386,18 @@ const DesktopSidebar = () => {
             [category]: !prev[category]
         }));
     };
-    
+
     const navigationItems = NAVIGATION_ITEMS;
 
     // Icon component for consistent icon rendering
     const Icon = ({ name, size = "w-4 h-4" }) => {
         const icons = {
             home: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>,
-            atom: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 2c-1.5 0-3 4.5-3 10s1.5 10 3 10 3-4.5 3-10S13.5 2 12 2z"/><path d="M2 12c0 1.5 4.5 3 10 3s10-1.5 10-3-4.5-3-10-3S2 10.5 2 12z"/><path d="M2 12c0-1.5 4.5-3 10-3s10 1.5 10 3-4.5 3-10 3S2 13.5 2 12z"/></svg>,
-            molecule: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>,
+            atom: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2" /><path d="M12 2c-1.5 0-3 4.5-3 10s1.5 10 3 10 3-4.5 3-10S13.5 2 12 2z" /><path d="M2 12c0 1.5 4.5 3 10 3s10-1.5 10-3-4.5-3-10-3S2 10.5 2 12z" /><path d="M2 12c0-1.5 4.5-3 10-3s10 1.5 10 3-4.5 3-10 3S2 13.5 2 12z" /></svg>,
+            molecule: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3" /><circle cx="18" cy="18" r="3" /><circle cx="18" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><line x1="9" y1="9" x2="15" y2="15" /><line x1="15" y1="9" x2="9" y2="15" /></svg>,
             organism: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
-            template: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
+            template: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>,
+            pages: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
         };
         return icons[name] || <div className={size}></div>;
     };
@@ -345,12 +416,11 @@ const DesktopSidebar = () => {
                                 {/* <Icon name={section.icon} size="w-4 h-4" /> */}
                                 <span>{section.category}</span>
                             </div>
-                            <svg 
-                                className={`w-4 h-4 text-gray-400 transition-transform ${
-                                    expandedCategories[section.category] ? 'rotate-90' : ''
-                                }`} 
-                                fill="none" 
-                                stroke="currentColor" 
+                            <svg
+                                className={`w-4 h-4 text-gray-400 transition-transform ${expandedCategories[section.category] ? 'rotate-90' : ''
+                                    }`}
+                                fill="none"
+                                stroke="currentColor"
                                 viewBox="0 0 24 24"
                             >
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -368,16 +438,15 @@ const DesktopSidebar = () => {
                                             className={({ isActive }) => {
                                                 const isOverviewActive = item.path === '' && (isActive || location.pathname === '/');
                                                 const active = isActive || location.pathname.includes(item.path) || isOverviewActive;
-                                                return `flex items-center px-6 py-2 text-sm transition-colors rounded-lg ${
-                                                    active
-                                                        ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-200'
-                                                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                                                }`;
+                                                return `flex items-center px-6 py-2 text-sm transition-colors rounded-lg ${active
+                                                    ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-200'
+                                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                                    }`;
                                             }}
                                         >
                                             <span className="truncate font-medium">{item.name}</span>
                                         </NavLink>
-                                        
+
                                         {/* Sub-items for individual components */}
                                         {item.subItems && (
                                             <div className="ml-4 mt-1 space-y-1">
@@ -388,11 +457,10 @@ const DesktopSidebar = () => {
                                                         className={({ isActive }) => {
                                                             const active = isActive || location.pathname.includes(subItem.path);
                                                             console.log("active", active, isActive, location.pathname, subItem.path);
-                                                            return `flex items-center px-4 py-1.5 text-xs transition-colors rounded-md ${
-                                                                active
-                                                                    ? 'bg-blue-100 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300'
-                                                                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
-                                                            }`;
+                                                            return `flex items-center px-4 py-1.5 text-xs transition-colors rounded-md ${active
+                                                                ? 'bg-blue-100 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300'
+                                                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
+                                                                }`;
                                                         }}
                                                     >
                                                         <span className="truncate">{subItem.name}</span>
@@ -419,7 +487,8 @@ const Sidebar = ({ isOpen }) => {
         'Atoms': false,
         'Molecules': false,
         'Organisms': false,
-        'Templates': false
+        'Templates': false,
+        'Sample Pages': false
     });
 
     const toggleCategory = (category) => {
@@ -428,27 +497,26 @@ const Sidebar = ({ isOpen }) => {
             [category]: !prev[category]
         }));
     };
-    
+
     const navigationItems = NAVIGATION_ITEMS;
 
     // Icon component for consistent icon rendering
     const Icon = ({ name, size = "w-4 h-4" }) => {
         const icons = {
             home: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>,
-            atom: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 2c-1.5 0-3 4.5-3 10s1.5 10 3 10 3-4.5 3-10S13.5 2 12 2z"/><path d="M2 12c0 1.5 4.5 3 10 3s10-1.5 10-3-4.5-3-10-3S2 10.5 2 12z"/><path d="M2 12c0-1.5 4.5-3 10-3s10 1.5 10 3-4.5 3-10 3S2 13.5 2 12z"/></svg>,
-            molecule: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>,
+            atom: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2" /><path d="M12 2c-1.5 0-3 4.5-3 10s1.5 10 3 10 3-4.5 3-10S13.5 2 12 2z" /><path d="M2 12c0 1.5 4.5 3 10 3s10-1.5 10-3-4.5-3-10-3S2 10.5 2 12z" /><path d="M2 12c0-1.5 4.5-3 10-3s10 1.5 10 3-4.5 3-10 3S2 13.5 2 12z" /></svg>,
+            molecule: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3" /><circle cx="18" cy="18" r="3" /><circle cx="18" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><line x1="9" y1="9" x2="15" y2="15" /><line x1="15" y1="9" x2="9" y2="15" /></svg>,
             organism: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
-            template: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>
+            template: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>,
+            pages: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
         };
         return icons[name] || <div className={size}></div>;
     };
 
     return (
-        <aside className={`bg-white dark:bg-gray-800 transition-all duration-300 ${
-            isOpen ? 'w-64' : 'w-0 lg:w-0'
-        } min-h-screen fixed lg:sticky top-16 z-30 lg:z-auto ${
-            isOpen ? 'block' : 'hidden lg:hidden'
-        } overflow-y-auto overflow-x-hidden border-r border-gray-200 dark:border-gray-700`}>
+        <aside className={`bg-white dark:bg-gray-800 transition-all duration-300 ${isOpen ? 'w-64' : 'w-0 lg:w-0'
+            } min-h-screen fixed lg:sticky top-16 z-30 lg:z-auto ${isOpen ? 'block' : 'hidden lg:hidden'
+            } overflow-y-auto overflow-x-hidden border-r border-gray-200 dark:border-gray-700`}>
             <nav className="px-3 py-4 space-y-1">
                 {navigationItems.map((section) => (
                     <div key={section.category} className="mb-6">
@@ -461,12 +529,11 @@ const Sidebar = ({ isOpen }) => {
                                 <Icon name={section.icon} size="w-4 h-4" />
                                 <span>{section.category}</span>
                             </div>
-                            <svg 
-                                className={`w-4 h-4 text-gray-400 transition-transform ${
-                                    expandedCategories[section.category] ? 'rotate-90' : ''
-                                }`} 
-                                fill="none" 
-                                stroke="currentColor" 
+                            <svg
+                                className={`w-4 h-4 text-gray-400 transition-transform ${expandedCategories[section.category] ? 'rotate-90' : ''
+                                    }`}
+                                fill="none"
+                                stroke="currentColor"
                                 viewBox="0 0 24 24"
                             >
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -484,16 +551,15 @@ const Sidebar = ({ isOpen }) => {
                                             className={({ isActive }) => {
                                                 const isOverviewActive = item.path === '' && (isActive || location.pathname === '/');
                                                 const active = isActive || location.pathname.includes(item.path) || isOverviewActive;
-                                                return `flex items-center px-6 py-2 text-sm transition-colors rounded-lg ${
-                                                    active
-                                                        ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-200'
-                                                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                                                }`;
+                                                return `flex items-center px-6 py-2 text-sm transition-colors rounded-lg ${active
+                                                    ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-200'
+                                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                                    }`;
                                             }}
                                         >
                                             <span className="truncate font-medium">{item.name}</span>
                                         </NavLink>
-                                        
+
                                         {/* Sub-items for individual components */}
                                         {item.subItems && (
                                             <div className="ml-4 mt-1 space-y-1">
@@ -503,11 +569,10 @@ const Sidebar = ({ isOpen }) => {
                                                         to={`/${subItem.path.replace(/^\/+/, '')}`}
                                                         className={({ isActive }) => {
                                                             const active = isActive || location.pathname.includes(subItem.path);
-                                                            return `flex items-center px-4 py-1.5 text-xs transition-colors rounded-md ${
-                                                                active
-                                                                    ? 'bg-blue-100 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300'
-                                                                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
-                                                            }`;
+                                                            return `flex items-center px-4 py-1.5 text-xs transition-colors rounded-md ${active
+                                                                ? 'bg-blue-100 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300'
+                                                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
+                                                                }`;
                                                         }}
                                                     >
                                                         <span className="truncate">{subItem.name}</span>
@@ -527,14 +592,14 @@ const Sidebar = ({ isOpen }) => {
 };
 
 const ScrollToTop = () => {
-  const { pathname } = useLocation();
+    const { pathname } = useLocation();
 
-  useEffect(() => {
-    // Scroll to top when pathname changes
-    window.scrollTo(0, 0);
-  }, [pathname]);
+    useEffect(() => {
+        // Scroll to top when pathname changes
+        window.scrollTo(0, 0);
+    }, [pathname]);
 
-  return null;
+    return null;
 };
 
 // Main Content Component
@@ -546,7 +611,7 @@ const MainContent = ({ sidebarOpen }) => {
                 <Routes>
                     <Route index element={<OverviewPage />} />
                     <Route path="installation" element={<InstallationPage />} />
-                    
+
                     {/* Atoms Routes */}
                     <Route path="atoms/display" element={<ComponentShowcase category="atoms" subcategory="display" />} />
                     <Route path="atoms/display/:component" element={<ComponentShowcase category="atoms" subcategory="display" />} />
@@ -556,7 +621,7 @@ const MainContent = ({ sidebarOpen }) => {
                     <Route path="atoms/feedback/:component" element={<ComponentShowcase category="atoms" subcategory="feedback" />} />
                     <Route path="atoms/navigation" element={<ComponentShowcase category="atoms" subcategory="navigation" />} />
                     <Route path="atoms/navigation/:component" element={<ComponentShowcase category="atoms" subcategory="navigation" />} />
-                    
+
                     {/* Molecules Routes */}
                     <Route path="molecules/data" element={<ComponentShowcase category="molecules" subcategory="data" />} />
                     <Route path="molecules/data/:component" element={<ComponentShowcase category="molecules" subcategory="data" />} />
@@ -564,7 +629,7 @@ const MainContent = ({ sidebarOpen }) => {
                     <Route path="molecules/display/:component" element={<ComponentShowcase category="molecules" subcategory="display" />} />
                     <Route path="molecules/forms" element={<ComponentShowcase category="molecules" subcategory="forms" />} />
                     <Route path="molecules/forms/:component" element={<ComponentShowcase category="molecules" subcategory="forms" />} />
-                    
+
                     {/* Organisms Routes */}
                     <Route path="organisms/data-grids" element={<ComponentShowcase category="organisms" subcategory="data-grids" />} />
                     <Route path="organisms/data-grids/:component" element={<ComponentShowcase category="organisms" subcategory="data-grids" />} />
@@ -574,12 +639,21 @@ const MainContent = ({ sidebarOpen }) => {
                     <Route path="organisms/management/:component" element={<ComponentShowcase category="organisms" subcategory="management" />} />
                     <Route path="organisms/workflow" element={<ComponentShowcase category="organisms" subcategory="workflow" />} />
                     <Route path="organisms/workflow/:component" element={<ComponentShowcase category="organisms" subcategory="workflow" />} />
-                    
+
                     {/* Templates Routes */}
                     <Route path="templates/layouts" element={<ComponentShowcase category="templates" subcategory="layouts" />} />
                     <Route path="templates/layouts/:component" element={<ComponentShowcase category="templates" subcategory="layouts" />} />
                     <Route path="templates/pages" element={<ComponentShowcase category="templates" subcategory="pages" />} />
                     <Route path="templates/pages/:component" element={<ComponentShowcase category="templates" subcategory="pages" />} />
+
+                    {/* Sample Pages Routes */}
+                    <Route path="templates/pages/listing-page" element={<SampleListingPage />} />
+                    <Route path="templates/pages/detail-page/:id" element={<SampleDetailPage />} />
+                    <Route path="templates/pages/detail-page-2/:id" element={<SampleDetailPage2 />} />
+                    <Route path="templates/pages/export-modal" element={<ExportModalPage />} />
+                    <Route path="templates/pages/import-modal" element={<ImportModalPage />} />
+                    <Route path="templates/pages/create-page" element={<CreatePage />} />
+                    <Route path="templates/pages/create-modal" element={<CreateModalPage />} />
                 </Routes>
             </div>
         </main>
