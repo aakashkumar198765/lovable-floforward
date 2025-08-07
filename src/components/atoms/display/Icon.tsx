@@ -23,7 +23,7 @@ const Icon = forwardRef<HTMLSpanElement, IconProps>(
       if (typeof size === 'number') {
         return '';
       }
-      
+
       const sizeClasses = {
         xs: 'h-3 w-3',
         sm: 'h-4 w-4',
@@ -31,7 +31,7 @@ const Icon = forwardRef<HTMLSpanElement, IconProps>(
         lg: 'h-6 w-6',
         xl: 'h-8 w-8'
       };
-      
+
       return sizeClasses[size] || sizeClasses.md;
     };
 
@@ -64,12 +64,93 @@ const Icon = forwardRef<HTMLSpanElement, IconProps>(
 
     // Lucide icon mapping for backward compatibility
     const getLucideIcon = (iconName: string) => {
+      const iconMap: Record<string, keyof typeof LucideIcons> = {
+        // Basic icons
+        'check': 'Check',
+        'x': 'X',
+        'plus': 'Plus',
+        'minus': 'Minus',
+
+        // Arrow icons
+        'arrow-up': 'ArrowUp',
+        'arrow-down': 'ArrowDown',
+        'arrow-left': 'ArrowLeft',
+        'arrow-right': 'ArrowRight',
+
+        // UI icons
+        'search': 'Search',
+        'menu': 'Menu',
+        'settings': 'Settings',
+
+        // Status icons
+        'info': 'Info',
+        'warning': 'AlertTriangle',
+        'error': 'AlertCircle',
+        'success': 'CheckCircle',
+
+        // File icons
+        'file': 'File',
+        'download': 'Download',
+        'upload': 'Upload',
+
+        // User icons
+        'user': 'User',
+        'users': 'Users',
+        'user-plus': 'UserPlus',
+
+        // Action icons
+        'edit': 'Edit',
+        'trash': 'Trash2',
+        'filter': 'Filter',
+        'compare': 'BarChart3',
+        'star': 'Star',
+
+        // Status icons (additional)
+        'check-circle': 'CheckCircle',
+        'x-circle': 'XCircle',
+        'clock': 'Clock',
+        'skip-forward': 'SkipForward',
+        'ban': 'Ban',
+        'circle': 'Circle',
+
+        // Chevron icons
+        'chevron-up': 'ChevronUp',
+        'chevron-down': 'ChevronDown',
+        'chevron-left': 'ChevronLeft',
+        'chevron-right': 'ChevronRight',
+        'chevron-up-down': 'ChevronsUpDown',
+
+        // Additional icons
+        'table': 'Table',
+        'eye': 'Eye',
+        'eye-off': 'EyeOff',
+        'shield': 'Shield',
+        'lock': 'Lock',
+        'refresh': 'RefreshCw',
+        'save': 'Save',
+
+        // Navigation and UI icons
+        'home': 'Home',
+        'document': 'FileText',
+        'bell': 'Bell',
+        'close': 'X',
+        'logout': 'LogOut',
+        'package': 'Package',
+        "currency-rupee": "IndianRupee",
+        'building': 'Building',
+        'calendar': 'Calendar',
+        'printer': 'Printer',
+        'timeline': 'List', // or another icon that fits your use case
+
+
+      };
+
       const lucideIconName = iconMap[iconName];
       if (lucideIconName && LucideIcons[lucideIconName]) {
         const IconComponent = LucideIcons[lucideIconName] as React.ComponentType<any>;
         return <IconComponent />;
       }
-      
+
       return null;
     };
 
@@ -86,7 +167,7 @@ const Icon = forwardRef<HTMLSpanElement, IconProps>(
         if (lucideIcon) {
           return lucideIcon;
         }
-        
+
         // Fallback to text icon
         return <span>{name}</span>;
       }
