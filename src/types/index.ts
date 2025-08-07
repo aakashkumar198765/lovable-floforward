@@ -1,6 +1,104 @@
 // Commerce State Types
 export type CommerceState = 'initiation' | 'agreement' | 'execution' | 'settlement' | 'completion' | 'none';
 
+// Layout Types
+export interface FlexLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
+  direction?: 'row' | 'row-reverse' | 'col' | 'col-reverse';
+  wrap?: 'nowrap' | 'wrap' | 'wrap-reverse';
+  justify?: 'start' | 'end' | 'center' | 'between' | 'around' | 'evenly';
+  align?: 'start' | 'end' | 'center' | 'baseline' | 'stretch';
+  alignContent?: 'start' | 'end' | 'center' | 'between' | 'around' | 'evenly' | 'stretch';
+  gap?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  inline?: boolean;
+  padding?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  margin?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  fullWidth?: boolean;
+  fullHeight?: boolean;
+  background?: 'none' | 'white' | 'gray' | 'primary' | 'secondary' | string;
+  border?: 'none' | 'default' | 'dashed' | 'dotted' | string;
+  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full' | string;
+  shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | string;
+  children: React.ReactNode;
+}
+
+export interface GridLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
+  cols?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 'none' | 'subgrid' | string;
+  rows?: 1 | 2 | 3 | 4 | 5 | 6 | 'none' | 'subgrid' | string;
+  gap?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  gapX?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  gapY?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  flow?: 'row' | 'col' | 'row-dense' | 'col-dense';
+  autoCols?: 'auto' | 'min' | 'max' | 'fr' | string;
+  autoRows?: 'auto' | 'min' | 'max' | 'fr' | string;
+  justifyItems?: 'start' | 'end' | 'center' | 'stretch';
+  alignItems?: 'start' | 'end' | 'center' | 'stretch';
+  justifyContent?: 'start' | 'end' | 'center' | 'stretch' | 'between' | 'around' | 'evenly';
+  alignContent?: 'start' | 'end' | 'center' | 'stretch' | 'between' | 'around' | 'evenly';
+  padding?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  margin?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  fullWidth?: boolean;
+  fullHeight?: boolean;
+  background?: 'none' | 'white' | 'gray' | 'primary' | 'secondary' | string;
+  border?: 'none' | 'default' | 'dashed' | 'dotted' | string;
+  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full' | string;
+  shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | string;
+  children: React.ReactNode;
+}
+
+// Navbar Types
+export interface NavbarItem {
+  id: string;
+  label: string;
+  icon?: React.ReactNode;
+  href?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  badge?: string | number;
+  submenu?: NavbarItem[];
+}
+
+export interface NavbarProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
+  items: NavbarItem[];
+  activeItem?: string;
+  variant?: 'default' | 'minimal' | 'pills';
+  size?: 'sm' | 'md' | 'lg';
+  orientation?: 'horizontal' | 'vertical';
+  responsive?: boolean;
+  showOverflow?: boolean;
+  overflowTrigger?: 'hover' | 'click';
+  onChange?: (itemId: string) => void;
+  onItemClick?: (item: NavbarItem) => void;
+}
+
+// Sidebar Types
+export interface SidebarItem {
+  id: string;
+  label: string;
+  icon?: React.ReactNode;
+  href?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  badge?: string | number;
+  submenu?: SidebarItem[];
+}
+
+export interface SidebarProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange' | 'onToggle'> {
+  items: SidebarItem[];
+  activeItem?: string;
+  variant?: 'default' | 'dark' | 'light';
+  size?: 'sm' | 'md' | 'lg';
+  position?: 'left' | 'right';
+  fixed?: boolean;
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
+  width?: number;
+  collapsedWidth?: number;
+  showTooltips?: boolean;
+  onChange?: (itemId: string) => void;
+  onItemClick?: (item: SidebarItem) => void;
+  onToggle?: (collapsed: boolean) => void;
+}
+
 // Separator Key Types
 export type SeparatorKey = 'arrow' | 'slash' | 'dot' | 'dash' | 'pipe' | 'chevron';
 
@@ -2682,9 +2780,121 @@ export interface LoadingStateClassMap {
     spacing: string;
   }>;
 }
-
 export interface FormInputClassMap {
   size: Record<FormInputSize, string>;
   variant: Record<FormInputVariant, string>;
   status: Record<FormInputStatus, string>;
+}
+
+export interface ToastContainerProps {
+  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center';
+  children?: React.ReactNode;
+  className?: string;
+}
+
+
+export interface FlexLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Flex direction */
+  direction?: 'row' | 'row-reverse' | 'col' | 'col-reverse';
+  /** Flex wrap */
+  wrap?: 'nowrap' | 'wrap' | 'wrap-reverse';
+  /** Justify content (main axis alignment) */
+  justify?: 'start' | 'end' | 'center' | 'between' | 'around' | 'evenly';
+  /** Align items (cross axis alignment) */
+  align?: 'start' | 'end' | 'center' | 'baseline' | 'stretch';
+  /** Align content (multi-line alignment) */
+  alignContent?: 'start' | 'end' | 'center' | 'between' | 'around' | 'evenly' | 'stretch';
+  /** Gap between items */
+  gap?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  /** Inline flex instead of block flex */
+  inline?: boolean;
+  /** Custom padding */
+  padding?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  /** Custom margin */
+  margin?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  /** Full width */
+  fullWidth?: boolean;
+  /** Full height */
+  fullHeight?: boolean;
+  /** Background color variant */
+  background?: 'none' | 'white' | 'gray' | 'primary' | 'secondary' | string;
+  /** Border variant */
+  border?: 'none' | 'default' | 'dashed' | 'dotted' | string;
+  /** Border radius */
+  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full' | string;
+  /** Shadow variant */
+  shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | string;
+  /** Children components */
+  children: React.ReactNode;
+}
+export interface GridLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Number of columns */
+  cols?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 'none' | 'subgrid' | string;
+  /** Number of rows */
+  rows?: 1 | 2 | 3 | 4 | 5 | 6 | 'none' | 'subgrid' | string;
+  /** Gap between grid items */
+  gap?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  /** Gap between columns */
+  gapX?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  /** Gap between rows */
+  gapY?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  /** Grid flow direction */
+  flow?: 'row' | 'col' | 'row-dense' | 'col-dense';
+  /** Auto columns sizing */
+  autoCols?: 'auto' | 'min' | 'max' | 'fr' | string;
+  /** Auto rows sizing */
+  autoRows?: 'auto' | 'min' | 'max' | 'fr' | string;
+  /** Justify items (horizontal alignment within grid cells) */
+  justifyItems?: 'start' | 'end' | 'center' | 'stretch';
+  /** Align items (vertical alignment within grid cells) */
+  alignItems?: 'start' | 'end' | 'center' | 'stretch';
+  /** Justify content (horizontal alignment of grid within container) */
+  justifyContent?: 'start' | 'end' | 'center' | 'stretch' | 'between' | 'around' | 'evenly';
+  /** Align content (vertical alignment of grid within container) */
+  alignContent?: 'start' | 'end' | 'center' | 'stretch' | 'between' | 'around' | 'evenly';
+  /** Custom padding */
+  padding?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  /** Custom margin */
+  margin?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | string;
+  /** Full width */
+  fullWidth?: boolean;
+  /** Full height */
+  fullHeight?: boolean;
+  /** Background color variant */
+  background?: 'none' | 'white' | 'gray' | 'primary' | 'secondary' | string;
+  /** Border variant */
+  border?: 'none' | 'default' | 'dashed' | 'dotted' | string;
+  /** Border radius */
+  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full' | string;
+  /** Shadow variant */
+  shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | string;
+  /** Children components */
+  children: React.ReactNode;
+}
+
+
+export interface NavbarItem {
+  id: string;
+  label: string;
+  icon?: React.ReactNode;
+  href?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  badge?: string | number;
+  submenu?: NavbarItem[];
+}
+
+export interface NavbarProps {
+  items: NavbarItem[];
+  activeItem?: string;
+  variant?: 'default' | 'minimal' | 'pills';
+  size?: 'sm' | 'md' | 'lg';
+  orientation?: 'horizontal' | 'vertical';
+  responsive?: boolean;
+  showOverflow?: boolean;
+  overflowTrigger?: 'hover' | 'click';
+  className?: string;
+  style?: React.CSSProperties;
+  onChange?: (itemId: string) => void;
+  onItemClick?: (item: NavbarItem) => void;
 }

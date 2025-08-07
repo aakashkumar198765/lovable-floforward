@@ -99,7 +99,7 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
           {!loading && iconLeft && <span className="flex-shrink-0">{iconLeft}</span>}
           
           {children && (
-            <span className={cn('truncate', loading && 'opacity-70')}>
+            <span className={cn('w-full flex truncate', loading && 'opacity-70')}>
               {children}
             </span>
           )}
@@ -132,7 +132,7 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
         )}
 
         {children && (
-          <span className={cn(loading && 'opacity-70')}>
+          <span className={cn('w-full flex', loading && 'opacity-70')}>
             {children}
           </span>
         )}

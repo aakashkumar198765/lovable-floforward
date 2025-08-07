@@ -73,13 +73,6 @@ const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
           >
             {label}
           </Label>
-          // <span className={cn(
-          //   'ml-2 text-sm font-medium font-work-sans',
-          //   colorClasses[color],
-          //   overlay && 'block mt-2 ml-0'
-          // )}>
-          //   {label}
-          // </span>
         )}
 
         {/* Screen reader text */}

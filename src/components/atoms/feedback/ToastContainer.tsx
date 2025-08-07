@@ -1,11 +1,6 @@
 import React from 'react';
 import { cn } from '../../../utils/utils';
-
-interface ToastContainerProps {
-  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center';
-  children?: React.ReactNode;
-  className?: string;
-}
+import { ToastContainerProps } from '../../../types';
 
 const ToastContainer: React.FC<ToastContainerProps> = ({
   position = 'top-right',

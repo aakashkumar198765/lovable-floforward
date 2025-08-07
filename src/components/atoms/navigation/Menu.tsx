@@ -35,7 +35,7 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const itemRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
-    // Handle outside click
+    // Handle outside click and scroll events
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
         if (menuRef.current && !menuRef.current.contains(event.target as Node) &&
@@ -46,11 +46,41 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
         }
       };
 
+      const handleScroll = () => {
+        // Close all menus when page is scrolled
+        setIsOpen(false);
+        setOpenSubmenus(new Set());
+        setHoveredItem(null);
+      };
+
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          setIsOpen(false);
+          setOpenSubmenus(new Set());
+          setHoveredItem(null);
+        }
+      };
+
       if (isOpen) {
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        document.addEventListener('scroll', handleScroll, true); // Use capture phase to catch all scroll events
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+          document.removeEventListener('mousedown', handleClickOutside);
+          document.removeEventListener('scroll', handleScroll, true);
+          document.removeEventListener('keydown', handleKeyDown);
+        };
       }
     }, [isOpen]);
+
+    // Cleanup timeouts on unmount
+    useEffect(() => {
+      return () => {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+      };
+    }, []);
 
     // Handle menu open/close
     const handleMenuToggle = (open: boolean) => {
@@ -94,6 +124,18 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
         setOpenSubmenus(new Set());
         setHoveredItem(null);
       }
+    };
+
+    // Calculate main menu position
+    const getMainMenuPosition = () => {
+      if (!triggerRef.current) return { top: 0, left: 0 };
+      
+      const triggerRect = triggerRef.current.getBoundingClientRect();
+      
+      return {
+        top: triggerRect.bottom + 4,
+        left: triggerRect.left
+      };
     };
 
     // Calculate submenu position
@@ -200,11 +242,16 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
             }}
             onMouseLeave={() => {
               if (hasSubmenu && trigger === 'hover') {
-                setTimeout(() => {
+                // Clear any existing timeout
+                if (timeoutRef.current) {
+                  clearTimeout(timeoutRef.current);
+                }
+                timeoutRef.current = setTimeout(() => {
                   if (hoveredItem === item.id) {
                     handleSubmenuToggle(item.id, false);
+                    setHoveredItem(null);
                   }
-                }, 150);
+                }, 200);
               }
             }}
             disabled={item.disabled}
@@ -281,7 +328,7 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
         <div
           key={`submenu-${item.id}`}
           className={cn(
-            'fixed z-[60] min-w-48 py-1 font-work-sans',
+            'fixed z-[110] min-w-48 py-1 font-work-sans',
             variantClasses[variant],
             'animate-in fade-in slide-in-from-left-2 duration-200'
           )}
@@ -298,9 +345,14 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
           }}
           onMouseLeave={() => {
             if (trigger === 'hover') {
-              setTimeout(() => {
+              // Clear any existing timeout
+              if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+              }
+              timeoutRef.current = setTimeout(() => {
                 handleSubmenuToggle(item.id, false);
-              }, 150);
+                setHoveredItem(null);
+              }, 200);
             }
           }}
         >
@@ -320,7 +372,15 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
         <div
           ref={triggerRef}
           onMouseEnter={() => trigger === 'hover' && handleMenuToggle(true)}
-          onMouseLeave={() => trigger === 'hover' && handleMenuToggle(false)}
+          onMouseLeave={() => {
+            if (trigger === 'hover') {
+              // Clear any existing timeout
+              if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+              }
+              handleMenuToggle(false);
+            }
+          }}
           onClick={() => trigger === 'click' && handleMenuToggle(!isOpen)}
           className={cn(
             'inline-block cursor-pointer',
@@ -339,18 +399,26 @@ const Menu = forwardRef<HTMLDivElement, MenuProps>(
           <div
             ref={menuRef}
             className={cn(
-              'absolute z-50 min-w-48 py-1 font-work-sans',
+              'fixed z-[100] min-w-48 py-1 font-work-sans',
               variantClasses[variant],
-              placementClasses[placement],
               'animate-in fade-in slide-in-from-top-2 duration-200',
               className
             )}
             style={{
               maxHeight: maxHeight ? `${maxHeight}px` : undefined,
-              overflowY: maxHeight ? 'auto' : undefined
+              overflowY: maxHeight ? 'auto' : undefined,
+              ...getMainMenuPosition()
             }}
             onMouseEnter={() => trigger === 'hover' && handleMenuToggle(true)}
-            onMouseLeave={() => trigger === 'hover' && handleMenuToggle(false)}
+            onMouseLeave={() => {
+              if (trigger === 'hover') {
+                // Clear any existing timeout
+                if (timeoutRef.current) {
+                  clearTimeout(timeoutRef.current);
+                }
+                handleMenuToggle(false);
+              }
+            }}
             role="menu"
             aria-orientation="vertical"
           >

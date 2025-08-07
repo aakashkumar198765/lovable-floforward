@@ -64,6 +64,8 @@ const NAVIGATION_ITEMS = [
                 path: 'atoms/navigation', 
                 isCategory: true,
                 subItems: [
+                    { name: 'Navbar', path: 'atoms/navigation/Navbar' },
+                    { name: 'Sidebar', path: 'atoms/navigation/Sidebar' },
                     { name: 'Breadcrumb', path: 'atoms/navigation/Breadcrumb' },
                     { name: 'Pagination', path: 'atoms/navigation/Pagination' },
                     { name: 'Tab', path: 'atoms/navigation/Tab' }

@@ -8,6 +8,10 @@ import * as Molecules from '../components/molecules';
 import * as Organisms from '../components/organisms';
 import * as Templates from '../components/templates';
 
+// Import custom pages
+import NavigationComponentsPage from './NavigationComponentsPage';
+import TemplatesLayoutsPage from './TemplatesLayoutsPage';
+
 // Import Breadcrumb component for navigation
 const { Breadcrumb } = Atoms;
 
@@ -1438,6 +1442,17 @@ const ComponentShowcase = ({ category, subcategory }) => {
     };
 
     const specificComponent = selectedComponentName ? findComponent(selectedComponentName) : null;
+
+    // If showing navigation components, render custom NavigationComponentsPage
+    // This includes both the category view and individual Navbar/Sidebar component views
+    if (category === 'atoms' && subcategory === 'navigation') {
+        return <NavigationComponentsPage />;
+    }
+
+    // If showing templates layouts, render custom TemplatesLayoutsPage  
+    if (category === 'templates' && subcategory === 'layouts') {
+        return <TemplatesLayoutsPage />;
+    }
 
     // If showing a specific component, render its detailed view
     if (selectedComponentName && specificComponent) {

@@ -718,3 +718,16 @@ export const gridLayoutClasses = {
   "two-column": "grid-cols-1 md:grid-cols-2",
   "three-column": "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
 };
+
+export const flexGridLayoutClasses = {
+  // Gap classes
+  gapClasses: {
+    none: "0",
+    xs: "1",
+    sm: "2",
+    md: "4",
+    lg: "6",
+    xl: "8",
+    "2xl": "12",
+  },
+};

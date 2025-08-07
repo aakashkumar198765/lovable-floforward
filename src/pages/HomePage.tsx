@@ -1,4 +1,14 @@
 import React, { useState } from "react";
+import { 
+  Home, 
+  Settings, 
+  Users, 
+  FileText, 
+  BarChart3,
+  Calendar,
+  MessageCircle,
+  HelpCircle 
+} from "lucide-react";
 import {
   InputAllTypes,
   TextareaAllTypes,
@@ -54,7 +64,10 @@ import {
   WorkflowPage,
   ThemeToggle,
 } from "../components";
+import { Navbar, Sidebar } from "../components/atoms/layouts";
 import EditableDataGridInfiniteScrollExample from "./EditableDataGridInfiniteScrollExample";
+import FlexLayoutExamples from "../components/atoms/layouts/FlexLayoutExamples";
+import GridLayoutExamples from "../components/atoms/layouts/GridLayoutExamples";
 
 function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,6 +77,9 @@ function HomePage() {
   const [activeTab, setActiveTab] = useState("tab1");
   const [currentPage, setPaginationPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [activeSidebarItem, setActiveSidebarItem] = useState("analytics");
+  const [activeDarkSidebarItem, setActiveDarkSidebarItem] = useState("reports");
+  const [activeLightSidebarItem, setActiveLightSidebarItem] = useState("projects");
 
   const handleLoadingToggle = () => {
     setIsLoading(true);
@@ -78,6 +94,304 @@ function HomePage() {
             Reusable React Component Library
           </h1>
           <ThemeToggle />
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 transition-colors duration-200">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+            Navbar Component
+          </h2>
+          <div className="space-y-8">
+            {/* Default Navbar */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Default Navbar</h3>
+              <div className="border rounded-lg overflow-hidden">
+                <Navbar
+                  items={[
+                    { id: 'nav1', label: 'nav 1', href: '#nav1' },
+                    { id: 'nav2', label: 'nav 2', href: '#nav2', badge: '3' },
+                    { id: 'nav3', label: 'nav 3', href: '#nav3' },
+                    { id: 'nav4', label: 'nav 4', href: '#nav4' },
+                    { 
+                      id: 'nav5', 
+                      label: 'nav 5', 
+                      submenu: [
+                        { id: 'nav5-1', label: 'nav 5-1', href: '#nav5-1' },
+                        { id: 'nav5-2', label: 'nav 5-2', href: '#nav5-2' }
+                      ]
+                    },
+                    { id: 'nav6', label: 'nav 6', href: '#nav6' },
+                    { id: 'nav7', label: 'nav 7', href: '#nav7' },
+                    { id: 'nav8', label: 'nav 8', href: '#nav8' },
+                    { id: 'nav9', label: 'nav 9', href: '#nav9' },
+                    { id: 'nav10', label: 'nav 10', href: '#nav10' },
+                    { id: 'nav11', label: 'nav 11', href: '#nav11' },
+                    { id: 'nav12', label: 'nav 12', href: '#nav12' },
+                    { id: 'nav13', label: 'nav 13', href: '#nav13' },
+                    { id: 'nav14', label: 'nav 14', href: '#nav14' },
+                    { id: 'nav15', label: 'nav 15', href: '#nav15' }
+                  ]}
+                  activeItem="nav2"
+                  variant="default"
+                  size="md"
+                  responsive={true}
+                  showOverflow={true}
+                  overflowTrigger="hover"
+                />
+              </div>
+            </div>
+
+            {/* Pills Variant */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Pills Navbar</h3>
+              <div className="border rounded-lg overflow-hidden">
+                <Navbar
+                  items={[
+                    { id: 'home', label: 'Home', href: '#home' },
+                    { id: 'about', label: 'About', href: '#about' },
+                    { 
+                      id: 'services', 
+                      label: 'Services', 
+                      submenu: [
+                        { id: 'web-design', label: 'Web Design', href: '#web-design' },
+                        { id: 'development', label: 'Development', href: '#development' },
+                        { 
+                          id: 'consulting', 
+                          label: 'Consulting',
+                          submenu: [
+                            { id: 'tech-consulting', label: 'Tech Consulting', href: '#tech' },
+                            { id: 'business-consulting', label: 'Business Consulting', href: '#business' }
+                          ]
+                        }
+                      ]
+                    },
+                    { id: 'portfolio', label: 'Portfolio', href: '#portfolio', badge: '12' },
+                    { id: 'contact', label: 'Contact', href: '#contact' }
+                  ]}
+                  activeItem="services"
+                  variant="pills"
+                  size="md"
+                  responsive={true}
+                  showOverflow={true}
+                />
+              </div>
+            </div>
+
+            {/* Minimal Variant */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Minimal Navbar</h3>
+              <div className="border rounded-lg overflow-hidden">
+                <Navbar
+                  items={[
+                    { id: 'dashboard', label: 'Dashboard', href: '#dashboard' },
+                    { id: 'analytics', label: 'Analytics', href: '#analytics', badge: 'New' },
+                    { id: 'settings', label: 'Settings', href: '#settings' },
+                    { id: 'profile', label: 'Profile', href: '#profile' }
+                  ]}
+                  activeItem="analytics"
+                  variant="minimal"
+                  size="lg"
+                  responsive={true}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 transition-colors duration-200">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+            Sidebar Component
+          </h2>
+          <div className="space-y-8">
+            {/* Default Sidebar */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Default Sidebar</h3>
+              <div className="relative border rounded-lg overflow-hidden" style={{ height: '400px' }}>
+                <Sidebar
+                  items={[
+                    { 
+                      id: 'dashboard', 
+                      label: 'Dashboard', 
+                      icon: <Home />, 
+                      href: '#dashboard' 
+                    },
+                    { 
+                      id: 'analytics', 
+                      label: 'Analytics', 
+                      icon: <BarChart3 />, 
+                      href: '#analytics', 
+                      badge: '3' 
+                    },
+                    { 
+                      id: 'users', 
+                      label: 'Users', 
+                      icon: <Users />,
+                      submenu: [
+                        { id: 'all-users', label: 'All Users', href: '#all-users' },
+                        { id: 'user-roles', label: 'User Roles', href: '#user-roles', badge: 'New' },
+                        { id: 'permissions', label: 'Permissions', href: '#permissions' }
+                      ]
+                    },
+                    { 
+                      id: 'content', 
+                      label: 'Content', 
+                      icon: <FileText />,
+                      submenu: [
+                        { id: 'articles', label: 'Articles', href: '#articles' },
+                        { id: 'media', label: 'Media', href: '#media', badge: '12' },
+                        { 
+                          id: 'categories', 
+                          label: 'Categories',
+                          submenu: [
+                            { id: 'main-categories', label: 'Main Categories', href: '#main' },
+                            { id: 'sub-categories', label: 'Sub Categories', href: '#sub' }
+                          ]
+                        }
+                      ]
+                    },
+                    { 
+                      id: 'calendar', 
+                      label: 'Calendar', 
+                      icon: <Calendar />, 
+                      href: '#calendar' 
+                    },
+                    { 
+                      id: 'messages', 
+                      label: 'Messages', 
+                      icon: <MessageCircle />, 
+                      href: '#messages', 
+                      badge: '5' 
+                    },
+                    { 
+                      id: 'settings', 
+                      label: 'Settings', 
+                      icon: <Settings />, 
+                      href: '#settings' 
+                    },
+                    { 
+                      id: 'help', 
+                      label: 'Help', 
+                      icon: <HelpCircle />, 
+                      href: '#help' 
+                    }
+                  ]}
+                  activeItem={activeSidebarItem}
+                  variant="default"
+                  size="md"
+                  position="left"
+                  fixed={false}
+                  collapsible={true}
+                  defaultCollapsed={false}
+                  width={256}
+                  collapsedWidth={64}
+                  showTooltips={true}
+                  onChange={setActiveSidebarItem}
+                />
+              </div>
+            </div>
+
+            {/* Dark Sidebar */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Dark Sidebar (Collapsed)</h3>
+              <div className="relative border rounded-lg overflow-hidden" style={{ height: '400px' }}>
+                <Sidebar
+                  items={[
+                    { 
+                      id: 'home', 
+                      label: 'Home', 
+                      icon: <Home />, 
+                      href: '#home' 
+                    },
+                    { 
+                      id: 'reports', 
+                      label: 'Reports', 
+                      icon: <BarChart3 />, 
+                      href: '#reports', 
+                      badge: 'New' 
+                    },
+                    { 
+                      id: 'team', 
+                      label: 'Team', 
+                      icon: <Users />,
+                      submenu: [
+                        { id: 'members', label: 'Members', href: '#members' },
+                        { id: 'departments', label: 'Departments', href: '#departments' }
+                      ]
+                    },
+                    { 
+                      id: 'files', 
+                      label: 'Files', 
+                      icon: <FileText />, 
+                      href: '#files' 
+                    },
+                    { 
+                      id: 'config', 
+                      label: 'Configuration', 
+                      icon: <Settings />, 
+                      href: '#config' 
+                    }
+                  ]}
+                  activeItem={activeDarkSidebarItem}
+                  variant="dark"
+                  size="md"
+                  position="left"
+                  fixed={false}
+                  collapsible={true}
+                  defaultCollapsed={true}
+                  width={240}
+                  collapsedWidth={60}
+                  showTooltips={true}
+                  onChange={setActiveDarkSidebarItem}
+                />
+              </div>
+            </div>
+
+            {/* Light Sidebar */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">Light Sidebar (Small Size)</h3>
+              <div className="relative border rounded-lg overflow-hidden" style={{ height: '300px' }}>
+                <Sidebar
+                  items={[
+                    { 
+                      id: 'overview', 
+                      label: 'Overview', 
+                      icon: <Home />, 
+                      href: '#overview' 
+                    },
+                    { 
+                      id: 'projects', 
+                      label: 'Projects', 
+                      icon: <FileText />, 
+                      href: '#projects', 
+                      badge: '8' 
+                    },
+                    { 
+                      id: 'team-mgmt', 
+                      label: 'Team Management', 
+                      icon: <Users />, 
+                      href: '#team-mgmt' 
+                    },
+                    { 
+                      id: 'preferences', 
+                      label: 'Preferences', 
+                      icon: <Settings />, 
+                      href: '#preferences' 
+                    }
+                  ]}
+                  activeItem={activeLightSidebarItem}
+                  variant="light"
+                  size="sm"
+                  position="left"
+                  fixed={false}
+                  collapsible={true}
+                  defaultCollapsed={false}
+                  width={200}
+                  collapsedWidth={50}
+                  showTooltips={true}
+                  onChange={setActiveLightSidebarItem}
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 transition-colors duration-200">
@@ -2698,6 +3012,20 @@ function HomePage() {
       </div>
       <div className="min-h-screen bg-gray-50">
         <EditableDataGridInfiniteScrollExample />
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 transition-colors duration-200">
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+          Flex Layout
+        </h2>
+        <FlexLayoutExamples />
+      </div>
+
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 transition-colors duration-200">
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+          Grid Layout
+        </h2>
+        <GridLayoutExamples />
       </div>
     </div>
   );
