@@ -217,41 +217,7 @@ const NAVIGATION_ITEMS = [
                 ]
             }
         ]
-    },
-    // {
-    //     category: 'Sample Pages',
-    //     icon: 'pages',
-    //     items: [
-    //         { 
-    //             name: 'Listing Page', 
-    //             path: 'sample-pages/listing-page'
-    //         },
-    //         { 
-    //             name: 'Detail Page', 
-    //             path: 'sample-pages/detail-page/ITEM-001'
-    //         },
-    //         { 
-    //             name: 'Detail Page 2 (Hardcoded)', 
-    //             path: 'sample-pages/detail-page-2/ITEM-001'
-    //         },
-    //         { 
-    //             name: 'Export Modal', 
-    //             path: 'sample-pages/export-modal'
-    //         },
-    //         { 
-    //             name: 'Import Modal', 
-    //             path: 'sample-pages/import-modal'
-    //         },
-    //         { 
-    //             name: 'Create Page', 
-    //             path: 'sample-pages/create-page'
-    //         },
-    //         { 
-    //             name: 'Create Modal', 
-    //             path: 'sample-pages/create-modal'
-    //         }
-    //     ]
-    // }
+    }
 ];
 
 const LibraryTemplate = () => {
@@ -373,8 +339,7 @@ const DesktopSidebar = () => {
         'Atoms': false,
         'Molecules': false,
         'Organisms': false,
-        'Templates': false,
-        'Sample Pages': false
+        'Templates': false
     });
 
     const toggleCategory = (category) => {
@@ -386,18 +351,6 @@ const DesktopSidebar = () => {
 
     const navigationItems = NAVIGATION_ITEMS;
 
-    // Icon component for consistent icon rendering
-    const Icon = ({ name, size = "w-4 h-4" }) => {
-        const icons = {
-            home: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>,
-            atom: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2" /><path d="M12 2c-1.5 0-3 4.5-3 10s1.5 10 3 10 3-4.5 3-10S13.5 2 12 2z" /><path d="M2 12c0 1.5 4.5 3 10 3s10-1.5 10-3-4.5-3-10-3S2 10.5 2 12z" /><path d="M2 12c0-1.5 4.5-3 10-3s10 1.5 10 3-4.5 3-10 3S2 13.5 2 12z" /></svg>,
-            molecule: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3" /><circle cx="18" cy="18" r="3" /><circle cx="18" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><line x1="9" y1="9" x2="15" y2="15" /><line x1="15" y1="9" x2="9" y2="15" /></svg>,
-            organism: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
-            template: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>,
-            pages: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-        };
-        return icons[name] || <div className={size}></div>;
-    };
 
     return (
         <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto">
@@ -413,15 +366,6 @@ const DesktopSidebar = () => {
                                 {/* Category icons could be added here if needed */}
                                 <span>{section.category}</span>
                             </div>
-                            <svg
-                                className={`w-4 h-4 text-gray-400 transition-transform ${expandedCategories[section.category] ? 'rotate-90' : ''
-                                    }`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
                             <ChevronRight
                                 className={`w-4 h-4 text-gray-400 transition-transform ${expandedCategories[section.category] ? 'rotate-90' : ''
                                     }`}
@@ -488,8 +432,7 @@ const Sidebar = ({ isOpen }) => {
         'Atoms': false,
         'Molecules': false,
         'Organisms': false,
-        'Templates': false,
-        'Sample Pages': false
+        'Templates': false
     });
 
     const toggleCategory = (category) => {
@@ -501,18 +444,6 @@ const Sidebar = ({ isOpen }) => {
 
     const navigationItems = NAVIGATION_ITEMS;
 
-    // Icon component for consistent icon rendering
-    const Icon = ({ name, size = "w-4 h-4" }) => {
-        const icons = {
-            home: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>,
-            atom: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2" /><path d="M12 2c-1.5 0-3 4.5-3 10s1.5 10 3 10 3-4.5 3-10S13.5 2 12 2z" /><path d="M2 12c0 1.5 4.5 3 10 3s10-1.5 10-3-4.5-3-10-3S2 10.5 2 12z" /><path d="M2 12c0-1.5 4.5-3 10-3s10 1.5 10 3-4.5 3-10 3S2 13.5 2 12z" /></svg>,
-            molecule: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3" /><circle cx="18" cy="18" r="3" /><circle cx="18" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><line x1="9" y1="9" x2="15" y2="15" /><line x1="15" y1="9" x2="9" y2="15" /></svg>,
-            organism: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
-            template: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" /></svg>,
-            pages: <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-        };
-        return icons[name] || <div className={size}></div>;
-    };
 
     return (
         <aside className={`bg-white dark:bg-gray-800 transition-all duration-300 ${isOpen ? 'w-64' : 'w-0 lg:w-0'
@@ -530,15 +461,6 @@ const Sidebar = ({ isOpen }) => {
                                 {/* Category icon would go here */}
                                 <span>{section.category}</span>
                             </div>
-                            <svg
-                                className={`w-4 h-4 text-gray-400 transition-transform ${expandedCategories[section.category] ? 'rotate-90' : ''
-                                    }`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
                             <ChevronRight
                                 className={`w-4 h-4 text-gray-400 transition-transform ${expandedCategories[section.category] ? 'rotate-90' : ''
                                     }`}
