@@ -1,0 +1,57 @@
+{
+  "title": "Smart AI Configuration",
+  "subtitle": "Select and configure the AI features to include in your application.",
+  "configurations": [
+    {
+      "id": "conversational-assistant",
+      "title": "Conversational Assistant",
+      "icon": "💬",
+      "description": "Adds a chat panel where end-users can ask natural language questions about their data and workflows.",
+      "exampleQuery": {
+        "label": "EXAMPLE END-USER QUERY",
+        "text": "\"What's the status of invoice #SI-12345?\""
+      },
+      "features": [
+        "Natural language processing",
+        "Data query capabilities",
+        "Workflow insights",
+        "Real-time responses"
+      ],
+      "enabled": false
+    },
+    {
+      "id": "anomaly-detection",
+      "title": "Anomaly Detection",
+      "icon": "⚠️",
+      "description": "The AI automatically monitors workflows and alerts users to significant deviations from the norm.",
+      "exampleAlert": {
+        "label": "EXAMPLE AI ALERT",
+        "text": "\"Shipment #SH-9876 has been in Customs for 7 days, which is longer than average.\""
+      },
+      "features": [
+        "Automatic monitoring",
+        "Pattern recognition",
+        "Smart alerts",
+        "Deviation analysis"
+      ],
+      "enabled": false
+    },
+    {
+      "id": "predictive-insights",
+      "title": "Predictive Insights",
+      "icon": "📈",
+      "description": "Uses historical data to forecast potential issues, such as late payments or shipment delays.",
+      "exampleForecast": {
+        "label": "EXAMPLE AI FORECAST",
+        "text": "\"Invoice #SI-54321 is at high risk of late payment based on customer history.\""
+      },
+      "features": [
+        "Historical data analysis",
+        "Risk assessment",
+        "Predictive modeling",
+        "Early warning system"
+      ],
+      "enabled": false
+    }
+  ]
+}

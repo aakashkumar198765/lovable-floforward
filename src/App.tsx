@@ -11,6 +11,7 @@ import paramSDKService from "./services/ParamSDKService";
 
 import Prompt from "./pages/Prompt";
 import Login from "./pages/Login";
+import AIConfiguration from "./pages/AIConfiguration";
 
 function App() {
   useEffect(() => {
@@ -40,6 +41,7 @@ function App() {
           <Route path="/workflow-preview" element={<WorkflowPreview />} />
           <Route path="/library-template" element={<LibraryTemplate />} />
           <Route path="/prompt" element={<Prompt />} />
+          <Route path="/ai-configuration" element={<AIConfiguration />} />
         </Routes>
 
         {/* Global Toast Container */}
