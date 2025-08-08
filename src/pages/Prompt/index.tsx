@@ -16,7 +16,9 @@ const Prompt: React.FC = () => {
   const [buildingAppName, setBuildingAppName] = React.useState<
     string | undefined
   >(undefined);
-  const [logs, setLogs] = React.useState<{ id: string; text: string }[]>([]);
+  const [logs, setLogs] = React.useState<
+    { message: string; status: string; format: string }[]
+  >([]);
 
   const handleSubmit = React.useCallback(() => {
     if (!prompt.trim()) return;
@@ -26,21 +28,74 @@ const Prompt: React.FC = () => {
     setLogs([]);
 
     const steps = [
-      `Initializing workspace for ${name}...`,
-      "Analyzing prompt and requirements...",
-      "Scaffolding project structure...",
-      "Generating components...",
-      "Wiring state and routes...",
-      "Finalizing setup...",
-      "Done! Project ready to open.",
+      {
+        message: `\`[INFO]\` **Initializing workspace for ${name}...**  
+- Setting up project environment  
+- Loading configuration files`,
+        status: "started",
+        format: "markdown",
+      },
+      {
+        message: `\`[INFO]\` **Analyzing prompt requirements...**  
+- Detected app type: *${name}*  
+- Generating schema for components`,
+        status: "pending",
+        format: "markdown",
+      },
+      {
+        message: `\`[SEQUENCE]\` **Scaffolding project structure...**  
+\`\`\`  
+├── src  
+│   ├── components  
+│   ├── pages  
+│   └── styles  
+└── public  
+\`\`\``,
+        status: "pending",
+        format: "markdown",
+      },
+      {
+        message: `\`[START]\` **Generating UI components...**  
+- **Header**: Responsive navigation  
+- **Main**: Dynamic content area  
+- **Footer**: Static branding`,
+        status: "pending",
+        format: "markdown",
+      },
+      {
+        message: `\`[COMPLETE]\` **Building ${name} core logic...**  
+## Generated Features  
+- **State Management**: Redux integration  
+- **Routing**: React Router setup  
+- **API Layer**: Mock endpoints ready  
+\`\`\`javascript  
+const app = initializeApp({ name: "${name}" });  
+app.start();  
+\`\`\``,
+        status: "completed",
+        format: "markdown",
+      },
+      {
+        message: `\`[INFO]\` **Running final validations...**  
+- Linting: ✅ Passed  
+- Tests: ✅ 100% coverage`,
+        status: "pending",
+        format: "markdown",
+      },
+      {
+        message: `\`[DONE]\` **${name} is ready!**  
+# Next Steps  
+1. Open project in editor  
+2. Run \`npm start\`  
+3. Deploy to production`,
+        status: "completed",
+        format: "markdown",
+      },
     ];
 
     let idx = 0;
     const interval = setInterval(() => {
-      setLogs((prev) => [
-        ...prev,
-        { id: `${Date.now()}-${idx}`, text: steps[idx] },
-      ]);
+      setLogs((prev) => [...prev, steps[idx]]);
       idx += 1;
       if (idx >= steps.length) {
         clearInterval(interval);

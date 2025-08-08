@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import { Textarea, Button, Badge } from "../../components/atoms";
+import Logs from "./Logs";
 
 type RecentApp = { id: string; name: string; description?: string };
 
-type LogEntry = { id: string; text: string; timestamp?: string };
+type LogEntry = {
+  message: string;
+  status: string;
+  format: string;
+};
 
 type PromptContentProps = {
   prompt: string;
@@ -33,7 +38,6 @@ const PromptContent: React.FC<PromptContentProps> = ({
   };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Close drawer only if the click is on the backdrop (not on the drawer content)
     if (e.target === e.currentTarget) {
       setIsDrawerOpen(false);
     }
@@ -63,30 +67,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
             </div>
           </div>
         ) : (
-          <div className="border border-gray-200 rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
-              Building {buildingAppName || "App"}
-            </h3>
-            <p className="text-sm text-gray-600 mb-4 text-center">
-              This is a simulated build log for demonstration purposes.
-            </p>
-            <div className="h-80 overflow-y-auto bg-gray-50 border border-gray-200 rounded-md p-4 space-y-2">
-              {logs.length === 0 ? (
-                <div className="text-sm text-gray-500 text-center">
-                  No logs yet
-                </div>
-              ) : (
-                logs.map((log) => (
-                  <div
-                    key={log.id}
-                    className="text-sm text-gray-800 text-center"
-                  >
-                    {log.text}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+          <Logs logs={logs} />
         )}
       </div>
 
