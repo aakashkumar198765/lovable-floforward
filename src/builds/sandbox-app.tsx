@@ -3,9 +3,37 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import { componentRegistry } from '../libraryTemplate/componentRegistry';
 
+// Define types for the component structure
+interface ComponentVariation {
+  name: string;
+  props: Record<string, any>;
+  description?: string;
+}
+
+interface ComponentDefinition {
+  name: string;
+  component: React.ComponentType<any>;
+  description: string;
+  variations: ComponentVariation[];
+}
+
+interface SubcategoryData {
+  components: ComponentDefinition[];
+}
+
+interface CategoryData {
+  [subcategory: string]: SubcategoryData;
+}
+
+interface ComponentRegistry {
+  [category: string]: CategoryData;
+}
+
 const ComponentSandbox = () => {
-  const [selectedComponent, setSelectedComponent] = useState(null);
+  const [selectedComponent, setSelectedComponent] = useState<ComponentDefinition | null>(null);
   const [selectedVariation, setSelectedVariation] = useState(0);
+
+  const typedRegistry = componentRegistry as ComponentRegistry;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -16,13 +44,13 @@ const ComponentSandbox = () => {
             <h2 className="text-lg font-semibold">Component Sandbox</h2>
           </div>
           
-          {Object.entries(componentRegistry).map(([category, categoryData]) => (
+          {Object.entries(typedRegistry).map(([category, categoryData]) => (
             <div key={category} className="p-4">
               <h3 className="font-medium text-gray-900 mb-2 capitalize">{category}</h3>
               {Object.entries(categoryData).map(([subcat, subcatData]) => (
                 <div key={subcat} className="ml-2 mb-2">
                   <h4 className="text-sm font-medium text-gray-700 mb-1">{subcat}</h4>
-                  {subcatData.components.map((comp) => (
+                  {subcatData.components.map((comp: ComponentDefinition) => (
                     <button
                       key={comp.name}
                       onClick={() => {
@@ -55,7 +83,7 @@ const ComponentSandbox = () => {
                   onChange={(e) => setSelectedVariation(Number(e.target.value))}
                   className="border rounded px-3 py-2"
                 >
-                  {selectedComponent.variations.map((variation, index) => (
+                  {selectedComponent.variations.map((variation: ComponentVariation, index: number) => (
                     <option key={index} value={index}>{variation.name}</option>
                   ))}
                 </select>
@@ -63,7 +91,10 @@ const ComponentSandbox = () => {
 
               {/* Component preview */}
               <div className="bg-white p-8 rounded-lg shadow-sm">
-                <selectedComponent.component {...selectedComponent.variations[selectedVariation].props} />
+                {React.createElement(
+                  selectedComponent.component,
+                  selectedComponent.variations[selectedVariation].props
+                )}
               </div>
 
               {/* Props display */}

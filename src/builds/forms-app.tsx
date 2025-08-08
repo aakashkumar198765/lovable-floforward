@@ -21,39 +21,48 @@ const FormsShowcase = () => {
           <h3 className="text-xl font-semibold mb-6">Sample Form</h3>
           
           <div className="space-y-6">
-            <Atoms.InputAllTypes 
-              label="Name"
-              placeholder="Enter your name"
-              type="text"
-            />
+            {/* InputAllTypes doesn't support label prop - it's a commerce state demo component */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+              <Atoms.InputAllTypes 
+                initialInputValue="Enter your name"
+                onValueChange={(value) => console.log('Name:', value)}
+              />
+            </div>
             
-            <Atoms.InputAllTypes 
-              label="Email"
-              placeholder="Enter your email"
-              type="email"
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <Atoms.InputAllTypes 
+                initialInputValue="Enter your email"
+                onValueChange={(value) => console.log('Email:', value)}
+              />
+            </div>
             
-            <Atoms.SelectAllTypes 
-              label="Role"
-              options={[
-                { value: 'admin', label: 'Administrator' },
-                { value: 'user', label: 'User' },
-                { value: 'guest', label: 'Guest' }
-              ]}
-            />
+            {/* SelectAllTypes doesn't support label or options props - it's a demo component */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+              <Atoms.SelectAllTypes 
+                onStateChange={(state) => console.log('Role state:', state)}
+              />
+            </div>
             
-            <Atoms.TextareaAllTypes 
-              label="Message"
-              placeholder="Enter your message"
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
+              <Atoms.TextareaAllTypes 
+                initialTextareaValue="Enter your message"
+                onValueChange={(value) => console.log('Message:', value)}
+              />
+            </div>
             
-            <Atoms.DatePickerAllTypes 
-              label="Date"
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+              <Atoms.DatePickerAllTypes />
+            </div>
             
-            <Atoms.FileUploadAllTypes 
-              label="Upload File"
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Upload File</label>
+              <Atoms.FileUploadAllTypes />
+            </div>
             
             <div className="flex space-x-4">
               <Atoms.Button variant="primary">Submit</Atoms.Button>

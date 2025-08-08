@@ -26,9 +26,16 @@ const MoleculesShowcase = () => {
             <h3 className="text-lg font-semibold mb-4">Metric Card</h3>
             <Molecules.MetricCard 
               title="Total Users"
-              value="1,234"
-              change="+12%"
-              trend="up"
+              metric={{
+                value: 1234,
+                format: 'number'
+              }}
+              trend={{
+                value: 12,
+                direction: 'up',
+                period: 'vs last month',
+                isPositive: true
+              }}
             />
           </div>
         </div>

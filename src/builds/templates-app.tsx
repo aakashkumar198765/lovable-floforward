@@ -16,9 +16,11 @@ const TemplatesShowcase = () => {
         </header>
 
         <Routes>
-          <Route path="/" element={<Templates.ListingPage />} />
-          <Route path="/detail" element={<Templates.DetailPage />} />
-          <Route path="/create" element={<Templates.CreatePage />} />
+          {/* Use actual exported template components */}
+          <Route path="/" element={<Templates.SettingsPage />} />
+          <Route path="/reports" element={<Templates.ReportsPage />} />
+          <Route path="/workflow" element={<Templates.WorkflowPage />} />
+          <Route path="/login" element={<Templates.LoginPageTemplate />} />
         </Routes>
       </div>
     </Router>
