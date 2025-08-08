@@ -1,0 +1,9 @@
+{
+    "paramSdk": {
+        "url": "https://staging.paramwallet.com:8006",
+        "apiKey": "19832b9f43cb285b9e5703617338f9e570688cd30f60d3f969402cc937d6d563",
+        "subdomainName": "param-ai-studio",
+        "portalType": "web",
+        "projectId": "ai-studio"
+    }
+}
