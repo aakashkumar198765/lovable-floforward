@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Textarea, Button, Badge } from "../../components/atoms";
 import Logs from "./Logs";
 
@@ -31,6 +32,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
   onSelectRecent,
   logs,
 }) => {
+  const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -51,8 +53,8 @@ const PromptContent: React.FC<PromptContentProps> = ({
   };
 
   const handleViewOutput = () => {
-    console.log("View output clicked");
-    alert("View Output functionality will be implemented here");
+    console.log("View output clicked - navigating to project plan");
+    navigate('/project-plan');
   };
 
   // Show logs if building or if logs exist and we're in logs view

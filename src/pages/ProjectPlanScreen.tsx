@@ -16,6 +16,8 @@ import { Button } from "../components/atoms/form";
 import { Select } from "../components/atoms/form";
 import MarkdownRenderer from "../utils/MarkdownRenderer";
 import { stateMachineExampleDummyData } from "../utils/stateMachine";
+import AIConfiguration from "./AIConfiguration";
+import WorkflowPreview from "./WorkflowPreview";
 
 const nodeColor = (node: any) => {
   switch (node.type) {
@@ -397,6 +399,10 @@ const ProjectPlanScreen: React.FC = () => {
             </ReactFlow>
           </div>
         );
+      case "smart-ai":
+        return <AIConfiguration />;
+      case "preview":
+        return <WorkflowPreview />;
       default:
         return <MarkdownRenderer content={testMarkdown} className="w-full" />;
     }

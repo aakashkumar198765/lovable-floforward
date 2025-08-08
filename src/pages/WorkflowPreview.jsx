@@ -777,13 +777,18 @@ const WorkflowPreview = () => {
 
       {/* Workflow Tabs */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <Tab
-          items={workflowTabItems}
-          activeTab={selectedWorkflow}
-          onChange={(tabId) => setSelectedWorkflow(tabId)}
-          variant="pills"
-          size="sm"
-        />
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          <div className="min-w-max">
+            <Tab
+              items={workflowTabItems}
+              activeTab={selectedWorkflow}
+              onChange={(tabId) => setSelectedWorkflow(tabId)}
+              variant="pills"
+              size="sm"
+              className="whitespace-nowrap"
+            />
+          </div>
+        </div>
       </div>
 
       {/* State Pills */}
