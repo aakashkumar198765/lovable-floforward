@@ -143,7 +143,10 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(
                   disabled={item.disabled}
                   onClick={() => item.id && handleTabChange(item.id)}
                 >
-                  <span className="flex items-center gap-2">
+                  <span className={cn(
+                    "flex items-center gap-2",
+                    (!item.icon && !item.badge) && "justify-center"
+                  )}>
                     {/* Icon */}
                     {item.icon && (
                       <span

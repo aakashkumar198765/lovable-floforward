@@ -1,10 +1,121 @@
 import React, { useState } from "react";
+import {
+  ReactFlow,
+  useNodesState,
+  useEdgesState,
+  MiniMap,
+  Controls,
+  Background,
+  applyNodeChanges,
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
 import ChatPage from "./Chatpage";
 import { FlexLayout } from "../components/atoms/layouts";
 import { Tab } from "../components/atoms/navigation";
 import { Button } from "../components/atoms/form";
 import { Select } from "../components/atoms/form";
 import MarkdownRenderer from "../utils/MarkdownRenderer";
+import { stateMachineExampleDummyData } from "../utils/stateMachine";
+
+const nodeColor = (node: any) => {
+  switch (node.type) {
+    case "addableNode":
+      return "#6ede87";
+    case "editableNode":
+      return "#6865A5";
+    case "accordionNode":
+      return "#6ede87";
+    default:
+      return "#ff0072";
+  }
+};
+
+const positions = {
+  defaultX: 50,
+  defaultOffsetX: 350,
+  defaultY: 100,
+  defaultOffsetY: 100,
+};
+
+interface SubState {
+  Start?: boolean;
+  End?: boolean;
+  NextState?: string;
+  Owner?: string[];
+  Visibility?: Record<string, boolean>;
+  Rule?: any;
+  MicroStates?: Record<string, {
+    Start?: boolean;
+    End?: boolean;
+    NextState?: string;
+    Owner?: string[];
+    Desc?: string;
+  }>;
+}
+
+interface State {
+  Schema?: string;
+  Props?: {
+    Flip?: boolean;
+    Edit?: boolean;
+    diff?: {
+      from?: string;
+      to?: string;
+    };
+  } | null;
+  SubStates?: Record<string, SubState>;
+  NextState?: string;
+  End?: boolean;
+  Desc?: string;
+  Owner?: string[];
+  Visibility?: Record<string, boolean>;
+  AttachStates?: string[];
+}
+
+interface StateMachine {
+  _id?: string;
+  AppType?: string;
+  Base_sm?: string;
+  Branch?: boolean;
+  Category?: string;
+  Desc?: string;
+  ExchangeParamID?: Array<{
+    paramID: string;
+    publicKey: string;
+  }>;
+  Index?: number;
+  Name: string;
+  Organizations?: Array<{
+    Name: string;
+    Desc: string;
+    Teams: Array<{
+      Role: string;
+      Desc: string;
+    }>;
+  }>;
+  Props?: {
+    Icon?: number;
+    BgColor?: string;
+    Category?: string;
+  };
+  Roles?: string[];
+  StartAt: string;
+  Start_sm?: string;
+  States: Record<string, State>;
+  installed?: number;
+  orgParamID?: string;
+  smID?: string;
+}
+
+interface AnnotationNode {
+  id: string;
+  type: string;
+  draggable: boolean;
+  selectable: boolean;
+  data: { label: string };
+  position: { x: number; y: number };
+  parentId?: string;
+}
 
 // Test markdown content from ai_docs/eg.md (simplified for testing)
 export const testMarkdown = `# ORGANIZATIONS & TEAMS
@@ -73,7 +184,7 @@ Workflow: Order Billing {CommerceState} (Invoice Processing)
 ✓ RBAC enables proper document flow between organizations
 ✓ Workflow names reflect actual business processes
 
-This workflow hierarchy maps Nykaa's private label outsource manufacturing process following the universal commerce pattern, with clear organization structure, role definitions, and access controls. The workflow captures the planning approval process, purchase order management with amendment handling for exceptions, dispatch tracking, and invoice processing as described in the business requirements.`; 
+This workflow hierarchy maps Nykaa's private label outsource manufacturing process following the universal commerce pattern, with clear organization structure, role definitions, and access controls. The workflow captures the planning approval process, purchase order management with amendment handling for exceptions, dispatch tracking, and invoice processing as described in the business requirements.`;
 
 const ProjectPlanScreen: React.FC = () => {
   const [activeProjectTab, setActiveProjectTab] = useState("brd");
@@ -98,12 +209,194 @@ const ProjectPlanScreen: React.FC = () => {
     },
   ];
 
+  const CustomMiniMap = (props: any) => {
+    setTimeout(() => {
+      const titleElement = document.getElementById(
+        "react-flow__minimap-desc-1"
+      );
+      if (titleElement) {
+        titleElement.textContent = "Minimap"; // Change the hover text
+      }
+    }, 5);
+
+    return <MiniMap {...props} />;
+  };
+
+  const getNodes = (): AnnotationNode[] => {
+    const data: Record<string, StateMachine> = stateMachineExampleDummyData;
+    const nodes: AnnotationNode[] = [];
+    
+    if (!data || Object.keys(data).length === 0) {
+      return nodes;
+    }
+
+    // Add root node
+    nodes.push({
+      id: "project-plan-node",
+      type: "annotation",
+      draggable: false,
+      selectable: false,
+      data: {
+        label: "Project Plan Node",
+      },
+      position: { x: 100, y: 20 },
+      parentId: "",
+    });
+
+    // Process by Index (1, 2, 3, ...)
+    let currentIndex = 1;
+    let foundStateMachine = true;
+
+    while (foundStateMachine) {
+      foundStateMachine = false;
+
+      // Find the state machine with current index
+      for (const [key, stateMachine] of Object.entries(data)) {
+        if (stateMachine?.Index === currentIndex) {
+          foundStateMachine = true;
+
+          // Create main node for this state machine
+          const mainNode: AnnotationNode = {
+            id: `${stateMachine.Name}-node`,
+            type: "annotation",
+            draggable: false,
+            selectable: false,
+            data: {
+              label: stateMachine.Name,
+            },
+            position: { x: 100, y: 20 },
+            parentId: "project-plan-node",
+          };
+          nodes.push(mainNode);
+
+          // Process the StartAt state
+          const startStateName = stateMachine.StartAt;
+          if (startStateName && stateMachine.States[startStateName]) {
+            processState(stateMachine, startStateName, stateMachine.Name, nodes);
+          }
+          break;
+        }
+      }
+      currentIndex++;
+    }
+
+    return nodes;
+  };
+
+  // Helper function to process a state and its chain
+  const processState = (
+    stateMachine: StateMachine,
+    stateName: string,
+    parentId: string,
+    nodes: AnnotationNode[]
+  ): void => {
+    const state = stateMachine.States[stateName];
+    if (!state) return;
+
+    // Check schema condition
+    const hasCommerceSchema = state.Schema?.includes("Commerce");
+    const shouldSkip = hasCommerceSchema && state.Props?.Flip === true;
+
+    if (shouldSkip) {
+      return;
+    }
+
+    // Create state node
+    const stateNode: AnnotationNode = {
+      id: stateName,
+      type: "annotation",
+      draggable: false,
+      selectable: false,
+      data: {
+        label: stateName,
+      },
+      position: { x: 100, y: 20 },
+      parentId: parentId,
+    };
+    nodes.push(stateNode);
+
+    // Process substates if they exist
+    if (state.SubStates && Object.keys(state.SubStates).length > 0) {
+      // Find the starting substate
+      for (const [subStateName, subState] of Object.entries(state.SubStates)) {
+        if (subState.Start) {
+          processSubStateChain(state.SubStates, subStateName, stateName, nodes);
+          break;
+        }
+      }
+    }
+
+    // Process next state in the chain
+    if (state.NextState && stateMachine.States[state.NextState]) {
+      processState(stateMachine, state.NextState, parentId, nodes);
+    }
+  };
+
+  // Helper function to process substate chain
+  const processSubStateChain = (
+    subStates: Record<string, SubState>,
+    currentSubStateName: string,
+    parentStateId: string,
+    nodes: AnnotationNode[]
+  ): void => {
+    let currentSubState = subStates[currentSubStateName];
+    let currentName = currentSubStateName;
+
+    while (currentSubState && currentName) {
+      // Create substate node
+      const subStateNode: AnnotationNode = {
+        id: currentName,
+        type: "annotation",
+        draggable: false,
+        selectable: false,
+        data: {
+          label: currentName,
+        },
+        position: { x: 100, y: 20 },
+        parentId: parentStateId,
+      };
+      nodes.push(subStateNode);
+
+      // Stop if this is an end state
+      if (currentSubState.End) {
+        break;
+      }
+
+      // Move to next substate
+      const nextSubStateName = currentSubState.NextState;
+      if (nextSubStateName && subStates[nextSubStateName]) {
+        currentName = nextSubStateName;
+        currentSubState = subStates[nextSubStateName];
+      } else {
+        break;
+      }
+    }
+  };
+
   const renderContent = () => {
     switch (activeProjectTab) {
       case "brd":
         return <MarkdownRenderer content={testMarkdown} className="w-full" />;
       case "plan":
-        return <></>;
+        return (
+          <div
+            className={`flow-builder`}
+            id="reactflow-container"
+            style={{ touchAction: "none", outline: "none" }}
+          >
+            <ReactFlow className="reactflow">
+              <CustomMiniMap
+                nodeColor={nodeColor}
+                nodeStrokeWidth={3}
+                zoomable
+                pannable
+                className="reactflow-minimap"
+              />
+              <Controls />
+              <Background color={"#2F4F4F"} />
+            </ReactFlow>
+          </div>
+        );
       default:
         return <MarkdownRenderer content={testMarkdown} className="w-full" />;
     }
@@ -175,9 +468,7 @@ const ProjectPlanScreen: React.FC = () => {
           </FlexLayout>
 
           {/* Rendering the tab content */}
-          <div className="w-full overflow-auto p-4">
-            {renderContent()}
-          </div>
+          <div className="w-full overflow-auto p-4">{renderContent()}</div>
         </FlexLayout>
       </FlexLayout>
     </div>

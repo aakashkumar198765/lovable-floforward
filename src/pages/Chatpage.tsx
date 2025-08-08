@@ -70,6 +70,8 @@ const ChatPage: React.FC = () => {
                 onChange={setActiveTab}
                 variant="simple"
                 size="md"
+                fullWidth={true}
+                centered={true}
                 className="flex-1 flex flex-col"
             />
         </FlexLayout>
