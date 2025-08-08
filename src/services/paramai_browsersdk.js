@@ -10,7 +10,7 @@ const shareKey = "94a5bcfa7fbcf707f434e63d7ce6c44d1e7b1bc0d45e3923ab8746feef66bc
 /**
  * Execute mind using browser fetch API
  */
-async function executeMind(mindName, isDefaultUiDisabled, args, responseStructure) {
+async function executeMind(mindName, args, responseStructure) {
   // Create FormData for multipart request
   const formData = new FormData();
   formData.append('mind_name', mindName);
@@ -80,8 +80,8 @@ async function getSession(mindId, sessionId, shareKey) {
  * Browser-compatible SSE streaming using EventSource
  * Note: This is a simplified version since full SSE implementation requires more complex setup
  */
-async function streamSSE(url, options = {}) {
-  const { onEvent, onError, maxRetries = 5, retryDelay = 5000 } = options;
+async function streamSSE(jobID, options = {}) {
+  const { onEvent, onError, onComplete, maxRetries = 5, retryDelay = 5000 } = options;
   let attempts = 0;
 
   const connect = () => {
@@ -89,11 +89,20 @@ async function streamSSE(url, options = {}) {
       try {
         // Note: EventSource has CORS limitations, so this might not work for all URLs
         // For production, you might need a proxy or server-side implementation
-        const eventSource = new EventSource(url);
+        const eventSource = new EventSource(`https://dev.paramai.studio:5013/events/${jobID}?check=1`);
         
         eventSource.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
+            
+            // Check if the status is completed and close the stream
+            if (data && data.status === 'completed') {
+              eventSource.close();
+              onComplete && onComplete(data);
+              resolve();
+              return;
+            }
+            
             onEvent && onEvent(data);
           } catch (err) {
             onEvent && onEvent(event.data);
