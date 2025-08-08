@@ -1,13 +1,14 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
-import ToastContainer from './components/atoms/feedback/ToastContainer';
+import ToastContainer from "./components/atoms/feedback/ToastContainer";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import LibraryTemplate from "./libraryTemplate";
 import ProjectPlanScreen from "./pages/ProjectPlanScreen";
 import WorkflowPreview from "./pages/WorkflowPreview";
 import Dashboard from "./pages/Dashboard";
 
+import Prompt from "./pages/Prompt";
 
 function App() {
   return (
@@ -17,7 +18,9 @@ function App() {
           <Route path="/project-plan" element={<ProjectPlanScreen />} />
           <Route path="/workflow-preview" element={<WorkflowPreview />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/*" element={<WorkflowPreview />} />
+          <Route path="/library-template" element={<LibraryTemplate />} />
+          <Route path="/project-plan" element={<ProjectPlanScreen />} />
+          <Route path="/prompt" element={<Prompt />} />
         </Routes>
 
         {/* Global Toast Container */}
