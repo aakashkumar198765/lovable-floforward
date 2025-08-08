@@ -1,0 +1,582 @@
+{
+  "_id": "public:0x7e5581b9fc141cc375778207b5584ee553d0bed81e368f283d9dc0b01ead2a1b",
+  "Base_schema": "@schema/Contact:public:0x059aa5c5eeaa2cb2576b3852426f0ca608469610ce2b585e722e95058a19b8f5",
+  "groups": [
+    "Contact",
+    "BankDetails",
+    "AdditionalProperties",
+    "Documents"
+  ],
+  "indexes": [
+    "Contact",
+    "BankDetails",
+    "AdditionalProperties",
+    "groups",
+    "SystemProperties",
+    "Invitee"
+  ],
+  "name": "VendorOMV",
+  "order": [
+    "Contact",
+    "Documents",
+    "BankDetails",
+    "Invitee",
+    "AdditionalProperties",
+    "groups",
+    "SystemProperties"
+  ],
+  "orgParamID": "0xAd58174BA2F5908dC27AB4f832836A452593A157",
+  "properties": {
+    "Invitee": {
+      "title": "Invitee",
+      "index": 400,
+      "properties": {
+        "C_PlantLocation": {
+          "type": "string",
+          "title": "Plant Location",
+          "index": 520
+        },
+        "C_Email": {
+          "title": "Invitee Email",
+          "index": 410,
+          "type": "string",
+          "format": "email"
+        },
+        "C_Region": {
+          "title": "Invitee State",
+          "index": 12,
+          "type": "string"
+        },
+        "C_Identifier": {
+          "index": 3,
+          "type": "string",
+          "title": "Invitee ParamID"
+        },
+        "C_InternalID": {
+          "index": 420,
+          "type": "string",
+          "title": "Invitee VendorID"
+        },
+        "C_LegalName": {
+          "type": "string",
+          "title": "Invitee Name",
+          "index": 14
+        },
+        "C_Organization": {
+          "index": 450,
+          "type": "string",
+          "title": "Invitee Organization"
+        },
+        "C_StreetAddress": {
+          "type": "string",
+          "title": "Invitee Street Address",
+          "index": 11
+        },
+        "C_PostalCode": {
+          "index": 16,
+          "type": "string",
+          "title": "Invite Postal Code"
+        },
+        "C_Telephone": {
+          "index": 6,
+          "type": "string",
+          "title": "Invitee Telephone"
+        },
+        "C_AddressLocality": {
+          "index": 7,
+          "type": "string",
+          "title": "Invitee Address Locality"
+        },
+        "C_PlantName": {
+          "index": 510,
+          "type": "string",
+          "title": "Plant Name"
+        },
+        "C_City": {
+          "title": "Invitee City",
+          "index": 13,
+          "type": "string"
+        },
+        "C_TaxID": {
+          "title": "Invitee Tax ID",
+          "index": 430,
+          "type": "string"
+        },
+        "C_Country": {
+          "type": "string",
+          "title": "Invite Country",
+          "index": 4
+        },
+        "C_Description": {
+          "index": 5,
+          "type": "string",
+          "title": "Invitee Description"
+        },
+        "C_PenID": {
+          "index": 22,
+          "type": "string",
+          "title": "Invitee NFT ID"
+        },
+        "C_Department": {
+          "title": "invitee Department",
+          "index": 9,
+          "type": "string"
+        },
+        "C_PlantID": {
+          "type": "string",
+          "title": "Plant ID",
+          "format": "PLANTS",
+          "index": 500
+        },
+        "C_Category": {
+          "index": 190,
+          "format": "select",
+          "type": "string",
+          "title": "Invitee Type",
+          "enum": [
+            "Buyer",
+            "Seller"
+          ]
+        },
+        "C_Type": {
+          "title": "",
+          "index": 0,
+          "type": "string"
+        }
+      },
+      "required": [
+        "C_Email",
+        "C_Category"
+      ],
+      "indexes": [
+        "C_LegalName",
+        "C_Identifier",
+        "C_Type",
+        "C_Category",
+        "C_Description",
+        "C_Telephone",
+        "C_Email",
+        "C_Organization",
+        "C_StreetAddress",
+        "C_AddressLocality",
+        "C_City",
+        "C_TaxID",
+        "C_Department",
+        "C_Region",
+        "C_PostalCode",
+        "C_Country",
+        "C_PlantID",
+        "C_InternalID",
+        "C_PenID",
+        "C_Type"
+      ],
+      "order": [
+        "C_Email",
+        "C_PlantID",
+        "C_PenID",
+        "C_InternalID",
+        "C_Identifier",
+        "C_LegalName",
+        "C_Type",
+        "C_Category",
+        "C_Description",
+        "C_Telephone",
+        "C_Organization",
+        "C_StreetAddress",
+        "C_AddressLocality",
+        "C_City",
+        "C_TaxID",
+        "C_Department",
+        "C_Region",
+        "C_PostalCode",
+        "C_Country"
+      ],
+      "type": "object"
+    },
+    "Documents": {
+      "order": [],
+      "type": "object",
+      "index": 150,
+      "title": "Documents",
+      "properties": {
+        "IGSTCertificate": {
+          "type": "file",
+          "format": "file",
+          "index": 0,
+          "title": "IGST Certificate"
+        },
+        "AEOLOCertificate": {
+          "title": "AEO-LO Certificate",
+          "type": "file",
+          "format": "file",
+          "index": 0
+        },
+        "ISOCertificate": {
+          "type": "file",
+          "format": "file",
+          "index": 0,
+          "title": "ISO Certificate"
+        },
+        "Certificates": {
+          "title": "Certificates",
+          "type": "file",
+          "format": "file"
+        },
+        "Tax": {
+          "title": "Tax",
+          "type": "file",
+          "format": "file"
+        },
+        "Others": {
+          "title": "Others",
+          "type": "file",
+          "format": "file"
+        },
+        "D_PanCard": {
+          "title": "PAN Card Copy",
+          "type": "file",
+          "format": "file",
+          "index": 0
+        },
+        "D_LicenseCopy": {
+          "title": "License Copy",
+          "type": "file",
+          "format": "file",
+          "index": 0
+        }
+      },
+      "required": [],
+      "indexes": []
+    },
+    "AppID": {
+      "index": 18,
+      "type": "string"
+    },
+    "SystemProperties": {
+      "properties": {
+        "P_SubState": {
+          "type": "string"
+        },
+        "P_TransactionType": {
+          "type": "integer"
+        },
+        "P_RootTxnID": {
+          "type": "string"
+        },
+        "P_Consent": {
+          "items": {},
+          "type": "array"
+        },
+        "P_ShareCatalogue": {
+          "type": "integer"
+        },
+        "P_AlignedInfo": {
+          "type": "integer"
+        },
+        "P_Subscribers": {
+          "items": [
+            {
+              "type": "string"
+            }
+          ],
+          "type": "array"
+        },
+        "P_FormData": {
+          "type": "object"
+        },
+        "P_RecordAdded": {
+          "type": "integer"
+        },
+        "P_QuantityDispute": {
+          "type": "boolean"
+        },
+        "P_SmID": {
+          "type": "string"
+        },
+        "P_IsClosed": {
+          "type": "boolean"
+        },
+        "P_ChildDocId": {
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "P_DocOwner": {
+          "type": "string"
+        },
+        "P_disambiguatingDescription": {
+          "type": "string"
+        },
+        "P_Attachments": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "required": [
+        "P_DocOwner",
+        "P_SmID"
+      ],
+      "order": [
+        "P_ChildDocId",
+        "P_Subscribers",
+        "P_Consent",
+        "P_IsClosed",
+        "P_RecordAdded",
+        "P_FormData",
+        "P_Attachments",
+        "P_AlignedInfo",
+        "P_DocOwner",
+        "P_TransactionType",
+        "P_ShareCatalogue",
+        "P_RootTxnID",
+        "P_SmID",
+        "P_QuantityDispute",
+        "P_disambiguatingDescription"
+      ],
+      "type": "object",
+      "title": "System Properties"
+    },
+    "Contact": {
+      "order": [
+        "C_Category",
+        "C_Country",
+        "C_TaxID",
+        "C_Organization",
+        "C_Identifier",
+        "C_InternalID",
+        "C_LegalName",
+        "C_Email",
+        "C_Type",
+        "C_PenID",
+        "C_Telephone",
+        "C_StreetAddress",
+        "C_AddressLocality",
+        "C_City",
+        "C_Description",
+        "C_Department",
+        "C_PlantID",
+        "C_Region",
+        "C_PostalCode"
+      ],
+      "type": "object",
+      "index": 100,
+      "title": "Contact",
+      "properties": {
+        "C_Type": {
+          "title": "",
+          "index": 0,
+          "type": "string"
+        },
+        "C_City": {
+          "title": "City",
+          "index": 150,
+          "type": "string"
+        },
+        "C_PlantLocation": {
+          "index": 0,
+          "type": "string",
+          "title": "Plant Location"
+        },
+        "C_PostalCode": {
+          "title": "Postal Code",
+          "index": 0,
+          "type": "string"
+        },
+        "C_InternalID": {
+          "title": "Vendor ID",
+          "index": 115,
+          "type": "string"
+        },
+        "C_LegalName": {
+          "type": "string",
+          "title": "Contact Name",
+          "index": 120
+        },
+        "C_Department": {
+          "type": "string",
+          "title": "Department",
+          "index": 0
+        },
+        "C_Country": {
+          "index": 100,
+          "type": "string",
+          "title": "Country"
+        },
+        "C_StreetAddress": {
+          "type": "string",
+          "title": "Street Address",
+          "index": 0
+        },
+        "C_AddressLocality": {
+          "title": "Address Locality",
+          "index": 0,
+          "type": "string"
+        },
+        "C_PlantName": {
+          "type": "string",
+          "title": "Plant Name",
+          "index": 0
+        },
+        "C_Telephone": {
+          "type": "string",
+          "title": "Telephone",
+          "index": 130
+        },
+        "C_Region": {
+          "title": "State",
+          "index": 165,
+          "type": "string"
+        },
+        "C_Organization": {
+          "title": "Vendor Name",
+          "index": 110,
+          "type": "string"
+        },
+        "C_Category": {
+          "title": "Vendor Category",
+          "enum": [
+            "Buyer",
+            "Seller"
+          ],
+          "index": 101,
+          "format": "select",
+          "type": "string"
+        },
+        "C_PlantID": {
+          "format": "PLANTS",
+          "index": 0,
+          "type": "string",
+          "title": "Plant ID"
+        },
+        "C_PenID": {
+          "title": "NFT ID",
+          "index": 2,
+          "type": "string"
+        },
+        "C_Description": {
+          "index": 0,
+          "type": "string",
+          "title": "Description"
+        },
+        "C_Email": {
+          "title": "Email",
+          "index": 125,
+          "type": "string",
+          "format": "email"
+        },
+        "C_Identifier": {
+          "index": 1,
+          "type": "string",
+          "title": "Param ID"
+        },
+        "C_TaxID": {
+          "type": "string",
+          "title": "GSTIN",
+          "index": 105
+        }
+      },
+      "required": [
+        "C_LegalName",
+        "C_Identifier",
+        "C_Email",
+        "C_Organization",
+        "C_City",
+        "C_Country",
+        "C_PenID",
+        "C_Category",
+        "C_InternalID"
+      ],
+      "indexes": [
+        "C_LegalName",
+        "C_Identifier",
+        "C_Type",
+        "C_Category",
+        "C_Description",
+        "C_Telephone",
+        "C_Email",
+        "C_Organization",
+        "C_StreetAddress",
+        "C_AddressLocality",
+        "C_City",
+        "C_TaxID",
+        "C_Department",
+        "C_Region",
+        "C_PostalCode",
+        "C_Country",
+        "C_PlantID",
+        "C_InternalID",
+        "C_PenID",
+        "C_Type"
+      ]
+    },
+    "BankDetails": {
+      "indexes": [
+        "C_BankName",
+        "C_BankAccount",
+        "C_IfscCode",
+        "C_Branch",
+        "C_BankAddress"
+      ],
+      "order": [
+        "C_BankName",
+        "C_BankAccount",
+        "C_IfscCode",
+        "C_Branch",
+        "C_BankAddress"
+      ],
+      "type": "object",
+      "index": 200,
+      "title": "Bank Details",
+      "properties": {
+        "C_BankName": {
+          "type": "string",
+          "title": "Bank Name",
+          "index": 210
+        },
+        "C_BankAccount": {
+          "type": "number",
+          "title": "Account Number",
+          "index": 220
+        },
+        "C_IfscCode": {
+          "index": 230,
+          "type": "string",
+          "title": "IFSC Code"
+        },
+        "C_Branch": {
+          "type": "string",
+          "title": "Branch",
+          "index": 240
+        },
+        "C_BankAddress": {
+          "type": "string",
+          "title": "Branch Address",
+          "index": 250
+        }
+      },
+      "required": []
+    },
+    "AdditionalProperties": {
+      "required": [],
+      "indexes": [],
+      "properties": {},
+      "type": "object",
+      "title": "Additional Properties",
+      "index": 300
+    }
+  },
+  "required": [
+    "Contact",
+    "groups",
+    "SystemProperties",
+    "Documents"
+  ],
+  "type": "object"
+}

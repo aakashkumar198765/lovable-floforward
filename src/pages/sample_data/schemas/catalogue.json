@@ -1,0 +1,666 @@
+{
+  "_id": "public:0x8b5a4bb829d9129307669cc2e0cb5f66bf5e79902b5d293535ea172ede605664",
+  "Base_schema": "@schema/Catalogue:public:0x220521c0ae39f87cbe85bca251f3ea79711c829f3e1f37ea6c5a13d528f1c6b4",
+  "Owner": "e63f2f72ed7f9d9590b4ba91161aba95127336abeb414076b62bd804b2600140",
+  "groups": [
+    "Items",
+    "Pricing",
+    "TaxAndDiscount",
+    "Inventory",
+    "AdditionalProperties",
+    "InventoryLevel"
+  ],
+  "indexes": [
+    "Items",
+    "AdditionalProperties",
+    "Inventory",
+    "SystemProperties",
+    "InventoryLevel",
+    "Pricing",
+    "TaxAndDiscount"
+  ],
+  "name": "OMV Catalogue Nykaa",
+  "order": [
+    "Items",
+    "Pricing",
+    "TaxAndDiscount",
+    "Inventory",
+    "InventoryLevel",
+    "AdditionalProperties",
+    "SystemProperties"
+  ],
+  "orgParamID": "0xAd58174BA2F5908dC27AB4f832836A452593A157",
+  "properties": {
+    "Items": {
+      "title": "Basic Info",
+      "properties": {
+        "I_Other3": {
+          "index": 975,
+          "type": "string",
+          "title": "Other3",
+          "format": "url"
+        },
+        "I_Other2": {
+          "type": "string",
+          "title": "Other2",
+          "format": "url",
+          "index": 970
+        },
+        "I_Other1": {
+          "format": "url",
+          "index": 966,
+          "type": "string",
+          "title": "Other1"
+        },
+        "I_Inner": {
+          "format": "url",
+          "type": "string",
+          "title": "Inner",
+          "index": 955
+        },
+        "I_BarcodeLabel": {
+          "type": "string",
+          "format": "url",
+          "title": "Barcode Label",
+          "index": 965
+        },
+        "I_SubCategory": {
+          "type": "string",
+          "title": "Sub Category",
+          "index": 245
+        },
+        "I_Container": {
+          "index": 280,
+          "format": "url",
+          "type": "string",
+          "title": "Container Primary"
+        },
+        "I_Monocarton": {
+          "index": 275,
+          "format": "url",
+          "type": "string",
+          "title": "Monocarton(Secondry Artwork)"
+        },
+        "I_Purpose": {
+          "type": "enum",
+          "format": "select",
+          "title": "Purpose",
+          "index": 300,
+          "enum": [
+            "Sell",
+            "Buy"
+          ]
+        },
+        "I_URL": {
+          "index": 1100,
+          "type": "string",
+          "title": "Image URL",
+          "format": "url"
+        },
+        "I_Brand": {
+          "type": "string",
+          "title": "Brand",
+          "index": 215
+        },
+        "I_ShelfLifeInMonth": {
+          "type": "number",
+          "title": "Shelf Life in Month",
+          "index": 260
+        },
+        "I_Number": {
+          "title": "Item Code",
+          "index": 205,
+          "type": "string"
+        },
+        "I_CountryOfOrigin": {
+          "title": "Country Of Origin",
+          "index": 265,
+          "type": "string"
+        },
+        "I_Base": {
+          "type": "string",
+          "title": "Base Label",
+          "index": 300,
+          "format": "url"
+        },
+        "I_Variant": {
+          "type": "string",
+          "title": "Variant",
+          "index": 230
+        },
+        "I_Type": {
+          "type": "enum",
+          "format": "select",
+          "title": "Type",
+          "index": 235,
+          "enum": [
+            "Goods",
+            "Services",
+            "Raw Material"
+          ]
+        },
+        "I_Outer": {
+          "title": "Outer",
+          "index": 960,
+          "type": "string",
+          "format": "url"
+        },
+        "I_Description": {
+          "type": "string",
+          "title": "FG Description",
+          "index": 220
+        },
+        "I_Shade": {
+          "title": "Shade Label",
+          "index": 290,
+          "type": "string",
+          "format": "url"
+        },
+        "I_Identifier": {
+          "index": 1,
+          "type": "string",
+          "title": "Param Catalogue ID"
+        },
+        "I_Range": {
+          "title": "Range",
+          "index": 250,
+          "type": "string"
+        },
+        "I_Name": {
+          "index": 200,
+          "type": "string",
+          "title": "Item's Name"
+        },
+        "I_HSNCode": {
+          "title": "HSN Code",
+          "index": 210,
+          "type": "string"
+        },
+        "I_Phase": {
+          "type": "string",
+          "title": "Phase",
+          "index": 255
+        },
+        "I_Category": {
+          "index": 240,
+          "type": "string",
+          "title": "Category"
+        }
+      },
+      "required": [
+        "I_Identifier",
+        "I_Name",
+        "I_Purpose",
+        "I_Type",
+        "I_Number"
+      ],
+      "indexes": [
+        "I_Identifier",
+        "I_Name",
+        "I_Purpose",
+        "I_Type",
+        "I_Number",
+        "I_HSNCode",
+        "I_Category",
+        "I_SubCategory",
+        "I_Description"
+      ],
+      "order": [
+        "I_Identifier",
+        "I_Name",
+        "I_HSNCode",
+        "I_Purpose",
+        "I_Brand",
+        "I_Description",
+        "I_Variant",
+        "I_Type",
+        "I_Number",
+        "I_Category",
+        "I_SubCategory",
+        "I_URL",
+        "I_Range",
+        "I_Phase",
+        "I_ShelfLifeInMonth",
+        "I_CountryOfOrigin",
+        "I_Container",
+        "I_Shade",
+        "I_Base",
+        "I_Inner",
+        "I_Outer",
+        "I_BarcodeLabel",
+        "I_Other1",
+        "I_Other2",
+        "I_Other3"
+      ],
+      "type": "object"
+    },
+    "Pricing": {
+      "order": [
+        "I_Price",
+        "I_PriceCurrency",
+        "I_CostPerItem"
+      ],
+      "type": "object",
+      "title": "Pricing",
+      "indexes": [
+        "I_Price",
+        "I_PriceCurrency"
+      ],
+      "properties": {
+        "I_Price": {
+          "type": "number",
+          "title": "Price",
+          "index": 1000
+        },
+        "I_PriceCurrency": {
+          "pattern": "^[a-zA-Z]{3}$",
+          "index": 1100,
+          "type": "enum",
+          "enum": [
+            "INR"
+          ],
+          "title": "Currency",
+          "format": "select"
+        },
+        "I_CostPerItem": {
+          "index": 1200,
+          "type": "number",
+          "title": "Cost Per Item"
+        }
+      },
+      "required": [
+        "I_Price",
+        "I_PriceCurrency"
+      ]
+    },
+    "TaxAndDiscount": {
+      "type": "array",
+      "indexes": [
+        "I_Type",
+        "I_Price",
+        "I_Name"
+      ],
+      "title": "Item Add On",
+      "items": [
+        {
+          "required": [],
+          "indexes": [
+            "I_Type",
+            "I_Price",
+            "I_Name"
+          ],
+          "order": [
+            "I_Name",
+            "I_Price",
+            "I_Type"
+          ],
+          "type": "object",
+          "index": 2205,
+          "properties": {
+            "I_Type": {
+              "index": 2210,
+              "type": "string",
+              "title": "Type"
+            },
+            "I_Price": {
+              "type": "number",
+              "title": "Price",
+              "index": 2215
+            },
+            "I_Name": {
+              "index": 2215,
+              "type": "string",
+              "title": "IGST"
+            }
+          }
+        },
+        {
+          "properties": {
+            "I_Name": {
+              "index": 2235,
+              "type": "string",
+              "title": "CGST"
+            },
+            "I_Type": {
+              "title": "Type",
+              "index": 2225,
+              "type": "string"
+            },
+            "I_Price": {
+              "type": "number",
+              "title": "Price",
+              "index": 2230
+            }
+          },
+          "required": [],
+          "indexes": [
+            "I_Type",
+            "I_Price",
+            "I_Name"
+          ],
+          "order": [
+            "I_Name",
+            "I_Price",
+            "I_Type"
+          ],
+          "type": "object",
+          "index": 2220
+        },
+        {
+          "indexes": [
+            "I_Type",
+            "I_Price",
+            "I_Name"
+          ],
+          "order": [
+            "I_Name",
+            "I_Price",
+            "I_Type"
+          ],
+          "type": "object",
+          "index": 2240,
+          "properties": {
+            "I_Name": {
+              "type": "string",
+              "title": "SGST",
+              "index": 2255
+            },
+            "I_Type": {
+              "type": "string",
+              "title": "Type",
+              "index": 2245
+            },
+            "I_Price": {
+              "type": "number",
+              "title": "Price",
+              "index": 2250
+            }
+          },
+          "required": []
+        },
+        {
+          "index": 2260,
+          "properties": {
+            "I_Type": {
+              "type": "string",
+              "title": "Type",
+              "index": 2265
+            },
+            "I_Price": {
+              "type": "number",
+              "title": "Price",
+              "index": 2270
+            },
+            "I_Ref": {
+              "title": "Ref",
+              "index": 2275,
+              "type": "string"
+            },
+            "I_Name": {
+              "index": 2280,
+              "type": "string",
+              "title": "Discount"
+            }
+          },
+          "required": [],
+          "indexes": [
+            "I_Type",
+            "I_Price",
+            "I_Ref",
+            "I_Name"
+          ],
+          "order": [
+            "I_Name",
+            "I_Price",
+            "I_Type",
+            "I_Ref"
+          ],
+          "type": "object"
+        }
+      ],
+      "required": [],
+      "index": 2200
+    },
+    "Inventory": {
+      "title": "Inventory",
+      "properties": {
+        "I_Units": {
+          "enum": [
+            "Kg",
+            "Ton",
+            "Units"
+          ],
+          "index": 1105,
+          "type": "enum",
+          "format": "select",
+          "title": "Unit"
+        },
+        "I_Quantity": {
+          "index": 1500,
+          "type": "number",
+          "title": "Quantity"
+        },
+        "I_SKU": {
+          "title": "SKU Parent Code",
+          "index": 1000,
+          "type": "string"
+        },
+        "I_S_Name": {
+          "index": 1006,
+          "title": "Vendor Name",
+          "type": "string"
+        },
+        "I_ProductionDate": {
+          "type": "date",
+          "format": "date",
+          "title": "Production Date",
+          "index": 1750
+        },
+        "I_Width": {
+          "title": "Width",
+          "index": 1900,
+          "type": "integer"
+        },
+        "I_ExpiryDate": {
+          "title": "Expiry Date",
+          "index": 1800,
+          "type": "date",
+          "format": "date"
+        },
+        "I_B_Identifier": {
+          "title": "Buyer Catalogue ID",
+          "index": 2,
+          "type": "string"
+        },
+        "I_Weight": {
+          "index": 1110,
+          "type": "number",
+          "title": "Weight"
+        },
+        "I_S_Identifier": {
+          "index": 3,
+          "type": "string",
+          "title": "Seller Catalogue ID"
+        },
+        "I_Length": {
+          "index": 1850,
+          "type": "integer",
+          "title": "Length"
+        },
+        "I_B_Number": {
+          "type": "string",
+          "title": "Buyer Internal ID",
+          "index": 4
+        },
+        "I_S_Number": {
+          "type": "string",
+          "title": "Vendor ID",
+          "index": 1005
+        },
+        "I_Barcode": {
+          "type": "string",
+          "title": "Barcode",
+          "index": 1450
+        },
+        "I_Height": {
+          "title": "Height",
+          "index": 1950,
+          "type": "integer"
+        }
+      },
+      "indexes": [
+        "I_Quantity",
+        "I_Units",
+        "I_SKU"
+      ],
+      "required": [
+        "I_Quantity"
+      ],
+      "order": [
+        "I_SKU",
+        "I_S_Name",
+        "I_S_Number",
+        "I_Quantity",
+        "I_Units",
+        "I_ProductionDate",
+        "I_ExpiryDate",
+        "I_Barcode",
+        "I_Length",
+        "I_Width",
+        "I_Height",
+        "I_Weight",
+        "I_B_Identifier",
+        "I_S_Identifier",
+        "I_B_Number"
+      ],
+      "type": "object"
+    },
+    "AdditionalProperties": {
+      "title": "Additional Properties",
+      "index": 0,
+      "type": "object"
+    },
+    "SystemProperties": {
+      "title": "System Properties",
+      "properties": {
+        "P_QuantityDispute": {
+          "type": "boolean"
+        },
+        "P_Subscribers": {
+          "items": [
+            {
+              "type": "string"
+            }
+          ],
+          "type": "array"
+        },
+        "P_DocOwner": {
+          "type": "string"
+        },
+        "P_Attachments": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object"
+            }
+          ]
+        },
+        "P_FormData": {
+          "type": "object"
+        },
+        "P_disambiguatingDescription": {
+          "type": "string"
+        },
+        "P_Consent": {
+          "type": "array",
+          "items": {}
+        },
+        "P_ShareCatalogue": {
+          "type": "integer"
+        },
+        "P_ChildDocId": {
+          "items": [
+            {
+              "type": "string"
+            }
+          ],
+          "type": "array"
+        },
+        "P_AlignedInfo": {
+          "type": "integer"
+        },
+        "P_SmID": {
+          "type": "string"
+        },
+        "P_TransactionType": {
+          "type": "integer"
+        },
+        "P_RootTxnID": {
+          "type": "string"
+        },
+        "P_SubState": {
+          "type": "string"
+        },
+        "P_IsClosed": {
+          "type": "boolean"
+        },
+        "P_RecordAdded": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "P_DocOwner",
+        "P_SmID"
+      ],
+      "order": [
+        "P_ChildDocId",
+        "P_Subscribers",
+        "P_Consent",
+        "P_IsClosed",
+        "P_RecordAdded",
+        "P_FormData",
+        "P_Attachments",
+        "P_AlignedInfo",
+        "P_DocOwner",
+        "P_TransactionType",
+        "P_ShareCatalogue",
+        "P_RootTxnID",
+        "P_SmID",
+        "P_QuantityDispute",
+        "P_disambiguatingDescription"
+      ],
+      "type": "object"
+    },
+    "InventoryLevel": {
+      "required": [],
+      "order": [
+        "I_MaxValue",
+        "I_MinValue"
+      ],
+      "type": "object",
+      "title": "Inventory Level",
+      "properties": {
+        "I_MaxValue": {
+          "title": "Maximum Inventory Level",
+          "index": 2100,
+          "type": "number"
+        },
+        "I_MinValue": {
+          "type": "integer",
+          "title": "Minimum Inventory Level",
+          "index": 2200
+        }
+      }
+    }
+  },
+  "required": [
+    "Items",
+    "Pricing",
+    "TaxAndDiscount",
+    "Inventory",
+    "InventoryLevel",
+    "SystemProperties"
+  ],
+  "title": "Catalogue OMV",
+  "type": "object"
+}

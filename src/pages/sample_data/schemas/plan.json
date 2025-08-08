@@ -1,0 +1,1166 @@
+{
+  "_id": "public:0x3d55b908dc90d22b8272c7f0595f87b0c276fbbab5682fb21ea5c346bced0c2a",
+  "Base_schema": "@schema/Commerce:public:0xf01b4ade0cb897e86430300167448127f2f93dbb1a400cf011bc67f8cee16e4a",
+  "Owner": "1889de5218804ee1a67cd3c95ebb5fd6db7467aa3a9a24699cc15ee149dffedb",
+  "name": "Commerce Plan OMV Nykaa",
+  "order": [
+    "DocDetails",
+    "Buyer",
+    "Seller",
+    "ReferencesOrder",
+    "OrderedItems",
+    "SystemProperties",
+    "AdditionalProperties",
+    "Broker",
+    "Summary"
+  ],
+  "orgParamID": "0x5142A1Fc452334D807aBd7965e3eB75aFd20BF29",
+  "properties": {
+    "Seller": {
+      "required": [
+        "C_Email",
+        "C_Organization",
+        "C_TaxID",
+        "C_PlantID",
+        "C_InternalID"
+      ],
+      "indexes": [],
+      "order": [
+        "C_LegalName",
+        "C_Identifier",
+        "C_Type",
+        "C_Description",
+        "C_PlantID",
+        "C_InternalID",
+        "C_PenID",
+        "C_Telephone",
+        "C_Email",
+        "C_StreetAddress",
+        "C_AddressLocality",
+        "C_City",
+        "C_TaxID",
+        "C_Department",
+        "C_Organization",
+        "C_Region",
+        "C_PostalCode",
+        "C_Country"
+      ],
+      "type": "object",
+      "title": "Seller",
+      "properties": {
+        "C_AddressLocality": {
+          "type": "string"
+        },
+        "C_City": {
+          "type": "string"
+        },
+        "C_Country": {
+          "type": "string"
+        },
+        "C_PenID": {
+          "type": "string",
+          "format": "PLANTS"
+        },
+        "C_Identifier": {
+          "type": "string"
+        },
+        "C_Telephone": {
+          "type": "string"
+        },
+        "C_Email": {
+          "format": "email",
+          "type": "string"
+        },
+        "C_Department": {
+          "type": "string"
+        },
+        "C_PlantID": {
+          "type": "string"
+        },
+        "C_InternalID": {
+          "type": "string",
+          "title": "Vendor ID",
+          "index": 305
+        },
+        "C_Region": {
+          "type": "string"
+        },
+        "C_PostalCode": {
+          "type": "string"
+        },
+        "C_StreetAddress": {
+          "type": "string"
+        },
+        "C_TaxID": {
+          "type": "string"
+        },
+        "C_LegalName": {
+          "type": "string"
+        },
+        "C_Type": {
+          "type": "string",
+          "enum": [
+            "Supplier",
+            "Customer"
+          ]
+        },
+        "C_Organization": {
+          "index": 300,
+          "type": "string",
+          "title": "Vendor Name"
+        },
+        "C_Description": {
+          "type": "string"
+        }
+      },
+      "index": 100,
+      "format": "contact"
+    },
+    "Summary": {
+      "required": [],
+      "indexes": [
+        "Brand",
+        "TotalFGInventory",
+        "ProductionForecast",
+        "CurrentMOI",
+        "OpenOrder",
+        "MOIPostOpenorder",
+        "NewOrder",
+        "MOIPostNeworder",
+        "TotalMOI"
+      ],
+      "order": [],
+      "index": 400,
+      "readOnly": [],
+      "type": "object",
+      "title": "Summary",
+      "properties": {
+        "ProductionForecast": {
+          "title": "Production Forecast Value",
+          "index": 420,
+          "type": "number"
+        },
+        "MOIPostNeworder": {
+          "title": "MOI Post New Order",
+          "index": 470,
+          "type": "number"
+        },
+        "TotalMOI": {
+          "title": "Total MOI",
+          "index": 480,
+          "type": "number"
+        },
+        "CurrentMOI": {
+          "title": "Current MOI",
+          "index": 430,
+          "type": "number"
+        },
+        "MOIPostOpenorder": {
+          "index": 450,
+          "type": "number",
+          "title": "MOI Post Open Order"
+        },
+        "TotalFGInventory": {
+          "title": "Total Inventory Value",
+          "index": 410,
+          "type": "number"
+        },
+        "Brand": {
+          "type": "string",
+          "title": "Brand",
+          "index": 400
+        },
+        "OpenOrder": {
+          "index": 440,
+          "type": "number",
+          "title": "Open Order Value"
+        },
+        "NewOrder": {
+          "type": "number",
+          "title": "New Order Value",
+          "index": 460
+        }
+      }
+    },
+    "ReferencesOrder": {
+      "indexes": [],
+      "order": [
+        "R_OrderNumber",
+        "R_Identifier",
+        "R_DiscountCode",
+        "R_Discount",
+        "R_DiscountCurrency",
+        "R_PaymentDueDate",
+        "R_OrderStatus",
+        "R_OrderedDate"
+      ],
+      "type": "object",
+      "title": "Reference Order",
+      "properties": {
+        "R_OrderStatus": {
+          "type": "string"
+        },
+        "R_OrderedDate": {
+          "format": "date",
+          "type": "string"
+        },
+        "R_OrderNumber": {
+          "link": "ReferencesOrder.R_Identifier",
+          "index": 250,
+          "type": "string",
+          "title": "Parent Doc"
+        },
+        "R_Identifier": {
+          "type": "string"
+        },
+        "R_DiscountCode": {
+          "type": "string"
+        },
+        "R_Discount": {
+          "type": "number"
+        },
+        "R_DiscountCurrency": {
+          "type": "string",
+          "maxLength": 3,
+          "minLength": 3
+        },
+        "R_PaymentDueDate": {
+          "format": "date",
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "Broker": {
+      "properties": {
+        "L_AddressLocality": {
+          "type": "string"
+        },
+        "L_Email": {
+          "type": "string",
+          "format": "email"
+        },
+        "L_TaxID": {
+          "type": "string"
+        },
+        "L_LegalName": {
+          "type": "string"
+        },
+        "L_StreetAddress": {
+          "type": "string"
+        },
+        "L_Identifier": {
+          "type": "string"
+        },
+        "L_Country": {
+          "type": "string"
+        },
+        "L_Region": {
+          "type": "string"
+        },
+        "L_PostalCode": {
+          "type": "string"
+        },
+        "L_Department": {
+          "type": "string"
+        },
+        "L_Telephone": {
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "OrderedItems": {
+      "index": 400,
+      "type": "array",
+      "format": "table",
+      "title": "Items",
+      "items": [
+        {
+          "indexes": [
+            "I_Identifier",
+            "I_Name",
+            "I_Purpose",
+            "I_Description",
+            "I_HSNCode",
+            "I_SubCategory",
+            "I_URL",
+            "I_Price",
+            "I_CostPerItem",
+            "I_ItemOffersAddOn",
+            "I_SKU",
+            "I_ProductionDate",
+            "I_ExpiryDate",
+            "I_Barcode",
+            "I_Quantity",
+            "I_Length",
+            "I_Width",
+            "I_Height",
+            "I_Units",
+            "I_Weight",
+            "I_B_Identifier",
+            "I_S_Identifier",
+            "I_B_Number",
+            "I_S_Number"
+          ],
+          "order": [
+            "I_Identifier",
+            "I_Name",
+            "I_Purpose",
+            "I_Description",
+            "I_HSNCode",
+            "I_SubCategory",
+            "I_URL",
+            "I_Price",
+            "I_CostPerItem",
+            "I_ItemOffersAddOn",
+            "I_SKU",
+            "I_ProductionDate",
+            "I_ExpiryDate",
+            "I_Barcode",
+            "I_Quantity",
+            "I_Length",
+            "I_Width",
+            "I_Height",
+            "I_Units",
+            "I_Weight",
+            "I_B_Identifier",
+            "I_S_Identifier",
+            "I_B_Number",
+            "I_S_Number",
+            "I_AdditionalProperties",
+            "I_Range",
+            "I_Brand",
+            "I_Status",
+            "I_CurrentInventory",
+            "I_NewOrder",
+            "I_MOINewOrder",
+            "I_OCDeliveryDate",
+            "I_ProductionForecast",
+            "I_VariantName",
+            "I_Type",
+            "I_MRP",
+            "I_CurrentMOI",
+            "I_OpenOrder",
+            "I_MOIPostOpenorder",
+            "I_TotalFGInventory",
+            "I_InternalID",
+            "I_Organization",
+            "I_TotalMOI"
+          ],
+          "index": 400,
+          "readOnly": [],
+          "type": "object",
+          "title": "Items",
+          "properties": {
+            "I_ExpiryDate": {
+              "format": "date",
+              "type": "string"
+            },
+            "I_Range": {
+              "type": "string",
+              "title": "Range",
+              "index": 470
+            },
+            "I_HSNCode": {
+              "type": "string"
+            },
+            "I_Width": {
+              "type": "number"
+            },
+            "I_Type": {
+              "format": "select",
+              "type": "enum",
+              "title": "Type",
+              "index": 415,
+              "enum": [
+                "FG",
+                "RM",
+                "PM"
+              ]
+            },
+            "I_Brand": {
+              "type": "string",
+              "title": "Brand",
+              "index": 455
+            },
+            "I_SKUParentCode": {
+              "type": "string",
+              "title": "SKU Parent Code",
+              "index": 0
+            },
+            "I_CurrentInventory": {
+              "index": 0,
+              "type": "number",
+              "title": "Current Inventory"
+            },
+            "I_Weight": {
+              "type": "number"
+            },
+            "I_Organization": {
+              "type": "string",
+              "title": "Vendor Name",
+              "index": 430
+            },
+            "I_SubCategory": {
+              "index": 465,
+              "type": "string",
+              "title": "Sub Category"
+            },
+            "I_MOINewOrder": {
+              "title": "MOI Post New Order",
+              "index": 510,
+              "type": "number"
+            },
+            "I_B_Number": {
+              "type": "string"
+            },
+            "I_AdditionalProperties": {
+              "type": "object"
+            },
+            "I_Barcode": {
+              "title": "Barcode",
+              "index": 410,
+              "type": "string"
+            },
+            "I_ProductionDate": {
+              "index": 450,
+              "type": "number",
+              "title": "Lead time"
+            },
+            "I_CostPerItem": {
+              "type": "number"
+            },
+            "I_Identifier": {
+              "type": "string"
+            },
+            "I_Height": {
+              "type": "number"
+            },
+            "I_Description": {
+              "type": "string",
+              "index": 10,
+              "title": "Description"
+            },
+            "I_MRP": {
+              "type": "string",
+              "title": "MRP",
+              "index": 420
+            },
+            "I_Name": {
+              "type": "string",
+              "title": "FG Description",
+              "index": 105
+            },
+            "I_TotalFGInventory": {
+              "title": "Total FG Inventory",
+              "index": 480,
+              "type": "number"
+            },
+            "I_NewOrder": {
+              "type": "number",
+              "title": "New Order",
+              "index": 505
+            },
+            "I_ItemOffersAddOn": {
+              "items": [
+                {
+                  "order": [
+                    "I_Name",
+                    "I_Price",
+                    "I_Type"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "I_Price": {
+                      "type": "number"
+                    },
+                    "I_Name": {
+                      "type": "string"
+                    },
+                    "I_Type": {
+                      "type": "string",
+                      "enum": [
+                        "%",
+                        "value"
+                      ]
+                    }
+                  },
+                  "required": [],
+                  "indexes": [
+                    "I_Type",
+                    "I_Price",
+                    "I_Name"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "I_Price": {
+                      "type": "number"
+                    },
+                    "I_Name": {
+                      "type": "string"
+                    },
+                    "I_Type": {
+                      "enum": [
+                        "%",
+                        "value"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "indexes": [
+                    "I_Type",
+                    "I_Price",
+                    "I_Name"
+                  ],
+                  "order": [
+                    "I_Name",
+                    "I_Price",
+                    "I_Type"
+                  ]
+                },
+                {
+                  "order": [
+                    "I_Name",
+                    "I_Price",
+                    "I_Type"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "I_Price": {
+                      "type": "number"
+                    },
+                    "I_Name": {
+                      "type": "string"
+                    },
+                    "I_Type": {
+                      "enum": [
+                        "%",
+                        "value"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "indexes": [
+                    "I_Type",
+                    "I_Price",
+                    "I_Name"
+                  ]
+                },
+                {
+                  "indexes": [
+                    "I_Type",
+                    "I_Price",
+                    "I_Ref",
+                    "I_Name"
+                  ],
+                  "order": [
+                    "I_Name",
+                    "I_Price",
+                    "I_Type",
+                    "I_Ref"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "I_Price": {
+                      "type": "number"
+                    },
+                    "I_Ref": {
+                      "type": "string"
+                    },
+                    "I_Name": {
+                      "type": "string"
+                    },
+                    "I_Type": {
+                      "type": "string",
+                      "enum": [
+                        "%",
+                        "value"
+                      ]
+                    }
+                  },
+                  "required": []
+                }
+              ],
+              "type": "array",
+              "index": 0,
+              "title": "Item Add On"
+            },
+            "I_MOIPostOpenorder": {
+              "index": 500,
+              "type": "number",
+              "title": "MOI Post Open Order"
+            },
+            "Images": {
+              "title": "Images",
+              "format": "file"
+            },
+            "I_OCDeliveryDate": {
+              "type": "date",
+              "format": "date",
+              "title": "Delivery Date",
+              "index": 0
+            },
+            "I_B_Identifier": {
+              "type": "string"
+            },
+            "I_Category": {
+              "title": "Category",
+              "index": 460,
+              "type": "string"
+            },
+            "I_ProductionForecast": {
+              "index": 485,
+              "type": "number",
+              "title": "Production Forecast"
+            },
+            "I_CurrentMOI": {
+              "title": "Current MOI",
+              "index": 490,
+              "type": "number"
+            },
+            "I_Status": {
+              "title": "Status",
+              "index": 440,
+              "type": "string"
+            },
+            "I_Purpose": {
+              "index": 60,
+              "type": "string",
+              "enum": [
+                "Buy",
+                "Sell"
+              ],
+              "title": "Purpose"
+            },
+            "I_TotalPrice": {
+              "type": "number",
+              "title": "Gross Price"
+            },
+            "I_VariantName": {
+              "title": "Variant Name",
+              "index": 475,
+              "type": "string"
+            },
+            "I_TotalMOI": {
+              "type": "number",
+              "title": "Total MOI",
+              "index": 515
+            },
+            "I_Number": {
+              "type": "string",
+              "title": "Line No.",
+              "index": 0
+            },
+            "I_S_Number": {
+              "type": "string"
+            },
+            "I_Quantity": {
+              "title": "MOQ",
+              "index": 445,
+              "type": "number"
+            },
+            "I_Units": {
+              "type": "string",
+              "enum": [
+                "Kg",
+                "Ton",
+                "Unit"
+              ]
+            },
+            "I_S_Identifier": {
+              "type": "string"
+            },
+            "I_URL": {
+              "type": "string"
+            },
+            "I_SKU": {
+              "type": "string",
+              "title": "SKU Parent Code",
+              "index": 405
+            },
+            "I_OpenOrder": {
+              "title": "Open Order",
+              "index": 495,
+              "type": "number"
+            },
+            "I_InternalID": {
+              "title": "Vendor ID",
+              "index": 425,
+              "type": "string"
+            },
+            "I_Price": {
+              "index": 435,
+              "type": "integer",
+              "title": "COGS"
+            },
+            "I_Length": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "I_Identifier",
+            "I_Name",
+            "I_Price",
+            "I_Quantity",
+            "I_ProductionForecast",
+            "I_SKU",
+            "I_TotalFGInventory",
+            "I_Brand",
+            "I_MRP",
+            "I_Status",
+            "I_OpenOrder"
+          ]
+        }
+      ]
+    },
+    "DocDetails": {
+      "index": 200,
+      "properties": {
+        "D_MinimumPaymentDueMinPrice": {
+          "type": "number"
+        },
+        "D_PaymentTerms": {
+          "type": "integer"
+        },
+        "D_PaymentDueDate": {
+          "format": "date",
+          "type": "string"
+        },
+        "D_Type": {
+          "type": "string"
+        },
+        "D_TotalPaymentDuePriceCurrency": {
+          "type": "string",
+          "pattern": "^[a-zA-Z]{3}$"
+        },
+        "D_TotalPaymentDueMinPrice": {
+          "title": "Amount",
+          "index": 500,
+          "type": "number"
+        },
+        "D_OrderStatus": {
+          "type": "string",
+          "title": "Status",
+          "index": 70
+        },
+        "D_DeliveryAddress": {
+          "type": "string",
+          "title": "Delivery Location"
+        },
+        "D_OrderNumber": {
+          "title": "Document Number",
+          "link": "_id",
+          "index": 200,
+          "type": "string"
+        },
+        "D_OrderedDate": {
+          "title": "Date",
+          "index": 100,
+          "type": "string",
+          "format": "date"
+        },
+        "D_ItemCount": {
+          "type": "integer"
+        },
+        "D_ExpiryDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "D_PaymentMethod": {
+          "type": "string"
+        },
+        "D_ExpectedDeliveryDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "D_MinimumPaymentDuePriceCurrency": {
+          "type": "string",
+          "pattern": "^[a-zA-Z]{3}$"
+        },
+        "D_Identifier": {
+          "type": "string"
+        },
+        "D_ScheduledPaymentDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "D_OffersAddOn": {
+          "title": "Offer Add On",
+          "items": [
+            {
+              "properties": {
+                "D_Price": {
+                  "type": "integer"
+                },
+                "D_Name": {
+                  "type": "string"
+                },
+                "D_Type": {
+                  "enum": [
+                    "%",
+                    "value"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "indexes": [
+                "D_Type",
+                "D_Price",
+                "D_Name"
+              ],
+              "order": [
+                "D_Name",
+                "D_Price",
+                "D_Type"
+              ],
+              "type": "object"
+            },
+            {
+              "indexes": [
+                "D_Type",
+                "D_Price",
+                "D_Name"
+              ],
+              "order": [
+                "D_Name",
+                "D_Price",
+                "D_Type"
+              ],
+              "type": "object",
+              "properties": {
+                "D_Type": {
+                  "enum": [
+                    "%",
+                    "value"
+                  ],
+                  "type": "string"
+                },
+                "D_Price": {
+                  "type": "integer"
+                },
+                "D_Name": {
+                  "type": "string"
+                }
+              },
+              "required": []
+            },
+            {
+              "type": "object",
+              "properties": {
+                "D_Price": {
+                  "type": "integer"
+                },
+                "D_Name": {
+                  "type": "string"
+                },
+                "D_Type": {
+                  "enum": [
+                    "%",
+                    "value"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "indexes": [
+                "D_Type",
+                "D_Price",
+                "D_Name"
+              ],
+              "order": [
+                "D_Name",
+                "D_Price",
+                "D_Type"
+              ]
+            },
+            {
+              "required": [],
+              "indexes": [
+                "D_Type",
+                "D_Price",
+                "D_Ref",
+                "D_Name"
+              ],
+              "order": [
+                "D_Name",
+                "D_Price",
+                "D_Type",
+                "D_Ref"
+              ],
+              "type": "object",
+              "properties": {
+                "D_Price": {
+                  "type": "integer"
+                },
+                "D_Ref": {
+                  "type": "string"
+                },
+                "D_Name": {
+                  "type": "string"
+                },
+                "D_Type": {
+                  "enum": [
+                    "%",
+                    "value"
+                  ],
+                  "type": "string"
+                }
+              }
+            }
+          ],
+          "type": "array"
+        }
+      },
+      "required": [
+        "D_OrderNumber",
+        "D_OrderedDate"
+      ],
+      "indexes": [
+        "D_OrderNumber",
+        "D_OrderedDate"
+      ],
+      "order": [
+        "D_Identifier",
+        "D_OrderNumber",
+        "D_OrderedDate",
+        "D_MinimumPaymentDuePriceCurrency",
+        "D_MinimumPaymentDueMinPrice",
+        "D_PaymentDueDate",
+        "D_PaymentMethod",
+        "D_OrderStatus",
+        "D_TotalPaymentDuePriceCurrency",
+        "D_TotalPaymentDueMinPrice",
+        "D_ScheduledPaymentDate",
+        "D_ExpectedDeliveryDate",
+        "D_ExpiryDate",
+        "D_PaymentTerms",
+        "D_ItemCount",
+        "D_OffersAddOn",
+        "D_DeliveryAddress"
+      ],
+      "type": "object"
+    },
+    "AdditionalProperties": {
+      "required": [],
+      "indexes": [],
+      "order": [],
+      "readOnly": [],
+      "type": "object",
+      "index": 0,
+      "title": "AdditionalProperties",
+      "properties": {}
+    },
+    "SystemProperties": {
+      "properties": {
+        "P_IsClosed": {
+          "type": "boolean"
+        },
+        "P_RecordAdded": {
+          "type": "integer"
+        },
+        "P_DocOwner": {
+          "type": "string"
+        },
+        "P_disambiguatingDescription": {
+          "type": "string"
+        },
+        "P_FormData": {
+          "type": "object"
+        },
+        "P_ChildDocId": {
+          "items": [
+            {
+              "type": "string"
+            }
+          ],
+          "type": "array"
+        },
+        "P_PlantIDs": {
+          "type": "object"
+        },
+        "P_QuantityDispute": {
+          "type": "boolean"
+        },
+        "P_SmID": {
+          "type": "string"
+        },
+        "P_SubState": {
+          "type": "string"
+        },
+        "P_Consent": {
+          "items": {},
+          "type": "array"
+        },
+        "P_TransactionType": {
+          "type": "integer"
+        },
+        "P_ShareCatalogue": {
+          "type": "integer"
+        },
+        "P_Subscribers": {
+          "items": [
+            {
+              "type": "string"
+            }
+          ],
+          "type": "array"
+        },
+        "P_RootTxnID": {
+          "type": "string"
+        },
+        "P_Attachments": {
+          "items": [
+            {
+              "type": "object"
+            }
+          ],
+          "type": "array"
+        },
+        "P_AlignedInfo": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "P_DocOwner",
+        "P_SmID"
+      ],
+      "order": [
+        "P_ChildDocId",
+        "P_Subscribers",
+        "P_Consent",
+        "P_IsClosed",
+        "P_RecordAdded",
+        "P_FormData",
+        "P_Attachments",
+        "P_AlignedInfo",
+        "P_DocOwner",
+        "P_TransactionType",
+        "P_ShareCatalogue",
+        "P_RootTxnID",
+        "P_SmID",
+        "P_QuantityDispute",
+        "P_disambiguatingDescription"
+      ],
+      "type": "object",
+      "title": "System Properties"
+    },
+    "Buyer": {
+      "properties": {
+        "C_Type": {
+          "enum": [
+            "Supplier",
+            "Customer"
+          ],
+          "type": "string"
+        },
+        "C_City": {
+          "type": "string"
+        },
+        "C_Email": {
+          "type": "string",
+          "format": "email"
+        },
+        "C_AddressLocality": {
+          "type": "string"
+        },
+        "C_PostalCode": {
+          "type": "string"
+        },
+        "C_Country": {
+          "type": "string"
+        },
+        "C_InternalID": {
+          "type": "string"
+        },
+        "C_Description": {
+          "type": "string"
+        },
+        "C_Department": {
+          "type": "string"
+        },
+        "C_LegalName": {
+          "type": "string"
+        },
+        "C_TaxID": {
+          "type": "string"
+        },
+        "C_PenID": {
+          "type": "string"
+        },
+        "C_Telephone": {
+          "type": "string"
+        },
+        "C_PlantID": {
+          "format": "PLANTS",
+          "type": "string"
+        },
+        "C_StreetAddress": {
+          "type": "string"
+        },
+        "C_Region": {
+          "type": "string"
+        },
+        "C_Organization": {
+          "index": 400,
+          "type": "string",
+          "title": "Buyer Name"
+        },
+        "C_Identifier": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "C_Email",
+        "C_Organization",
+        "C_TaxID",
+        "C_PlantID",
+        "C_InternalID"
+      ],
+      "indexes": [
+        "C_Organization"
+      ],
+      "order": [
+        "C_LegalName",
+        "C_Identifier",
+        "C_Type",
+        "C_Description",
+        "C_PlantID",
+        "C_InternalID",
+        "C_PenID",
+        "C_Telephone",
+        "C_Email",
+        "C_StreetAddress",
+        "C_AddressLocality",
+        "C_City",
+        "C_TaxID",
+        "C_Department",
+        "C_Organization",
+        "C_Region",
+        "C_PostalCode",
+        "C_Country"
+      ],
+      "type": "object",
+      "title": "Buyer",
+      "index": 100,
+      "format": "contact"
+    }
+  },
+  "required": [
+    "Broker",
+    "Buyer",
+    "DocDetails",
+    "Seller",
+    "ReferencesOrder",
+    "OrderedItems",
+    "SystemProperties",
+    "AdditionalProperties"
+  ],
+  "type": "object"
+}
