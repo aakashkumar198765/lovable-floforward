@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Textarea, Button, Badge } from "../../components/atoms";
 import Logs from "./Logs";
 
@@ -31,7 +32,10 @@ const PromptContent: React.FC<PromptContentProps> = ({
   onSelectRecent,
   logs,
 }) => {
+  const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [showLogs, setShowLogs] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -43,11 +47,35 @@ const PromptContent: React.FC<PromptContentProps> = ({
     }
   };
 
+  const handleBackToPrompt = () => {
+    setShowLogs(false);
+    setIsCompleted(false); // Reset isCompleted when returning to prompt
+  };
+
+  const handleViewOutput = () => {
+    console.log("View output clicked - navigating to project plan");
+    navigate('/project-plan');
+  };
+
+  // Show logs if building or if logs exist and we're in logs view
+  // const shouldShowLogs = building || (logs.length > 0 && showLogs);
+
+  // Update showLogs when building starts and check for completed logs
+  useEffect(() => {
+    if (building) {
+      setShowLogs(true);
+    }
+    // Check if any log has status "completed"
+    if (logs.some((log) => log.status.toLowerCase() === "completed")) {
+      setIsCompleted(true);
+    }
+  }, [building, logs]);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
       {/* Main Content: Prompt or Logs */}
       <div className="w-full max-w-2xl">
-        {!building ? (
+        {!showLogs ? (
           <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
               Build App With Natural Language
@@ -58,21 +86,41 @@ const PromptContent: React.FC<PromptContentProps> = ({
               value={prompt}
               onChange={(e) => onPromptChange(e.target.value)}
               rows={6}
-              className="w-full"
+              className="w-full text-center"
             />
             <div className="flex justify-center mt-4">
-              <Button onClick={onSubmit} variant="primary" disabled={building}>
+              <Button onClick={onSubmit} variant="primary">
                 Build
               </Button>
             </div>
           </div>
         ) : (
-          <Logs logs={logs} />
+          <>
+            <Logs logs={logs} />
+            {logs.length > 0 && (
+              <div className="mt-6 flex justify-center space-x-4">
+                <Button
+                  onClick={handleBackToPrompt}
+                  variant="secondary"
+                  className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                >
+                  ← Back to Prompt
+                </Button>
+                <Button
+                  onClick={handleViewOutput}
+                  variant="primary"
+                  className={`px-6 py-2 rounded-lg transition-colors duration-200`}
+                >
+                  View Output →
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Recent Apps Drawer Trigger: Hidden During Building */}
-      {!building && (
+      {/* Recent Apps Drawer Trigger: Hidden During Logs */}
+      {!showLogs && (
         <div className="fixed bottom-4 left-0 right-0 flex justify-center">
           <button
             onClick={toggleDrawer}
@@ -102,7 +150,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
       )}
 
       {/* Recent Apps Drawer with Backdrop: Shown When Triggered */}
-      {isDrawerOpen && !building && (
+      {isDrawerOpen && !showLogs && (
         <div
           className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-end"
           onClick={handleBackdropClick}

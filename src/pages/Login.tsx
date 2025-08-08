@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import {
   Mail,
   Lock,
@@ -21,6 +22,7 @@ import paramSDKService from '../services/ParamSDKService';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   
   // State management
   const [currentStep, setCurrentStep] = useState<'email' | 'otp'>('email');
@@ -103,15 +105,14 @@ const Login: React.FC = () => {
         console.log('✅ Login successful for:', email);
         console.log('🔑 User data:', (result as any).data);
         
-        // Store authentication data if needed
-        if ((result as any).data?.token) {
-          localStorage.setItem('authToken', (result as any).data.token);
-          console.log('🔑 Token stored successfully');
-        }
+        // Store authentication data and mark user as logged in
+        const token = (result as any).data?.token;
+        login(token);
+        console.log('🔑 User authenticated successfully');
         
-        // Navigate to dashboard
+        // Navigate to prompt page
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/prompt');
         }, 1000);
       } else {
         // User-friendly error message for verification failures

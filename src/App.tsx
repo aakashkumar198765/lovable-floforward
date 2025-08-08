@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import ToastContainer from "./components/atoms/feedback/ToastContainer";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import LibraryTemplate from "./libraryTemplate";
 import ProjectPlanScreen from "./pages/ProjectPlanScreen";
 import WorkflowPreview from "./pages/WorkflowPreview";
@@ -31,21 +33,37 @@ function App() {
 
   return (
     <ThemeProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/project-plan" element={<ProjectPlanScreen />} />
-          <Route path="/workflow-preview" element={<WorkflowPreview />} />
-          <Route path="/library-template" element={<LibraryTemplate />} />
-          <Route path="/prompt" element={<Prompt />} />
-          <Route path="/ai-configuration" element={<AIConfiguration />} />
-        </Routes>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/prompt" element={
+              <ProtectedRoute>
+                <Prompt />
+              </ProtectedRoute>
+            } />
+            <Route path="/project-plan" element={
+              <ProtectedRoute>
+                <ProjectPlanScreen />
+              </ProtectedRoute>
+            } />
+            <Route path="/ai-configuration" element={
+              <ProtectedRoute>
+                <AIConfiguration />
+              </ProtectedRoute>
+            } />
+            <Route path="/workflow-preview" element={
+              <ProtectedRoute>
+                <WorkflowPreview />
+              </ProtectedRoute>
+            } />
+          </Routes>
 
-        {/* Global Toast Container */}
-        <ToastContainer position="top-right" />
-      </Router>
+          {/* Global Toast Container */}
+          <ToastContainer position="top-right" />
+        </Router>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

@@ -18,6 +18,8 @@ import MarkdownRenderer from "../utils/MarkdownRenderer";
 import { stateMachineExampleDummyData } from "../utils/stateMachine";
 import { FlowEdge, FlowNode, StateMachine, SubState } from "../types";
 import { testMarkdown } from "./sample_data/brd";
+import AIConfiguration from "./AIConfiguration";
+import WorkflowPreview from "./WorkflowPreview";
 
 const nodeColor = (node: any) => {
   switch (node.type) {
@@ -407,6 +409,10 @@ const ProjectPlanScreen: React.FC = () => {
             </ReactFlow>
           </div>
         );
+      case "smart-ai":
+        return <AIConfiguration />;
+      case "preview":
+        return <WorkflowPreview />;
       default:
         return <MarkdownRenderer content={testMarkdown} className="w-full" />;
     }
