@@ -1694,6 +1694,15 @@ export interface EditableDataGridProps extends EnterpriseComponentProps {
   onExport?: (format: string) => void;
   onSort?: (columnKey: string, direction: 'asc' | 'desc') => void;
   onFilter?: (filters: Record<string, any>) => void;
+  // Display control props
+  showHeader?: boolean;
+  title?: string;
+  subtitle?: string;
+  showToolbar?: boolean;
+  showAddButton?: boolean;
+  showFiltersButton?: boolean;
+  showExportButton?: boolean;
+  showBulkActions?: boolean;
 }
 
 export interface ComparisonTableProps extends EnterpriseComponentProps {

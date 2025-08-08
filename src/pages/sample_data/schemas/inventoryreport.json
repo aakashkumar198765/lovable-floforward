@@ -1,0 +1,1153 @@
+{
+  "_id": "public:0xa58dc6785ee91581464cd8dd49af149dd7960799719edaeb423fddd2048afaa5",
+  "Base_schema": "@schema/Commerce:public:0xf01b4ade0cb897e86430300167448127f2f93dbb1a400cf011bc67f8cee16e4a",
+  "Owner": "1889de5218804ee1a67cd3c95ebb5fd6db7467aa3a9a24699cc15ee149dffedb",
+  "name": "Commerce Inventory Report Nykaa OMV",
+  "order": [
+    "DocDetails",
+    "Buyer",
+    "Seller",
+    "ReferencesOrder",
+    "OrderedItems",
+    "SystemProperties",
+    "AdditionalProperties",
+    "Broker"
+  ],
+  "orgParamID": "0x5142A1Fc452334D807aBd7965e3eB75aFd20BF29",
+  "properties": {
+
+    "AdditionalProperties": {
+      "type": "object"
+    },
+    "SystemProperties": {
+      "required": [
+        "P_DocOwner",
+        "P_SmID"
+      ],
+      "order": [
+        "P_ChildDocId",
+        "P_Subscribers",
+        "P_Consent",
+        "P_IsClosed",
+        "P_RecordAdded",
+        "P_FormData",
+        "P_Attachments",
+        "P_AlignedInfo",
+        "P_DocOwner",
+        "P_TransactionType",
+        "P_ShareCatalogue",
+        "P_RootTxnID",
+        "P_SmID",
+        "P_QuantityDispute",
+        "P_disambiguatingDescription"
+      ],
+      "type": "object",
+      "title": "System Properties",
+      "properties": {
+        "P_DocOwner": {
+          "type": "string"
+        },
+        "P_RootTxnID": {
+          "type": "string"
+        },
+        "P_QuantityDispute": {
+          "type": "boolean"
+        },
+        "P_Subscribers": {
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "P_Attachments": {
+          "items": [
+            {
+              "type": "object"
+            }
+          ],
+          "type": "array"
+        },
+        "P_IsClosed": {
+          "type": "boolean"
+        },
+        "P_SmID": {
+          "type": "string"
+        },
+        "P_PlantIDs": {
+          "type": "object"
+        },
+        "P_RecordAdded": {
+          "type": "integer"
+        },
+        "P_TransactionType": {
+          "type": "integer"
+        },
+        "P_ChildDocId": {
+          "items": [
+            {
+              "type": "string"
+            }
+          ],
+          "type": "array"
+        },
+        "P_SubState": {
+          "type": "string"
+        },
+        "P_Consent": {
+          "items": {},
+          "type": "array"
+        },
+        "P_ShareCatalogue": {
+          "type": "integer"
+        },
+        "P_disambiguatingDescription": {
+          "type": "string"
+        },
+        "P_FormData": {
+          "type": "object"
+        },
+        "P_AlignedInfo": {
+          "type": "integer"
+        }
+      }
+    },
+    "DocDetails": {
+      "index": 100,
+      "indexes": [
+        "D_OrderNumber",
+        "D_OrderedDate",
+        "D_TotalPaymentDueMinPrice"
+      ],
+      "order": [
+        "D_Identifier",
+        "D_OrderNumber",
+        "D_OrderedDate",
+        "D_MinimumPaymentDuePriceCurrency",
+        "D_MinimumPaymentDueMinPrice",
+        "D_PaymentDueDate",
+        "D_PaymentMethod",
+        "D_OrderStatus",
+        "D_TotalPaymentDuePriceCurrency",
+        "D_TotalPaymentDueMinPrice",
+        "D_ScheduledPaymentDate",
+        "D_ExpectedDeliveryDate",
+        "D_ExpiryDate",
+        "D_PaymentTerms",
+        "D_ItemCount",
+        "D_OffersAddOn",
+        "D_DeliveryAddress"
+      ],
+      "type": "object",
+      "properties": {
+        "D_PaymentDueDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "D_ExpiryDate": {
+          "format": "date",
+          "type": "string"
+        },
+        "D_PaymentTerms": {
+          "type": "integer"
+        },
+        "D_DeliveryAddress": {
+          "title": "Delivery Location",
+          "type": "string"
+        },
+        "D_Identifier": {
+          "type": "string"
+        },
+        "D_ItemCount": {
+          "type": "integer"
+        },
+        "D_OrderNumber": {
+          "title": "Document Number",
+          "link": "_id",
+          "index": 200,
+          "type": "string"
+        },
+        "D_MinimumPaymentDueMinPrice": {
+          "type": "number"
+        },
+        "D_TotalPaymentDueMinPrice": {
+          "title": "Amount",
+          "index": 500,
+          "type": "number"
+        },
+        "D_PaymentMethod": {
+          "type": "string"
+        },
+        "D_OrderStatus": {
+          "title": "Status",
+          "index": 70,
+          "type": "string"
+        },
+        "D_TotalPaymentDuePriceCurrency": {
+          "pattern": "^[a-zA-Z]{3}$",
+          "type": "string"
+        },
+        "D_OrderedDate": {
+          "index": 100,
+          "type": "date",
+          "format": "date",
+          "title": "Date"
+        },
+        "D_MinimumPaymentDuePriceCurrency": {
+          "pattern": "^[a-zA-Z]{3}$",
+          "type": "string"
+        },
+        "D_ScheduledPaymentDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "D_ExpectedDeliveryDate": {
+          "format": "date",
+          "type": "string"
+        },
+        "D_Type": {
+          "type": "string"
+        },
+        "D_OffersAddOn": {
+          "title": "Offer Add On",
+          "items": [
+            {
+              "properties": {
+                "D_Type": {
+                  "enum": [
+                    "%",
+                    "value"
+                  ],
+                  "type": "string"
+                },
+                "D_Price": {
+                  "type": "integer"
+                },
+                "D_Name": {
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "indexes": [
+                "D_Type",
+                "D_Price",
+                "D_Name"
+              ],
+              "order": [
+                "D_Name",
+                "D_Price",
+                "D_Type"
+              ],
+              "type": "object"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "D_Name": {
+                  "type": "string"
+                },
+                "D_Type": {
+                  "enum": [
+                    "%",
+                    "value"
+                  ],
+                  "type": "string"
+                },
+                "D_Price": {
+                  "type": "integer"
+                }
+              },
+              "required": [],
+              "indexes": [
+                "D_Type",
+                "D_Price",
+                "D_Name"
+              ],
+              "order": [
+                "D_Name",
+                "D_Price",
+                "D_Type"
+              ]
+            },
+            {
+              "required": [],
+              "indexes": [
+                "D_Type",
+                "D_Price",
+                "D_Name"
+              ],
+              "order": [
+                "D_Name",
+                "D_Price",
+                "D_Type"
+              ],
+              "type": "object",
+              "properties": {
+                "D_Price": {
+                  "type": "integer"
+                },
+                "D_Name": {
+                  "type": "string"
+                },
+                "D_Type": {
+                  "type": "string",
+                  "enum": [
+                    "%",
+                    "value"
+                  ]
+                }
+              }
+            },
+            {
+              "indexes": [
+                "D_Type",
+                "D_Price",
+                "D_Ref",
+                "D_Name"
+              ],
+              "order": [
+                "D_Name",
+                "D_Price",
+                "D_Type",
+                "D_Ref"
+              ],
+              "type": "object",
+              "properties": {
+                "D_Ref": {
+                  "type": "string"
+                },
+                "D_Name": {
+                  "type": "string"
+                },
+                "D_Type": {
+                  "enum": [
+                    "%",
+                    "value"
+                  ],
+                  "type": "string"
+                },
+                "D_Price": {
+                  "type": "integer"
+                }
+              },
+              "required": []
+            }
+          ],
+          "type": "array"
+        }
+      },
+      "required": [
+        "D_OrderNumber",
+        "D_OrderedDate"
+      ]
+    },
+    "ReferencesOrder": {
+      "required": [],
+      "indexes": [
+        "R_Identifier",
+        "R_OrderNumber"
+      ],
+      "order": [
+        "R_OrderNumber",
+        "R_Identifier",
+        "R_DiscountCode",
+        "R_Discount",
+        "R_DiscountCurrency",
+        "R_PaymentDueDate",
+        "R_OrderStatus",
+        "R_OrderedDate"
+      ],
+      "type": "object",
+      "title": "Reference Order",
+      "properties": {
+        "R_Identifier": {
+          "type": "string"
+        },
+        "R_DiscountCode": {
+          "type": "string"
+        },
+        "R_Discount": {
+          "type": "number"
+        },
+        "R_DiscountCurrency": {
+          "minLength": 3,
+          "type": "string",
+          "maxLength": 3
+        },
+        "R_PaymentDueDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "R_OrderStatus": {
+          "type": "string"
+        },
+        "R_OrderedDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "R_OrderNumber": {
+          "index": 250,
+          "type": "string",
+          "title": "Parent Doc",
+          "link": "ReferencesOrder.R_Identifier"
+        }
+      }
+    },
+    "OrderedItems": {
+      "type": "array",
+      "title": "Items",
+      "format": "table",
+      "items": [
+        {
+          "indexes": [
+            "I_Identifier",
+            "I_Name",
+            "I_Number",
+            "I_Purpose",
+            "I_Description",
+            "I_Type",
+            "I_HSNCode",
+            "I_SubCategory",
+            "I_URL",
+            "I_Price",
+            "I_PriceCurrency",
+            "I_CostPerItem",
+            "I_ItemOffersAddOn",
+            "I_SKU",
+            "I_ProductionDate",
+            "I_ExpiryDate",
+            "I_Barcode",
+            "I_Quantity",
+            "I_Length",
+            "I_Width",
+            "I_Height",
+            "I_Units",
+            "I_Weight",
+            "I_B_Identifier",
+            "I_S_Identifier",
+            "I_B_Number",
+            "I_S_Number"
+          ],
+          "order": [
+            "I_Identifier",
+            "I_Name",
+            "I_Number",
+            "I_Purpose",
+            "I_Description",
+            "I_Type",
+            "I_HSNCode",
+            "I_SubCategory",
+            "I_URL",
+            "I_Price",
+            "I_PriceCurrency",
+            "I_CostPerItem",
+            "I_ItemOffersAddOn",
+            "I_SKU",
+            "I_ProductionDate",
+            "I_ExpiryDate",
+            "I_Barcode",
+            "I_Quantity",
+            "I_Length",
+            "I_Width",
+            "I_Height",
+            "I_Units",
+            "I_Weight",
+            "I_B_Identifier",
+            "I_S_Identifier",
+            "I_B_Number",
+            "I_S_Number",
+            "I_AdditionalProperties",
+            "I_BatchNumber",
+            "I_BatchNumber",
+            "I_WIPSFGQty",
+            "I_BatchNumber",
+            "I_HoldQty",
+            "I_RejectedQty",
+            "I_OpenOrderQty",
+            "I_GR_RRNo",
+            "I_Transport",
+            "I_Remark",
+            "I_PONumber",
+            "I_InvoiceNumber",
+            "I_BillDate"
+          ],
+          "type": "object",
+          "title": "Items",
+          "properties": {
+            "I_Height": {
+              "type": "number"
+            },
+            "I_Barcode": {
+              "type": "string"
+            },
+            "I_ExpiryDate": {
+              "format": "date",
+              "title": "Expiry Date",
+              "index": 360,
+              "type": "date"
+            },
+            "I_HSNCode": {
+              "type": "string"
+            },
+            "I_SKU": {
+              "index": 305,
+              "title": "Nykaa Item Code",
+              "type": "string"
+            },
+            "I_BatchNumber": {
+              "title": "Batch Number",
+              "type": "string",
+              "index": 350
+            },
+            "I_HoldQty": {
+              "type": "number",
+              "title": "Hold Qty",
+              "index": 330
+            },
+            "I_Price": {
+              "index": 345,
+              "type": "number",
+              "title": "Unit Price"
+            },
+            "I_WIPSFGQty": {
+              "title": "WIP/SFG Qty",
+              "type": "number",
+              "index": 325
+            },
+            "I_Type": {
+              "type": "string",
+              "enum": [
+                "Goods",
+                "Services",
+                "Raw Material"
+              ]
+            },
+            "I_Quantity": {
+              "title": "Inward Quantity",
+              "index": 320,
+              "type": "number"
+            },
+            "I_Remark": {
+              "index": 380,
+              "title": "Remark",
+              "type": "string"
+            },
+            "I_Identifier": {
+              "type": "string"
+            },
+            "I_RejectedQty": {
+              "type": "number",
+              "index": 335,
+              "title": "Rejected Qty"
+            },
+            "I_Number": {
+              "index": 310,
+              "type": "string",
+              "title": "Item Code"
+            },
+            "I_Width": {
+              "type": "number"
+            },
+            "I_Units": {
+              "enum": [
+                "Kg",
+                "Ton",
+                "Unit"
+              ],
+              "type": "string"
+            },
+            "I_GR_RRNo": {
+              "title": "GR/RR No",
+              "index": 365,
+              "type": "string"
+            },
+            "I_ItemOffersAddOn": {
+              "title": "Item Offers Add On",
+              "index": 5000,
+              "items": [
+                {
+                  "order": [
+                    "I_Name",
+                    "I_Price",
+                    "I_Amount",
+                    "I_Type"
+                  ],
+                  "readOnly": [
+                    "I_Name"
+                  ],
+                  "type": "object",
+                  "index": 0,
+                  "properties": {
+                    "I_Price": {
+                      "type": "number"
+                    },
+                    "I_Name": {
+                      "defaultValue": "Discount",
+                      "type": "string"
+                    },
+                    "I_Title": {
+                      "defaultValue": "Discount (%)",
+                      "type": "string"
+                    },
+                    "I_Type": {
+                      "enum": [
+                        "%",
+                        "value"
+                      ],
+                      "defaultValue": "%",
+                      "type": "string"
+                    },
+                    "I_Amount": {
+                      "type": "number",
+                      "defaultValue": "Amount"
+                    }
+                  },
+                  "required": [],
+                  "indexes": [
+                    "I_Type",
+                    "I_Price",
+                    "I_Name"
+                  ]
+                },
+                {
+                  "order": [
+                    "I_Name",
+                    "I_Price",
+                    "I_Amount",
+                    "I_Type"
+                  ],
+                  "readOnly": [
+                    "I_Name"
+                  ],
+                  "type": "object",
+                  "index": 5300,
+                  "properties": {
+                    "I_Amount": {
+                      "defaultValue": "Amount",
+                      "type": "number"
+                    },
+                    "I_Title": {
+                      "type": "string",
+                      "defaultValue": "CGST (%)"
+                    },
+                    "I_Type": {
+                      "defaultValue": "%",
+                      "type": "string",
+                      "enum": [
+                        "%",
+                        "value"
+                      ]
+                    },
+                    "I_Price": {
+                      "type": "number"
+                    },
+                    "I_Name": {
+                      "defaultValue": "CGST",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "indexes": [
+                    "I_Type",
+                    "I_Price",
+                    "I_Name"
+                  ]
+                },
+                {
+                  "order": [
+                    "I_Name",
+                    "I_Price",
+                    "I_Amount",
+                    "I_Type"
+                  ],
+                  "readOnly": [
+                    "I_Name"
+                  ],
+                  "type": "object",
+                  "index": 5400,
+                  "properties": {
+                    "I_Amount": {
+                      "defaultValue": "Amount",
+                      "type": "number"
+                    },
+                    "I_Type": {
+                      "enum": [
+                        "%",
+                        "value"
+                      ],
+                      "defaultValue": "%",
+                      "type": "string"
+                    },
+                    "I_Price": {
+                      "type": "number"
+                    },
+                    "I_Name": {
+                      "defaultValue": "SGST",
+                      "type": "string"
+                    },
+                    "I_Title": {
+                      "defaultValue": "SGST (%)",
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "indexes": [
+                    "I_Type",
+                    "I_Price",
+                    "I_Name"
+                  ]
+                },
+                {
+                  "properties": {
+                    "I_Name": {
+                      "type": "string",
+                      "defaultValue": "IGST"
+                    },
+                    "I_Title": {
+                      "defaultValue": "IGST (%)",
+                      "type": "string"
+                    },
+                    "I_Type": {
+                      "defaultValue": "%",
+                      "type": "string",
+                      "enum": [
+                        "%",
+                        "value"
+                      ]
+                    },
+                    "I_Amount": {
+                      "type": "number",
+                      "defaultValue": "Amount"
+                    },
+                    "I_Price": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [],
+                  "indexes": [
+                    "I_Type",
+                    "I_Price",
+                    "I_Name"
+                  ],
+                  "order": [
+                    "I_Name",
+                    "I_Price",
+                    "I_Amount",
+                    "I_Type"
+                  ],
+                  "readOnly": [
+                    "I_Name"
+                  ],
+                  "type": "object",
+                  "index": 5500
+                },
+                {
+                  "index": 5500,
+                  "properties": {
+                    "I_Type": {
+                      "enum": [
+                        "%",
+                        "value"
+                      ],
+                      "defaultValue": "%",
+                      "type": "string"
+                    },
+                    "I_Amount": {
+                      "type": "number",
+                      "defaultValue": "Amount"
+                    },
+                    "I_Price": {
+                      "formula": "(I_OpenOrderQty + I_Quantity + I_WIPSFGQty + I_HoldQty) * I_Price",
+                      "type": "number"
+                    },
+                    "I_Name": {
+                      "defaultValue": "I_Total",
+                      "type": "string"
+                    },
+                    "I_Title": {
+                      "type": "string",
+                      "defaultValue": "Total"
+                    }
+                  },
+                  "required": [],
+                  "indexes": [
+                    "I_Type",
+                    "I_Price",
+                    "I_Name"
+                  ],
+                  "order": [
+                    "I_Name",
+                    "I_Price",
+                    "I_Amount",
+                    "I_Type"
+                  ],
+                  "readOnly": [
+                    "I_Name"
+                  ],
+                  "type": "object"
+                }
+              ],
+              "type": "array"
+            },
+            "I_ProductionDate": {
+              "title": "Mfg Date",
+              "index": 355,
+              "type": "date",
+              "format": "date"
+            },
+            "I_PriceCurrency": {
+              "type": "string",
+              "pattern": "^[a-zA-Z]{3}$"
+            },
+            "I_Description": {
+              "type": "string",
+              "index": 10,
+              "title": "Description"
+            },
+            "I_S_Number": {
+              "type": "string"
+            },
+            "I_B_Number": {
+              "type": "string"
+            },
+            "I_B_Identifier": {
+              "type": "string"
+            },
+            "I_AdditionalProperties": {
+              "type": "object"
+            },
+            "I_OpenOrderQty": {
+              "type": "number",
+              "index": 340,
+              "title": "Open Order Qty"
+            },
+            "I_TotalPrice": {
+              "title": "Gross Price",
+              "type": "number"
+            },
+            "I_Weight": {
+              "type": "number"
+            },
+            "I_Length": {
+              "type": "number"
+            },
+            "I_SubCategory": {
+              "title": "Sub Category",
+              "index": 30,
+              "type": "string"
+            },
+            "I_S_Identifier": {
+              "type": "string"
+            },
+            "I_Name": {
+              "index": 315,
+              "type": "string",
+              "title": "FG Description"
+            },
+            "I_Purpose": {
+              "type": "string",
+              "enum": [
+                "Buy",
+                "Sell"
+              ]
+            },
+            "I_CostPerItem": {
+              "title": "Unit Price",
+              "type": "number"
+            },
+            "I_URL": {
+              "type": "string"
+            },
+            "I_Category": {
+              "type": "string",
+              "title": "Category",
+              "index": 20
+            },
+            "I_Transport": {
+              "type": "string",
+              "title": "Transport",
+              "index": 370
+            },
+            "I_PONumber": {
+              "type": "string",
+              "title": "PO Number",
+              "index": 301
+            },
+            "I_InvoiceNumber": {
+              "type": "string",
+              "title": "Invoice Number",
+              "index": 302
+            },
+            "I_BillDate": {
+              "type": "string",
+              "title": "Bill Date",
+              "index": 303,
+              "format": "date"
+            }
+          },
+          "required": [
+            "I_Identifier",
+            "I_Name",
+            "I_Number",
+            "I_Price",
+            "I_Quantity"
+          ]
+        }
+      ],
+      "index": 300
+    },
+    "Seller": {
+      "properties": {
+        "C_Telephone": {
+          "type": "string"
+        },
+        "C_Description": {
+          "type": "string"
+        },
+        "C_InternalID": {
+          "index": 305,
+          "title": "Vendor ID",
+          "type": "string"
+        },
+        "C_StreetAddress": {
+          "type": "string"
+        },
+        "C_City": {
+          "type": "string"
+        },
+        "C_PlantID": {
+          "type": "string"
+        },
+        "C_AddressLocality": {
+          "type": "string"
+        },
+        "C_LegalName": {
+          "title": "Supplier Name",
+          "index": 315,
+          "type": "string"
+        },
+        "C_TaxID": {
+          "type": "string"
+        },
+        "C_Identifier": {
+          "type": "string"
+        },
+        "C_Email": {
+          "type": "string",
+          "format": "email"
+        },
+        "C_PenID": {
+          "type": "string",
+          "format": "PLANTS"
+        },
+        "C_Organization": {
+          "type": "string",
+          "title": "Vendor Name",
+          "index": 305
+        },
+        "C_PostalCode": {
+          "type": "string"
+        },
+        "C_Country": {
+          "type": "string"
+        },
+        "C_Region": {
+          "type": "string"
+        },
+        "C_Department": {
+          "type": "string"
+        },
+        "C_Type": {
+          "type": "string",
+          "enum": [
+            "Supplier",
+            "Customer"
+          ]
+        }
+      },
+      "required": [
+        "C_Email",
+        "C_Organization",
+        "C_TaxID",
+        "C_PlantID",
+        "C_InternalID"
+      ],
+      "indexes": [],
+      "format": "contact",
+      "index": 200,
+      "order": [
+        "C_LegalName",
+        "C_Identifier",
+        "C_Type",
+        "C_Description",
+        "C_PlantID",
+        "C_InternalID",
+        "C_PenID",
+        "C_Telephone",
+        "C_Email",
+        "C_StreetAddress",
+        "C_AddressLocality",
+        "C_City",
+        "C_TaxID",
+        "C_Department",
+        "C_Organization",
+        "C_Region",
+        "C_PostalCode",
+        "C_Country"
+      ],
+      "type": "object",
+      "title": "Seller"
+    },
+    "Buyer": {
+      "format": "contact",
+      "title": "Buyer",
+      "properties": {
+        "C_LegalName": {
+          "type": "string"
+        },
+        "C_Department": {
+          "type": "string"
+        },
+        "C_Organization": {
+          "type": "string",
+          "title": "Buyer Name",
+          "index": 400
+        },
+        "C_Identifier": {
+          "type": "string"
+        },
+        "C_Type": {
+          "type": "string",
+          "enum": [
+            "Supplier",
+            "Customer"
+          ]
+        },
+        "C_Telephone": {
+          "type": "string"
+        },
+        "C_Region": {
+          "type": "string"
+        },
+        "C_InternalID": {
+          "type": "string"
+        },
+        "C_Description": {
+          "type": "string"
+        },
+        "C_City": {
+          "type": "string"
+        },
+        "C_TaxID": {
+          "type": "string"
+        },
+        "C_PostalCode": {
+          "type": "string"
+        },
+        "C_PenID": {
+          "type": "string"
+        },
+        "C_Country": {
+          "type": "string"
+        },
+        "C_StreetAddress": {
+          "type": "string"
+        },
+        "C_Email": {
+          "format": "email",
+          "type": "string"
+        },
+        "C_PlantID": {
+          "type": "string",
+          "format": "PLANTS"
+        },
+        "C_AddressLocality": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "C_Email",
+        "C_Organization",
+        "C_TaxID",
+        "C_PlantID",
+        "C_InternalID"
+      ],
+      "indexes": [
+        "C_Organization"
+      ],
+      "order": [
+        "C_LegalName",
+        "C_Identifier",
+        "C_Type",
+        "C_Description",
+        "C_PlantID",
+        "C_InternalID",
+        "C_PenID",
+        "C_Telephone",
+        "C_Email",
+        "C_StreetAddress",
+        "C_AddressLocality",
+        "C_City",
+        "C_TaxID",
+        "C_Department",
+        "C_Organization",
+        "C_Region",
+        "C_PostalCode",
+        "C_Country"
+      ],
+      "type": "object"
+    },
+    "Broker": {
+      "type": "object",
+      "properties": {
+        "L_Region": {
+          "type": "string"
+        },
+        "L_Country": {
+          "type": "string"
+        },
+        "L_Telephone": {
+          "type": "string"
+        },
+        "L_PostalCode": {
+          "type": "string"
+        },
+        "L_TaxID": {
+          "type": "string"
+        },
+        "L_StreetAddress": {
+          "type": "string"
+        },
+        "L_Identifier": {
+          "type": "string"
+        },
+        "L_Department": {
+          "type": "string"
+        },
+        "L_AddressLocality": {
+          "type": "string"
+        },
+        "L_LegalName": {
+          "type": "string"
+        },
+        "L_Email": {
+          "type": "string",
+          "format": "email"
+        }
+      },
+      "required": []
+    }
+  },
+  "required": [
+    "Broker",
+    "Buyer",
+    "DocDetails",
+    "Seller",
+    "ReferencesOrder",
+    "OrderedItems",
+    "SystemProperties",
+    "AdditionalProperties"
+  ],
+  "type": "object"
+}
