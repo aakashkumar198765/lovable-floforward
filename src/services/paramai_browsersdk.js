@@ -4,19 +4,19 @@
  */
 
 
-const mindId = "98b50fe2-54df-47f0-acee-b33f8dbeb78e";
+const defaultMindId = "98b50fe2-54df-47f0-acee-b33f8dbeb78e";
 const shareKey = "94a5bcfa7fbcf707f434e63d7ce6c44d1e7b1bc0d45e3923ab8746feef66bcbb"; 
 
 /**
  * Execute mind using browser fetch API
  */
-async function executeMind(mindName, args, responseStructure) {
+async function executeMind(mindName, args, responseStructure , mindID) {
   // Create FormData for multipart request
   const formData = new FormData();
   formData.append('mind_name', mindName);
   formData.append('is_default_ui_disabled', false);
   formData.append('args', JSON.stringify(args));
-  formData.append('mind_id', mindId);
+  formData.append('mind_id', mindID ? mindID : defaultMindId);
   formData.append('response_structure', JSON.stringify(responseStructure));
 
   const response = await fetch('https://dev.paramai.studio:5012/mindflow/execute_mind', {
@@ -26,7 +26,7 @@ async function executeMind(mindName, args, responseStructure) {
       'Share-Key': shareKey,
       'Origin': 'https://lab.paramai.studio',
       'Referer': 'https://lab.paramai.studio/',
-      'X-Mind-Id': mindId,
+      'X-Mind-Id': mindID ? mindID : defaultMindId,
     },
     body: formData,
   });
