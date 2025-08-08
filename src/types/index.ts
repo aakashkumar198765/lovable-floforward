@@ -2918,3 +2918,94 @@ export interface MarkdownRendererProps {
   className?: string;
   style?: React.CSSProperties;
 }
+
+
+export interface SubState {
+  Start?: boolean;
+  End?: boolean;
+  NextState?: string;
+  Owner?: string[];
+  Visibility?: Record<string, boolean>;
+  Rule?: any;
+  MicroStates?: Record<
+    string,
+    {
+      Start?: boolean;
+      End?: boolean;
+      NextState?: string;
+      Owner?: string[];
+      Desc?: string;
+    }
+  >;
+}
+
+export interface State {
+  Schema?: string;
+  Props?: {
+    Flip?: boolean;
+    Edit?: boolean;
+    diff?: {
+      from?: string;
+      to?: string;
+    };
+  } | null;
+  SubStates?: Record<string, SubState>;
+  NextState?: string;
+  End?: boolean;
+  Desc?: string;
+  Owner?: string[];
+  Visibility?: Record<string, boolean>;
+  AttachStates?: string[];
+}
+
+export interface StateMachine {
+  _id?: string;
+  AppType?: string;
+  Base_sm?: string;
+  Branch?: boolean;
+  Category?: string;
+  Desc?: string;
+  ExchangeParamID?: Array<{
+    paramID: string;
+    publicKey: string;
+  }>;
+  Index?: number;
+  Name: string;
+  Organizations?: Array<{
+    Name: string;
+    Desc: string;
+    Teams: Array<{
+      Role: string;
+      Desc: string;
+    }>;
+  }>;
+  Props?: {
+    Icon?: number;
+    BgColor?: string;
+    Category?: string;
+  };
+  Roles?: string[];
+  StartAt: string;
+  Start_sm?: string;
+  States: Record<string, State>;
+  installed?: number;
+  orgParamID?: string;
+  smID?: string;
+}
+
+export interface FlowNode {
+  id: string;
+  type: string;
+  data: { label: string };
+  position: { x: number; y: number };
+  parentId?: string;
+  style?: Record<string, any>;
+}
+
+export interface FlowEdge {
+  id: string;
+  source: string;
+  target: string;
+  type?: string;
+  animated?: boolean;
+}
