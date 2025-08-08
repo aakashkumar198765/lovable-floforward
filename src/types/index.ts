@@ -866,7 +866,7 @@ export interface TabProps extends EnterpriseComponentProps {
   items?: TabItem[];
   activeTab?: string;
   defaultActiveTab?: string;
-  variant?: 'default' | 'pills' | 'underline' | 'card';
+  variant?: 'default' | 'pills' | 'underline' | 'card' | 'simple' | 'bordered';
   size?: 'sm' | 'md' | 'lg';
   orientation?: 'horizontal' | 'vertical';
   closable?: boolean;
@@ -2900,4 +2900,12 @@ export interface NavbarProps {
   style?: React.CSSProperties;
   onChange?: (itemId: string) => void;
   onItemClick?: (item: NavbarItem) => void;
+}
+
+// Markdown Renderer
+export interface MarkdownRendererProps {
+  content: string;
+  mindAppChat?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
 }

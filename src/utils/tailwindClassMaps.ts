@@ -571,6 +571,20 @@ export const tabVariantClasses = {
     content:
       "p-6 dark:bg-transparent bg-white rounded-b-lg shadow-sm border border-gray-200 border-t-0",
   },
+  simple: {
+    container: "flex border-b border-gray-200",
+    tab: "px-6 py-3 text-sm font-medium transition-colors",
+    active: "bg-primary-600 text-white",
+    inactive: "bg-white text-gray-700 hover:text-gray-900",
+    content: "flex-1 p-0",
+  },
+  bordered: {
+    container: "flex border border-gray-300 rounded",
+    tab: "px-4 py-2 text-sm font-medium border-r border-gray-300 last:border-r-0 transition-colors",
+    active: "bg-primary-600 text-white",
+    inactive: "bg-white text-gray-700 hover:text-gray-900 hover:bg-gray-50",
+    content: "flex-1 p-0",
+  },
 };
 
 export const tabSizeClasses = {

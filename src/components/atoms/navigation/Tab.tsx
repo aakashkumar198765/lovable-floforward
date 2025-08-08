@@ -131,7 +131,8 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(
                   applyDefaultClasses={false}
                   className={cn(
                     getTabClasses(item, isActive),
-                    "flex items-center justify-center"
+                    "flex items-center justify-center",
+                    (variant === "bordered" || variant === "simple") && "rounded-none"
                   )}
                   style={{ display: 'flex' }}
                   role="tab"

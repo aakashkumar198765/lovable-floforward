@@ -26,6 +26,7 @@ const ChatPage: React.FC = () => {
                             placeholder="What changes you want to make"
                             className="w-full"
                             variant="default"
+                            disabled
                             onChange={() => {console.log('Input changed')}}
                         />
                     </div>
@@ -44,14 +45,14 @@ const ChatPage: React.FC = () => {
     ];
 
     return (
-        <FlexLayout direction="col" className="h-full bg-white">
+        <FlexLayout direction="col" className="h-full bg-white p-0 gap-0">
             {/* Header */}
             <FlexLayout 
                 direction="row" 
                 justify="between" 
                 align="center" 
-                padding="md" 
-                className="border-b bg-white w-full"
+                padding="sm" 
+                className="border-b pb-[13px] bg-white w-full rounded-none"
             >
                 <FlexLayout direction="row" align="center" gap="sm">
                     <ChevronLeft className="w-5 h-5 text-gray-600" />
@@ -67,7 +68,7 @@ const ChatPage: React.FC = () => {
                 items={tabItems}
                 activeTab={activeTab}
                 onChange={setActiveTab}
-                variant="default"
+                variant="simple"
                 size="md"
                 className="flex-1 flex flex-col"
             />

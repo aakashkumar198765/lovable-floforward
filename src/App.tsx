@@ -6,7 +6,6 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import LibraryTemplate from "./libraryTemplate";
 import ProjectPlanScreen from "./pages/ProjectPlanScreen";
 
-
 function App() {
   return (
     <ThemeProvider>
