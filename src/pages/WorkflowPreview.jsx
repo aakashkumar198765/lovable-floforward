@@ -119,13 +119,52 @@ const WorkflowPreview = () => {
     const indexA = typeof workflowA.Index === 'number' ? workflowA.Index : 0;
     const indexB = typeof workflowB.Index === 'number' ? workflowB.Index : 0;
     
-    console.log(`Sorting: ${workflowA.Name} (${indexA}) vs ${workflowB.Name} (${indexB})`);
-    
     return indexA - indexB;
   });
   
   const currentWorkflow = stateMachines[selectedWorkflow];
   
+  // Get substates in order based on Start and NextState
+  const getSubStatesInOrder = (subStates) => {
+    if (!subStates || Object.keys(subStates).length === 0) return [];
+    
+    const orderedSubStates = [];
+    
+    // Find the starting substate
+    let currentSubState = Object.keys(subStates).find(key => subStates[key].Start === true);
+    
+    if (!currentSubState) {
+      console.warn('No starting substate found');
+      return Object.keys(subStates); // Fallback to all substates
+    }
+    
+    while (currentSubState && subStates[currentSubState]) {
+      const subState = subStates[currentSubState];
+      orderedSubStates.push(currentSubState);
+      
+      // Break if this is the end substate
+      if (subState.End === true) {
+        break;
+      }
+      
+      // Move to next substate
+      const nextSubState = subState.NextState;
+      if (!nextSubState || !subStates[nextSubState]) {
+        break;
+      }
+      
+      currentSubState = nextSubState;
+      
+      // Prevent infinite loops
+      if (orderedSubStates.length > 10) {
+        console.warn('Breaking infinite loop in substates');
+        break;
+      }
+    }
+    
+    return orderedSubStates;
+  };
+
   // Get states in workflow order based on StartAt and NextState
   const getWorkflowStates = (workflow) => {
     if (!workflow || !workflow.States) return [];
@@ -141,7 +180,20 @@ const WorkflowPreview = () => {
     
     while (currentState && workflow.States[currentState]) {
       const state = workflow.States[currentState];
-      orderedStates.push(currentState);
+      
+      // Check if this state has substates
+      if (state.SubStates && Object.keys(state.SubStates).length > 0) {
+        // Get substates in order
+        const orderedSubStates = getSubStatesInOrder(state.SubStates);
+        
+        // Add each substate with format "StateName : SubStateName"
+        orderedSubStates.forEach(subState => {
+          orderedStates.push(`${currentState}:${subState}`);
+        });
+      } else {
+        // Add the state without substates
+        orderedStates.push(currentState);
+      }
       
       // Break conditions:
       // 1. If state has End: true
@@ -181,16 +233,21 @@ const WorkflowPreview = () => {
   };
   
   const states = React.useMemo(() => {
-    return currentWorkflow ? getWorkflowStates(currentWorkflow) : [];
+    const result = currentWorkflow ? getWorkflowStates(currentWorkflow) : [];
+    console.log('Generated states for workflow:', selectedWorkflow, result);
+    return result;
   }, [currentWorkflow]);
   
   // Initialize selected state when workflow changes
   React.useEffect(() => {
-    console.log('useEffect triggered - workflow changed:', selectedWorkflow);
     if (currentWorkflow && states.length > 0) {
       const firstState = states[0];
-      console.log('Setting first state:', firstState);
-      if (firstState && currentWorkflow.States[firstState]) {
+      
+      // Handle both "State" and "State:SubState" formats for validation
+      const mainStateKey = firstState.includes(':') ? firstState.split(':')[0] : firstState;
+      
+      if (firstState && currentWorkflow.States[mainStateKey]) {
+        console.log('Setting selectedState to:', firstState);
         setSelectedState(firstState);
       } else {
         console.warn('First state not found, resetting selected state');
@@ -215,11 +272,18 @@ const WorkflowPreview = () => {
 
   // Function to extract schema ID from state Schema property and find matching schema
   const getSchemaFromState = (stateKey) => {
-    if (!currentWorkflow || !stateKey || !currentWorkflow.States[stateKey]) {
+    if (!currentWorkflow || !stateKey) {
       return null;
     }
     
-    const state = currentWorkflow.States[stateKey];
+    // Handle both "State" and "State:SubState" formats
+    const mainStateKey = stateKey.includes(':') ? stateKey.split(':')[0] : stateKey;
+    
+    if (!currentWorkflow.States[mainStateKey]) {
+      return null;
+    }
+    
+    const state = currentWorkflow.States[mainStateKey];
     const schemaProperty = state.Schema;
     
     // Handle empty schema
@@ -240,14 +304,6 @@ const WorkflowPreview = () => {
     // Find schema by _id
     const schema = Object.values(schemaMap).find(schema => schema._id === fullSchemaId);
     
-    console.log('Schema lookup:', {
-      stateKey,
-      schemaProperty,
-      extractedId: schemaId,
-      fullSchemaId,
-      foundSchema: schema ? schema.name : 'Not found'
-    });
-    
     return schema;
   };
 
@@ -265,7 +321,7 @@ const WorkflowPreview = () => {
   };
 
   const currentDocuments = selectedState ? getStateDocuments(selectedState) : [];
-
+  
   // Create workflow tab items
   const workflowTabItems = workflows.map((workflowKey) => ({
     id: workflowKey,
@@ -735,22 +791,37 @@ const WorkflowPreview = () => {
         <div className="bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex flex-wrap gap-2">
             {states.map((stateKey) => {
-              const state = currentWorkflow.States[stateKey];
+              // Handle both "State" and "State:SubState" formats
+              const mainStateKey = stateKey.includes(':') ? stateKey.split(':')[0] : stateKey;
+              const subStateKey = stateKey.includes(':') ? stateKey.split(':')[1] : null;
+              
+              const state = currentWorkflow.States[mainStateKey];
               
               // Safety check for state existence
               if (!state) {
-                console.warn('State not found:', stateKey);
+                console.warn('State not found:', mainStateKey);
                 return null;
               }
               
               const isSelected = selectedState === stateKey;
               const documentCount = getStateDocuments(stateKey).length;
               
+              // Get display text
+              let displayText;
+              if (subStateKey) {
+                // For substates, show "State : SubState" format
+                const mainStateDesc = state.Desc || mainStateKey;
+                displayText = `${mainStateDesc} : ${subStateKey}`;
+              } else {
+                // For regular states
+                displayText = state.Desc || stateKey;
+              }
+              
               return (
                 <button
                   key={stateKey}
                   onClick={() => {
-                    console.log('Clicking state:', stateKey);
+                    console.log('Clicked state:', stateKey, 'Current selectedState:', selectedState);
                     setSelectedState(stateKey);
                   }}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2 ${
@@ -759,7 +830,7 @@ const WorkflowPreview = () => {
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  {state.Desc || stateKey}
+                  {displayText}
                   <Badge 
                     variant={isSelected ? "secondary" : "primary"}
                     className="text-xs"
