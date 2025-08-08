@@ -24,6 +24,8 @@ const FlexLayout = forwardRef<HTMLDivElement, FlexLayoutProps>(
       className = '',
       style = {},
       children,
+      childrenWidths,
+      childrenHeights,
       ...props
     },
     ref
@@ -89,6 +91,25 @@ const FlexLayout = forwardRef<HTMLDivElement, FlexLayoutProps>(
       className
     );
 
+    // Render children with width styles if childrenWidths is provided
+    const renderChildren = () => {
+      if ((childrenWidths && Array.isArray(childrenWidths)) || (childrenHeights && Array.isArray(childrenHeights))) {
+        return React.Children.map(children, (child, index) => {
+          const width = childrenWidths?.[index] || 'auto';
+          const height = childrenHeights?.[index] || '100%';
+          if (width) {
+            return (
+              <div style={{ width, height }}>
+                {child}
+              </div>
+            );
+          }
+          return child;
+        });
+      }
+      return children;
+    };
+
     return (
       <div
         ref={ref}
@@ -96,7 +117,7 @@ const FlexLayout = forwardRef<HTMLDivElement, FlexLayoutProps>(
         style={style}
         {...props}
       >
-        {children}
+        {renderChildren()}
       </div>
     );
   }

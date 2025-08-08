@@ -19,6 +19,7 @@ export interface FlexLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
   rounded?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full' | string;
   shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | string;
   children: React.ReactNode;
+  childrenHeights?: string[];
 }
 
 export interface GridLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -2826,6 +2827,8 @@ export interface FlexLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
   shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | string;
   /** Children components */
   children: React.ReactNode;
+  /** Width percentages for each child component */
+  childrenWidths?: string[];
 }
 export interface GridLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Number of columns */

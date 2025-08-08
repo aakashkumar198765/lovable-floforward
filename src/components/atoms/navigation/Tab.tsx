@@ -228,7 +228,7 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(
         {items?.some((item) => item?.content) && (
           <div
             className={cn(
-              "transition-all duration-300",
+              "h-full transition-all duration-300",
               variantClasses[variant].content,
               sizeClasses[size].content
             )}
@@ -243,12 +243,12 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(
                   hidden={item?.id !== currentTab}
                   tabIndex={0}
                   className={cn(
-                    "focus:outline-none transition-opacity duration-300",
+                    "h-full focus:outline-none transition-opacity duration-300",
                     item?.id === currentTab ? "opacity-100" : "opacity-0"
                   )}
                 >
                   {item?.id === currentTab && (
-                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="h-full animate-in fade-in slide-in-from-bottom-2 duration-300">
                       {item?.content}
                     </div>
                   )}
