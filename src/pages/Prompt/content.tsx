@@ -153,6 +153,14 @@ const PromptContent: React.FC<PromptContentProps> = ({
                     <h2 className="text-4xl font-bold text-gray-800 mb-4">
                       Build Apps With Natural Language
                     </h2>
+                    <div className="text-center mb-4">
+                      <button
+                        onClick={() => navigate('/project-plan')}
+                        className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
+                      >
+                        → Go to Project Plan
+                      </button>
+                    </div>
                     <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
                       Transform your ideas into fully functional applications
                       using the power of AI. Simply describe what you want to
