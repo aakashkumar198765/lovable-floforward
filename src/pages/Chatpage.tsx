@@ -4,11 +4,17 @@ import { Tab } from '../components/atoms/navigation';
 import { Button } from '../components/atoms/form';
 import { Input } from '../components/atoms/form';
 import { ChevronLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const ChatPage: React.FC = () => {
     const navigate = useNavigate();
+    const { projectId, projectName } = useParams<{ projectId: string; projectName: string }>();
     const [activeTab, setActiveTab] = useState('chat');
+    
+    // Decode the project name from URL and format it nicely
+    const displayProjectName = projectName 
+        ? decodeURIComponent(projectName).replace(/-/g, ' ')
+        : 'Project Name';
 
     const tabItems = [
         {
@@ -58,7 +64,7 @@ const ChatPage: React.FC = () => {
             >
                 <FlexLayout direction="row" align="center" gap="sm">
                     <ChevronLeft className="w-5 h-5 text-gray-600 cursor-pointer" onClick={() => navigate("/prompt")}/>
-                    <span className="text-lg font-medium text-gray-900">Medirian EXIM</span>
+                    <span className="text-lg font-medium text-gray-900">{displayProjectName}</span>
                 </FlexLayout>
                 {/* <Button variant="ghost" size="sm">
                     Edit

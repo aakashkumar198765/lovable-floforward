@@ -107,7 +107,17 @@ const PromptContent: React.FC<PromptContentProps> = ({
 
   const handleViewOutput = () => {
     console.log("View output clicked - navigating to project plan");
-    navigate("/project-plan");
+    // Generate project ID in format P_DDMMYYYY_HHMM
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const projectId = `P_${day}${month}${year}_${hours}${minutes}`;
+    
+    const projectNameForUrl = buildingAppName ? encodeURIComponent(buildingAppName.replace(/\s+/g, '-')) : 'default-project';
+    navigate(`/project-plan/${projectId}/${projectNameForUrl}`);
   };
 
   const handleLogout = () => {
@@ -325,7 +335,19 @@ const PromptContent: React.FC<PromptContentProps> = ({
                     </div>
                     <div className="text-center mb-4">
                       <button
-                        onClick={() => navigate('/project-plan')}
+                        onClick={() => {
+                          // Generate project ID in format P_DDMMYYYY_HHMM
+                          const now = new Date();
+                          const day = String(now.getDate()).padStart(2, '0');
+                          const month = String(now.getMonth() + 1).padStart(2, '0');
+                          const year = now.getFullYear();
+                          const hours = String(now.getHours()).padStart(2, '0');
+                          const minutes = String(now.getMinutes()).padStart(2, '0');
+                          const projectId = `P_${day}${month}${year}_${hours}${minutes}`;
+                          
+                          const projectNameForUrl = buildingAppName ? encodeURIComponent(buildingAppName.replace(/\s+/g, '-')) : 'default-project';
+                          navigate(`/project-plan/${projectId}/${projectNameForUrl}`);
+                        }}
                         className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
                       >
                         → Go to Project Plan

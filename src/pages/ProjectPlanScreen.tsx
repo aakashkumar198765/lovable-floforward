@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   ReactFlow,
   useNodesState,
@@ -15,7 +15,6 @@ import ChatPage from "./Chatpage";
 import { FlexLayout } from "../components/atoms/layouts";
 import { Tab } from "../components/atoms/navigation";
 import { Button } from "../components/atoms/form";
-import { Select } from "../components/atoms/form";
 import MarkdownRenderer from "../utils/MarkdownRenderer";
 import { testMarkdown } from "./sample_data/brd";
 import AIConfiguration from "./AIConfiguration";
@@ -54,8 +53,8 @@ const nodeColor = (node: any) => {
 
 const ProjectPlanScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { projectId, projectName } = useParams<{ projectId: string; projectName: string }>();
   const [activeProjectTab, setActiveProjectTab] = useState("brd");
-  const [selectedVersion, setSelectedVersion] = useState("1.0");
 
   const projectTabItems = [
     {
@@ -138,7 +137,7 @@ const ProjectPlanScreen: React.FC = () => {
       id: "project-plan-node",
       type: "default",
       data: {
-        label: "Project Plan",
+        label: "Workflow Plan",
       },
       position: { x: ROOT_X, y: ROOT_Y },
       style: {
@@ -534,19 +533,9 @@ const ProjectPlanScreen: React.FC = () => {
             padding="sm"
             className="border-b bg-white w-full rounded-none"
           >
-            {/* Left side - Version dropdown */}
+            {/* Left side - Empty placeholder to maintain layout */}
             <FlexLayout direction="row" align="center" gap="sm">
-              <Select
-                value={selectedVersion}
-                onChange={(value) => setSelectedVersion(value as string)}
-                options={[
-                  { value: "1.0", label: "Version 1.0" },
-                  { value: "2.0", label: "Version 2.0" },
-                ]}
-                size="sm"
-                variant="default"
-                className="text-sm font-medium border-none"
-              />
+              <div className="w-32"></div>
             </FlexLayout>
 
             {/* Center - Tabs */}
@@ -559,14 +548,13 @@ const ProjectPlanScreen: React.FC = () => {
               className="w-fit"
             />
 
-            {/* Right side - Updated text and Deploy button */}
+            {/* Right side - Deploy button */}
             <FlexLayout direction="row" align="center" gap="md">
-              <span className="text-sm text-gray-500">Updated 3min ago</span>
               <Button
                 variant="primary"
                 size="sm"
                 className="bg-gray-800 hover:bg-gray-900"
-                onClick={() => navigate("/create-deploy")}
+                onClick={() => navigate(`/create-deploy/${projectId || 'default-id'}/${projectName || 'default-project'}`)}
               >
                 Create App
               </Button>

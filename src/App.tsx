@@ -47,7 +47,7 @@ function App() {
                   <Prompt />
                 // </ProtectedRoute>
               } />
-              <Route path="/project-plan" element={
+              <Route path="/project-plan/:projectId/:projectName" element={
                 <ProtectedRoute>
                   <ProjectPlanScreen />
                 </ProtectedRoute>
@@ -62,7 +62,7 @@ function App() {
                   <WorkflowPreview />
                 </ProtectedRoute>
               } />
-              <Route path="/create-deploy" element={
+              <Route path="/create-deploy/:projectId/:projectName" element={
                 <ProtectedRoute>
                   <CreateDeployScreen />
                 </ProtectedRoute>
