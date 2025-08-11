@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FlexLayout } from "../components/atoms/layouts";
 import { Button, LoadingState, Alert } from "../components/atoms";
 import paramSDKService from "../services/ParamSDKService";
@@ -17,6 +17,7 @@ interface ConversationMessage {
 
 const CreateDeployScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { projectId, projectName } = useParams<{ projectId: string; projectName: string }>();
   const [deploymentStatus, setDeploymentStatus] = useState<"idle" | "creating" | "created" | "deploying" | "deployed" | "failed">("idle");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [deploymentProgress, setDeploymentProgress] = useState(0);
@@ -447,7 +448,7 @@ const CreateDeployScreen: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate("/project-plan")}
+            onClick={() => navigate(`/project-plan/${projectId || 'default-id'}/${projectName || 'default-project'}`)}
           >
             ← Back to Project
           </Button>
