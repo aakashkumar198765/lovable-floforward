@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ReactFlow,
   useNodesState,
@@ -35,6 +36,7 @@ const nodeColor = (node: any) => {
 };
 
 const ProjectPlanScreen: React.FC = () => {
+  const navigate = useNavigate();
   const [activeProjectTab, setActiveProjectTab] = useState("brd");
   const [selectedVersion, setSelectedVersion] = useState("1.0");
 
@@ -477,8 +479,9 @@ const ProjectPlanScreen: React.FC = () => {
                 variant="primary"
                 size="sm"
                 className="bg-gray-800 hover:bg-gray-900"
+                onClick={() => navigate("/create-deploy")}
               >
-                Deploy
+                Create App
               </Button>
             </FlexLayout>
           </FlexLayout>
