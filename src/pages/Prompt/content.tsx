@@ -1,32 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Textarea, Button, Badge, Icon, Avatar } from "../../components/atoms";
+import { Textarea, Button, Badge, Icon, Avatar, Modal } from "../../components/atoms";
 import { useAuth } from "../../contexts/AuthContext";
 import { RootState } from "../../store";
 import Logs from "./Logs";
 import Workspace from "./Workspace";
-
-type RecentApp = { id: string; name: string; description?: string };
-
-type LogEntry = {
-  message: string;
-  status: string;
-  format: string;
-};
-
-type PromptContentProps = {
-  prompt: string;
-  onPromptChange: (value: string) => void;
-  onSubmit: () => void;
-  building: boolean;
-  buildingAppName?: string;
-  recentApps: RecentApp[];
-  onSelectRecent: (app: RecentApp) => void;
-  setBuilding?: (value: boolean) => void;
-  logs: LogEntry[];
-  streamCompleted?: boolean;
-};
+import { PromptContentProps } from "../../types";
 
 const PromptContent: React.FC<PromptContentProps> = ({
   prompt = "",
@@ -39,16 +19,24 @@ const PromptContent: React.FC<PromptContentProps> = ({
   onSelectRecent = () => {},
   streamCompleted = false,
   logs = [],
+  setStreamingCompleted = () => {}
 }) => {
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
   // Get user data from Redux store for detailed user information
   const user = useSelector((state: RootState) => state.auth?.user);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const handleBuildBRDClick = () => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+    } else {
+      onSubmit();
+    }
+  };
 
   // Fallback user info when Redux user is not available
   const getUserDisplayInfo = () => {
@@ -89,19 +77,8 @@ const PromptContent: React.FC<PromptContentProps> = ({
 
   const userInfo = getUserDisplayInfo();
 
-  const toggleDrawer = () => {
-    setIsDrawerOpen(!isDrawerOpen);
-  };
-
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      setIsDrawerOpen(false);
-    }
-  };
-
   const handleBackToPrompt = () => {
     setShowLogs(false);
-    setIsCompleted(false);
     setBuilding(false);
   };
 
@@ -162,9 +139,6 @@ const PromptContent: React.FC<PromptContentProps> = ({
   useEffect(() => {
     if (building) {
       setShowLogs(true);
-    }
-    if (logs.some((log) => log.status.toLowerCase() === "completed")) {
-      setIsCompleted(true);
     }
   }, [building, logs]);
 
@@ -321,7 +295,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
 
                     <div className="flex justify-center">
                       <Button
-                        onClick={onSubmit}
+                        onClick={handleBuildBRDClick}
                         variant="primary"
                         className="bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-4 rounded-xl font-semibold text-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={!prompt.trim() || building}
@@ -366,12 +340,50 @@ const PromptContent: React.FC<PromptContentProps> = ({
               onBackToPrompt={handleBackToPrompt}
               onViewOutput={handleViewOutput}
               streamCompleted={streamCompleted}
+              setStreamingCompleted={setStreamingCompleted}
             />
           )}
         </div>
       </main>
+      {/* Login Required Modal */}
+      {showLoginModal && (
+        <Modal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          title="Login Required"
+          size="lg"
+        >
+          <div className="text-center p-4">
+            <Icon name="lock" size="lg" className="mx-auto mb-4 text-blue-500" />
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Unlock Full Features</h3>
+            <p className="text-gray-600 mb-6">
+              To access the "Build BRD" functionality and save your projects,
+              please log in.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <Button
+                variant="secondary"
+                onClick={() => setShowLoginModal(false)}
+                className="px-6 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 text-gray-800 transition-all duration-300"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setShowLoginModal(false);
+                  navigate("/login");
+                }}
+                className="px-6 py-2 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-md transition-all duration-300"
+              >
+                Login Now
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
-  );
+  )
 };
 
 export default PromptContent;
