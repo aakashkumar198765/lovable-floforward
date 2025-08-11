@@ -7,6 +7,7 @@ import {
   MiniMap,
   Controls,
   Background,
+  ReactFlowProvider,
   applyNodeChanges,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -23,16 +24,32 @@ import AIConfiguration from "./AIConfiguration";
 import WorkflowPreview from "./WorkflowPreview";
 
 const nodeColor = (node: any) => {
-  switch (node.type) {
-    case "addableNode":
-      return "#6ede87";
-    case "editableNode":
-      return "#6865A5";
-    case "accordionNode":
-      return "#6ede87";
-    default:
-      return "#ff0072";
+  // First check if node has style with backgroundColor
+  if (node.style?.backgroundColor) {
+    return node.style.backgroundColor;
   }
+  
+  // Fallback based on node ID patterns to match the actual flow structure
+  if (node.id === "project-plan-node") {
+    return "#3b82f6"; // Blue for project plan root
+  }
+  
+  if (node.id.includes("-node") && !node.id.includes("project-plan")) {
+    return "#f59e0b"; // Yellow/amber for workflow nodes
+  }
+  
+  if (node.id.includes("-") && !node.id.includes("-node")) {
+    // Check if it's a substate (has multiple dashes indicating deeper nesting)
+    const parts = node.id.split("-");
+    if (parts.length > 2) {
+      return "#ec4899"; // Pink for substates
+    } else {
+      return "#16a34a"; // Green for states
+    }
+  }
+  
+  // Default fallback
+  return "#f1f5f9";
 };
 
 const ProjectPlanScreen: React.FC = () => {
@@ -60,24 +77,47 @@ const ProjectPlanScreen: React.FC = () => {
   ];
 
   const CustomMiniMap = (props: any) => {
-    setTimeout(() => {
-      const titleElement = document.getElementById(
-        "react-flow__minimap-desc-1"
-      );
-      if (titleElement) {
-        titleElement.textContent = "Minimap"; // Change the hover text
-      }
-    }, 5);
+    React.useEffect(() => {
+      const timer = setTimeout(() => {
+        const titleElement = document.getElementById(
+          "react-flow__minimap-desc-1"
+        );
+        if (titleElement) {
+          titleElement.textContent = "Minimap";
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }, []);
 
-    return <MiniMap {...props} />;
+    return (
+      <MiniMap 
+        nodeColor={nodeColor}
+        nodeStrokeWidth={2}
+        nodeBorderRadius={6}
+        zoomable
+        pannable
+        className="reactflow-minimap"
+        position="bottom-right"
+        style={{
+          height: 120,
+          backgroundColor: '#f8fafc',
+          border: '1px solid #e2e8f0',
+          borderRadius: '8px'
+        }}
+        {...props}
+      />
+    );
   };
 
-  // Layout constants - moved to component level
-  const LEVEL_HEIGHT = 150;
-  const NODE_WIDTH = 200;
-  const NODE_SPACING = 250;
-  const ROOT_X = 400;
-  const ROOT_Y = 50;
+  // Enhanced layout constants for better hierarchy and alignment
+  const LEVEL_HEIGHT = 220; // Further increased for better vertical spacing
+  const NODE_WIDTH = 160;
+  const NODE_SPACING_HORIZONTAL = 350; // Further increased horizontal spacing between workflows
+  const STATE_SPACING = 220; // Further increased spacing between states
+  const SUBSTATE_SPACING = 180; // Further increased spacing between substates
+  const ROOT_X = 800; // Move root further to accommodate more workflows
+  const ROOT_Y = 100;
 
   const getNodesAndEdges = (): { nodes: FlowNode[]; edges: FlowEdge[] } => {
     const data: Record<string, StateMachine> = stateMachineExampleDummyData;
@@ -88,7 +128,12 @@ const ProjectPlanScreen: React.FC = () => {
       return { nodes, edges };
     }
 
-    // Add root node
+    // Calculate workflow starting positions to prevent overlaps
+    const totalWorkflows = Object.values(data).length;
+    const totalWidth = (totalWorkflows - 1) * NODE_SPACING_HORIZONTAL;
+    const startX = Math.max(100, ROOT_X - (totalWidth / 2)); // Ensure minimum left margin
+
+    // Add root node - centered
     nodes.push({
       id: "project-plan-node",
       type: "default",
@@ -98,16 +143,19 @@ const ProjectPlanScreen: React.FC = () => {
       position: { x: ROOT_X, y: ROOT_Y },
       style: {
         backgroundColor: '#eff6ff',
-        border: '2px solid #3b82f6',
-        borderRadius: '8px',
-        padding: '10px',
-        fontSize: '14px',
+        border: '3px solid #3b82f6',
+        borderRadius: '12px',
+        padding: '12px 16px',
+        fontSize: '16px',
         fontWeight: 'bold',
-        color: '#1e40af'
+        color: '#1e40af',
+        minWidth: '140px',
+        textAlign: 'center'
       }
     });
 
-    // Track positions for each level
+    // Track global state positioning to prevent overlaps
+    let globalStateXPosition = startX;
     let stateMachineIndex = 0;
 
     // Process by Index (1, 2, 3, ...)
@@ -122,8 +170,8 @@ const ProjectPlanScreen: React.FC = () => {
         if (stateMachine?.Index === currentIndex) {
           foundStateMachine = true;
 
-          // Calculate position for this state machine
-          const smX = ROOT_X - 300 + (stateMachineIndex * NODE_SPACING);
+          // Calculate centered position for this workflow
+          const smX = startX + (stateMachineIndex * NODE_SPACING_HORIZONTAL);
           const smY = ROOT_Y + LEVEL_HEIGHT;
 
           // Create main node for this state machine
@@ -138,11 +186,13 @@ const ProjectPlanScreen: React.FC = () => {
             style: {
               backgroundColor: '#fef3c7',
               border: '2px solid #f59e0b',
-              borderRadius: '8px',
-              padding: '10px',
-              fontSize: '12px',
+              borderRadius: '10px',
+              padding: '10px 14px',
+              fontSize: '13px',
               fontWeight: 'bold',
-              color: '#92400e'
+              color: '#92400e',
+              minWidth: '120px',
+              textAlign: 'center'
             }
           });
 
@@ -155,18 +205,19 @@ const ProjectPlanScreen: React.FC = () => {
             animated: true
           });
 
-          // Process the StartAt state
+          // Process the StartAt state with global positioning
           const startStateName = stateMachine.StartAt;
           if (startStateName && stateMachine.States[startStateName]) {
-            processStateWithLayout(
+            globalStateXPosition = processStateWithLayout(
               stateMachine,
               startStateName,
               stateMachine.Name,
               nodes,
               edges,
-              smX,
+              globalStateXPosition, // Use global X position
               smY + LEVEL_HEIGHT,
-              0
+              0,
+              stateMachine
             );
           }
 
@@ -180,19 +231,20 @@ const ProjectPlanScreen: React.FC = () => {
     return { nodes, edges };
   };
 
-  // Helper function to process a state and its chain with layout
+  // Enhanced helper function to process a state and its chain with improved layout
   const processStateWithLayout = (
     stateMachine: StateMachine,
     stateName: string,
     parentId: string,
     nodes: FlowNode[],
     edges: FlowEdge[],
-    startX: number,
+    currentXPosition: number, // Global X position tracker
     startY: number,
-    stateIndex: number
-  ): number => {
+    stateIndex: number,
+    fullStateMachine?: StateMachine
+  ): number => { // Return updated X position
     const state = stateMachine.States[stateName];
-    if (!state) return stateIndex;
+    if (!state) return currentXPosition;
 
     // Check schema condition
     const hasCommerceSchema = state.Schema?.includes("Commerce");
@@ -207,16 +259,17 @@ const ProjectPlanScreen: React.FC = () => {
           parentId, 
           nodes, 
           edges, 
-          startX, 
+          currentXPosition, // Pass along current position
           startY, 
-          stateIndex
+          stateIndex,
+          fullStateMachine
         );
       }
-      return stateIndex;
+      return currentXPosition;
     }
 
-    // Calculate position for this state
-    const stateX = startX + (stateIndex * NODE_SPACING);
+    // Use current global X position for this state
+    const stateX = currentXPosition;
     const stateY = startY;
 
     // Create state node with unique ID based on parent workflow
@@ -232,13 +285,16 @@ const ProjectPlanScreen: React.FC = () => {
         backgroundColor: '#dcfce7',
         border: '2px solid #16a34a',
         borderRadius: '8px',
-        padding: '8px',
-        fontSize: '11px',
-        color: '#15803d'
+        padding: '8px 12px',
+        fontSize: '12px',
+        fontWeight: '600',
+        color: '#15803d',
+        minWidth: '100px',
+        textAlign: 'center'
       }
     });
 
-    // Add edge from parent workflow to this state (parent-child relationship only)
+    // Add edge from parent workflow to this state
     edges.push({
       id: `edge-${parentId}-${stateName}`,
       source: `${parentId}-node`,
@@ -246,9 +302,10 @@ const ProjectPlanScreen: React.FC = () => {
       type: "smoothstep"
     });
 
-    let nextStateIndex = stateIndex + 1;
+    // Update global X position for next state
+    const nextXPosition = currentXPosition + STATE_SPACING;
 
-    // Process substates if they exist - check for ANY state with SubStates
+    // Process substates if they exist
     if (state.SubStates && Object.keys(state.SubStates).length > 0) {
       // Find the starting substate
       for (const [subStateName, subState] of Object.entries(state.SubStates)) {
@@ -276,16 +333,17 @@ const ProjectPlanScreen: React.FC = () => {
         parentId, 
         nodes, 
         edges, 
-        startX, 
+        nextXPosition, // Pass updated X position
         startY, 
-        nextStateIndex
+        stateIndex + 1,
+        fullStateMachine
       );
     }
 
-    return nextStateIndex;
+    return nextXPosition; // Return the updated position for next workflow
   };
 
-  // Helper function to process substate chain with layout
+  // Enhanced helper function to process substate chain with better layout
   const processSubStateChainWithLayout = (
     subStates: Record<string, SubState>,
     currentSubStateName: string,
@@ -301,8 +359,8 @@ const ProjectPlanScreen: React.FC = () => {
     let index = subStateIndex;
 
     while (currentSubState && currentName) {
-      // Calculate position for this substate
-      const subStateX = startX + (index * (NODE_WIDTH + 50));
+      // Calculate position for this substate with better spacing
+      const subStateX = startX + (index * SUBSTATE_SPACING);
       const subStateY = startY;
 
       // Create substate node with unique ID based on parent state
@@ -318,13 +376,16 @@ const ProjectPlanScreen: React.FC = () => {
           backgroundColor: '#fce7f3',
           border: '2px solid #ec4899',
           borderRadius: '6px',
-          padding: '6px',
-          fontSize: '10px',
-          color: '#be185d'
+          padding: '6px 10px',
+          fontSize: '11px',
+          fontWeight: '500',
+          color: '#be185d',
+          minWidth: '80px',
+          textAlign: 'center'
         }
       });
 
-      // Add edge from parent state to this substate (parent-child relationship)
+      // Add edge from parent state to this substate
       edges.push({
         id: `edge-${parentStateId}-${currentName}`,
         source: parentStateId,
@@ -348,7 +409,15 @@ const ProjectPlanScreen: React.FC = () => {
       }
     }
   };
-  const { nodes, edges } = getNodesAndEdges();
+  
+  // Get initial nodes and edges and set up state management
+  const initialData = getNodesAndEdges();
+  const [flowNodes, setNodes, onNodesChange] = useNodesState(initialData.nodes);
+  const [flowEdges, setEdges, onEdgesChange] = useEdgesState(initialData.edges);
+  
+  // Ref to access ReactFlow instance
+  const reactFlowInstance = React.useRef<any>(null);
+  const [isFlowReady, setIsFlowReady] = React.useState(false);
 
   const renderContent = () => {
     switch (activeProjectTab) {
@@ -356,60 +425,78 @@ const ProjectPlanScreen: React.FC = () => {
         return <MarkdownRenderer content={testMarkdown} className="w-full" />;
       case "plan":
         return (
-          <div
-            className="flow-builder h-full w-full relative"
-            id="reactflow-container"
-            style={{ touchAction: "none", outline: "none" }}
-          >
-            <ReactFlow
-              className="reactflow h-full w-full"
-              nodes={nodes}
-              edges={edges}
-              fitView
-              attributionPosition="bottom-left"
-              proOptions={{ hideAttribution: true }}
-              panOnScroll={true}
-              selectionOnDrag={true}
-              panOnDrag={[1, 2]}
-              zoomOnScroll={true}
-              zoomOnPinch={true}
-              zoomOnDoubleClick={true}
-            >
-              <CustomMiniMap
-                nodeColor={nodeColor}
-                nodeStrokeWidth={3}
-                zoomable
-                pannable
-                className="reactflow-minimap"
-                position="bottom-right"
-              />
-              <Controls position="bottom-left" />
-              <Background color={"#f1f5f9"} gap={20} />
-              
-              {/* Legend Card */}
-              <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg border p-4 z-10 min-w-[200px]">
-                <h3 className="text-sm font-semibold mb-3 text-gray-800">Flow Legend</h3>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded border-2 border-blue-500 bg-blue-50"></div>
-                    <span className="text-xs text-gray-700">Project Name</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded border-2 border-amber-500 bg-amber-50"></div>
-                    <span className="text-xs text-gray-700">Workflow</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded border-2 border-green-600 bg-green-100"></div>
-                    <span className="text-xs text-gray-700">States</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded border-2 border-pink-500 bg-pink-100"></div>
-                    <span className="text-xs text-gray-700">Sub-States</span>
+          <ReactFlowProvider>
+            <div className="h-full w-full relative">
+              {!isFlowReady && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-20">
+                  <div className="text-gray-500">Loading flow diagram...</div>
+                </div>
+              )}
+              <div
+                className="flow-builder h-full w-full relative"
+                id="reactflow-container"
+                style={{ 
+                  touchAction: "none", 
+                  outline: "none",
+                  opacity: isFlowReady ? 1 : 0,
+                  transition: "opacity 0.3s ease-in-out"
+                }}
+              >
+              <ReactFlow
+                className="reactflow h-full w-full"
+                nodes={flowNodes}
+                edges={flowEdges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onInit={(instance) => {
+                  reactFlowInstance.current = instance;
+                  // Just set ready state without fitting
+                  requestAnimationFrame(() => {
+                    setIsFlowReady(true);
+                  });
+                }}
+                defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+                attributionPosition="bottom-left"
+                proOptions={{ hideAttribution: true }}
+                panOnScroll={true}
+                selectionOnDrag={true}
+                panOnDrag={[1, 2]}
+                zoomOnScroll={true}
+                zoomOnPinch={true}
+                zoomOnDoubleClick={true}
+                minZoom={0.3}
+                maxZoom={2}
+              >
+                <CustomMiniMap />
+                <Controls position="bottom-left" />
+                <Background color={"#f1f5f9"} gap={20} />
+                
+                {/* Legend Card */}
+                <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg border p-4 z-10 min-w-[200px]">
+                  <h3 className="text-sm font-semibold mb-3 text-gray-800">Flow Legend</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded border-2 border-blue-500 bg-blue-50"></div>
+                      <span className="text-xs text-gray-700">Project Name</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded border-2 border-amber-500 bg-amber-50"></div>
+                      <span className="text-xs text-gray-700">Workflow</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded border-2 border-green-600 bg-green-100"></div>
+                      <span className="text-xs text-gray-700">States</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded border-2 border-pink-500 bg-pink-100"></div>
+                      <span className="text-xs text-gray-700">Sub-States</span>
+                    </div>
                   </div>
                 </div>
+              </ReactFlow>
               </div>
-            </ReactFlow>
-          </div>
+            </div>
+          </ReactFlowProvider>
         );
       case "smart-ai":
         return <AIConfiguration />;
