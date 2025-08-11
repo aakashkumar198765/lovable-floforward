@@ -80,6 +80,15 @@ const PromptContent: React.FC<PromptContentProps> = ({
             <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
               Build App With Natural Language
             </h3>
+            {/* Temporary Link to Project Plan */}
+            <div className="text-center mb-4">
+              <button
+                onClick={() => navigate('/project-plan')}
+                className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
+              >
+                → Go to Project Plan
+              </button>
+            </div>
             <Textarea
               id="prompt"
               placeholder="Describe the app you want to build..."
