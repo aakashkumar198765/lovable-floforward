@@ -132,7 +132,7 @@ const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
         )}
 
         {children && (
-          <span className={cn('w-full flex', loading && 'opacity-70')}>
+          <span className={cn('w-full flex items-center', loading && 'opacity-70')}>
             {children}
           </span>
         )}

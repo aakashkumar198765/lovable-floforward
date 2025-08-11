@@ -36,12 +36,12 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<Login />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/" element={<Prompt />} />
             <Route path="/prompt" element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <Prompt />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             } />
             <Route path="/project-plan" element={
               <ProtectedRoute>

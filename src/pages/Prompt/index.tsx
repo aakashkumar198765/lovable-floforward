@@ -5,6 +5,8 @@ import {
   executeMindAndGetResults,
   streamSSE,
 } from "../../services/paramai_browsersdk";
+import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const MOCK_RECENTS = [
   { id: "1", name: "Meridian EXIM" },
@@ -16,9 +18,12 @@ const MOCK_RECENTS = [
 ];
 
 const Prompt: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [prompt, setPrompt] = React.useState("");
   const [building, setBuilding] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [streamCompleted, setStreamCompleted] = React.useState(false);
   const [buildingAppName, setBuildingAppName] = React.useState<
     string | undefined
   >(undefined);
@@ -27,6 +32,10 @@ const Prompt: React.FC = () => {
   >([]);
 
   const handleSubmit = React.useCallback(async () => {
+    if (!isAuthenticated) {
+      return navigate("/login", { replace: true });
+    }
+
     setLoading(true);
     if (!prompt.trim()) return;
     const name = prompt.trim();
@@ -123,6 +132,7 @@ const Prompt: React.FC = () => {
           onComplete: (data: any) => {
             // Handle completion - stream is already closed
             console.log("Stream completed:", data);
+            setStreamCompleted(true);
           },
           onError: (error: any) => {
             console.error("Stream error:", error);
@@ -201,16 +211,32 @@ const Prompt: React.FC = () => {
   );
 
   return (
-    <PromptContent
-      prompt={prompt}
-      onPromptChange={setPrompt}
-      onSubmit={handleSubmit}
-      building={building}
-      buildingAppName={buildingAppName}
-      recentApps={MOCK_RECENTS}
-      onSelectRecent={handleSelectRecent}
-      logs={logs}
-    />
+    <div className="relative bg-gradient-to-br from-blue-100 to-purple-100 h-screen">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden z-0">
+        <div className="absolute -top-10 -right-10 w-80 h-80 bg-blue-200 rounded-full filter blur-2xl opacity-40 animate-pulse"></div>
+        <div
+          className="absolute -bottom-10 -left-10 w-80 h-80 bg-purple-200 rounded-full filter blur-2xl opacity-40 animate-pulse"
+          style={{ animationDelay: "2s" }}
+        ></div>
+        <div
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-200 rounded-full filter blur-2xl opacity-40 animate-pulse"
+          style={{ animationDelay: "4s" }}
+        ></div>
+      </div>
+      <PromptContent
+        prompt={prompt}
+        onPromptChange={setPrompt}
+        onSubmit={handleSubmit}
+        building={building}
+        setBuilding={setBuilding}
+        buildingAppName={buildingAppName}
+        recentApps={MOCK_RECENTS}
+        onSelectRecent={handleSelectRecent}
+        logs={logs}
+        streamCompleted={streamCompleted}
+      />
+    </div>
   );
 };
 

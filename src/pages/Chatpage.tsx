@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { FlexLayout } from '../components/atoms/layouts';
 import { Tab } from '../components/atoms/navigation';
 import { Button } from '../components/atoms/form';
 import { Input } from '../components/atoms/form';
 import { ChevronLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const ChatPage: React.FC = () => {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('chat');
 
     const tabItems = [
@@ -13,7 +15,7 @@ const ChatPage: React.FC = () => {
             id: 'chat',
             label: 'Chat',
             content: (
-                <FlexLayout direction="col" className="h-full">
+                <FlexLayout direction="col" className="h-full" gap="none" padding="none">
                     <div className="flex-1 p-4 bg-gray-50 h-full">
                         <div className="bg-white rounded-lg p-4 shadow-sm">
                             <p className="text-gray-800">
@@ -24,7 +26,7 @@ const ChatPage: React.FC = () => {
                     <div className="border-t bg-white w-full">
                         <Input
                             placeholder="What changes you want to make"
-                            className="w-full"
+                            className="w-full rounded-none"
                             variant="default"
                             disabled
                             onChange={() => {console.log('Input changed')}}
@@ -55,12 +57,12 @@ const ChatPage: React.FC = () => {
                 className="border-b pb-[13px] bg-white w-full rounded-none"
             >
                 <FlexLayout direction="row" align="center" gap="sm">
-                    <ChevronLeft className="w-5 h-5 text-gray-600" />
+                    <ChevronLeft className="w-5 h-5 text-gray-600 cursor-pointer" onClick={() => navigate("/prompt")}/>
                     <span className="text-lg font-medium text-gray-900">Medirian EXIM</span>
                 </FlexLayout>
-                <Button variant="ghost" size="sm">
+                {/* <Button variant="ghost" size="sm">
                     Edit
-                </Button>
+                </Button> */}
             </FlexLayout>
 
             {/* Tabs */}

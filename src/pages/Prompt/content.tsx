@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Textarea, Button, Badge } from "../../components/atoms";
+import { Textarea, Button, Badge, Icon } from "../../components/atoms";
 import Logs from "./Logs";
+import Workspace from "./Workspace";
 
 type RecentApp = { id: string; name: string; description?: string };
 
@@ -19,23 +20,28 @@ type PromptContentProps = {
   buildingAppName?: string;
   recentApps: RecentApp[];
   onSelectRecent: (app: RecentApp) => void;
+  setBuilding?: (value: boolean) => void;
   logs: LogEntry[];
+  streamCompleted?: boolean;
 };
 
 const PromptContent: React.FC<PromptContentProps> = ({
-  prompt,
-  onPromptChange,
-  onSubmit,
-  building,
-  buildingAppName,
-  recentApps,
-  onSelectRecent,
-  logs,
+  prompt = "",
+  onPromptChange = () => {},
+  onSubmit = () => {},
+  building = false,
+  setBuilding = () => {},
+  buildingAppName = "",
+  recentApps = [],
+  onSelectRecent = () => {},
+  streamCompleted = false,
+  logs = [],
 }) => {
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -49,149 +55,158 @@ const PromptContent: React.FC<PromptContentProps> = ({
 
   const handleBackToPrompt = () => {
     setShowLogs(false);
-    setIsCompleted(false); // Reset isCompleted when returning to prompt
+    setIsCompleted(false);
+    setBuilding(false);
   };
 
   const handleViewOutput = () => {
     console.log("View output clicked - navigating to project plan");
-    navigate('/project-plan');
+    navigate("/project-plan");
   };
 
-  // Show logs if building or if logs exist and we're in logs view
-  // const shouldShowLogs = building || (logs.length > 0 && showLogs);
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 10;
+      if (isScrolled !== scrolled) {
+        setScrolled(isScrolled);
+      }
+    };
 
-  // Update showLogs when building starts and check for completed logs
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [scrolled]);
+
   useEffect(() => {
     if (building) {
       setShowLogs(true);
     }
-    // Check if any log has status "completed"
     if (logs.some((log) => log.status.toLowerCase() === "completed")) {
       setIsCompleted(true);
     }
   }, [building, logs]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
-      {/* Main Content: Prompt or Logs */}
-      <div className="w-full max-w-2xl">
-        {!showLogs ? (
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
-              Build App With Natural Language
-            </h3>
-            <Textarea
-              id="prompt"
-              placeholder="Describe the app you want to build..."
-              value={prompt}
-              onChange={(e) => onPromptChange(e.target.value)}
-              rows={6}
-              className="w-full text-center"
-            />
-            <div className="flex justify-center mt-4">
-              <Button onClick={onSubmit} variant="primary">
-                Build
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <Logs logs={logs} />
-            {logs.length > 0 && (
-              <div className="mt-6 flex justify-center space-x-4">
-                <Button
-                  onClick={handleBackToPrompt}
-                  variant="secondary"
-                  className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200"
-                >
-                  ← Back to Prompt
-                </Button>
-                <Button
-                  onClick={handleViewOutput}
-                  variant="primary"
-                  className={`px-6 py-2 rounded-lg transition-colors duration-200`}
-                >
-                  View Output →
-                </Button>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+    <div className="h-full relative overflow-y-auto overflow-x-hidden">
+      {/* Grid overlay */}
+      <div
+        className="absolute inset-0 opacity-20 z-0"
+        style={{
+          backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255,255,255,0.3) 1px, transparent 0)`,
+          backgroundSize: "30px 30px",
+        }}
+      ></div>
 
-      {/* Recent Apps Drawer Trigger: Hidden During Logs */}
-      {!showLogs && (
-        <div className="fixed bottom-4 left-0 right-0 flex justify-center">
-          <button
-            onClick={toggleDrawer}
-            className="flex items-center bg-white border border-gray-200 rounded-lg px-4 py-2 shadow-sm hover:bg-gray-50 transition"
-          >
-            <span className="text-sm font-medium text-gray-900 mr-2">
-              Recent Apps
-            </span>
-            <svg
-              className={`w-4 h-4 transform ${
-                isDrawerOpen ? "rotate-180" : ""
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+      {/* Header */}
+      <header
+        className={`sticky top-0 z-20 transition-all duration-300 ${
+          scrolled
+            ? "bg-white/80 backdrop-blur-lg shadow-md"
+            : "bg-white/0 backdrop-blur-none shadow-none"
+        } border-b border-gray-200 backdrop-blur-[2px]`}
+      >
+        <div className="bg-white/70 mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center shadow-md">
+                <svg
+                  className="w-6 h-6 text-white"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold text-gray-800">
+                Lovable FloForward
+              </h1>
+            </div>
+
+            {/* Login Button */}
+            <Button
+              variant="secondary"
+              className="bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 transition-all duration-300 hover:scale-105 shadow-sm"
+              onClick={() => navigate("/login")}
+              iconLeft={<Icon name="user" size="sm" />}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M5 15l7-7 7 7"
-              />
-            </svg>
-          </button>
-        </div>
-      )}
-
-      {/* Recent Apps Drawer with Backdrop: Shown When Triggered */}
-      {isDrawerOpen && !showLogs && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex justify-center items-end"
-          onClick={handleBackdropClick}
-        >
-          <div className="w-full max-w-7xl bg-white border-t border-gray-200 p-6 shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-base font-semibold text-gray-900">
-                Recent Apps
-              </h4>
-              <Badge variant="secondary">{recentApps.length}</Badge>
-            </div>
-            {recentApps.length === 0 ? (
-              <div className="text-center text-gray-600">No recent apps</div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {recentApps.map((app) => (
-                  <button
-                    key={app.id}
-                    onClick={() => {
-                      onSelectRecent(app);
-                      setIsDrawerOpen(false);
-                    }}
-                    className="group h-28 rounded-lg border border-gray-200 hover:border-primary-300 hover:shadow-sm transition bg-white flex items-center justify-center text-center p-2"
-                  >
-                    <div>
-                      <div className="text-sm font-medium text-gray-900 group-hover:text-primary-700">
-                        {app.name}
-                      </div>
-                      {app.description && (
-                        <div className="mt-1 text-xs text-gray-500 line-clamp-2">
-                          {app.description}
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
+              Login
+            </Button>
           </div>
         </div>
-      )}
+      </header>
+
+      {/* Main Content */}
+      <main className="relative z-10">
+        <div className="flex flex-col items-center justify-center p-6">
+          {!showLogs ? (
+            <div className="flex flex-col items-center justify-center w-full">
+              <div className="w-full flex justify-center">
+                <div className="max-w-4xl bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl p-4 sm:p-8 shadow-lg mt-8">
+                  {/* Hero Section */}
+                  <div className="text-center mb-8">
+                    <h2 className="text-4xl font-bold text-gray-800 mb-4">
+                      Build Apps With Natural Language
+                    </h2>
+                    <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
+                      Transform your ideas into fully functional applications
+                      using the power of AI. Simply describe what you want to
+                      build, and watch it come to life.
+                    </p>
+                  </div>
+
+                  {/* Prompt Input */}
+                  <div className="space-y-6">
+                    <div className="relative">
+                      <Textarea
+                        id="prompt"
+                        placeholder="Describe the app you want to build... (e.g., 'A task management app with drag-and-drop functionality and team collaboration features')"
+                        value={prompt}
+                        onChange={(e) => onPromptChange(e.target.value)}
+                        rows={6}
+                        className="w-full bg-white/70 backdrop-blur-sm border border-white/50 rounded-xl text-gray-800 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-lg p-4 shadow-inner"
+                      />
+                      <div className="absolute bottom-4 right-4 text-gray-500 text-sm">
+                        {prompt.length}/1000
+                      </div>
+                    </div>
+
+                    <div className="flex justify-center">
+                      <Button
+                        onClick={onSubmit}
+                        variant="primary"
+                        className="bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-4 rounded-xl font-semibold text-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={!prompt.trim() || building}
+                        loading={building}
+                        iconLeft={
+                          !building ? <Icon name="arrow-right" /> : undefined
+                        }
+                      >
+                        {building ? "Building..." : "Build App"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                {/* Features Grid */}
+                {/* <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">...</div> */}
+              </div>
+              <Workspace />
+            </div>
+          ) : (
+            <Logs
+              logs={logs}
+              onBackToPrompt={handleBackToPrompt}
+              onViewOutput={handleViewOutput}
+              streamCompleted={streamCompleted}
+            />
+          )}
+        </div>
+      </main>
     </div>
   );
 };

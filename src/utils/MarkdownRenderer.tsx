@@ -275,7 +275,15 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
             if (isTable) {
               return (
-                <pre className="code-block">
+                <pre 
+                  className="code-block"
+                  style={{
+                    whiteSpace: "pre-wrap",
+                    wordWrap: "break-word",
+                    overflowWrap: "anywhere",
+                    overflow: "auto"
+                  }}
+                >
                   {heading && (
                     <Label
                       size="md"
@@ -293,7 +301,13 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
             return (
               <pre
                 className="code-block mb-4"
-                style={{ lineHeight: "1.75rem" }}
+                style={{ 
+                  lineHeight: "1.75rem",
+                  whiteSpace: "pre-wrap",
+                  wordWrap: "break-word",
+                  overflowWrap: "anywhere",
+                  overflow: "auto"
+                }}
               >
                 {children}
               </pre>
@@ -310,8 +324,14 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               </Badge>
             ) : (
               <code
-                className="block p-3 bg-gray-100 dark:bg-gray-800 rounded font-mono text-sm"
-                style={{ lineHeight: "1.75rem" }}
+                className="block p-3 rounded font-mono text-sm"
+                style={{ 
+                  lineHeight: "1.75rem",
+                  whiteSpace: "pre-wrap",
+                  wordWrap: "break-word",
+                  overflowWrap: "anywhere",
+                  overflow: "auto"
+                }}
               >
                 {children}
               </code>
