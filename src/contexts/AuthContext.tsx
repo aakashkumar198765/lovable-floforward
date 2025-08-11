@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (token?: string) => void;
+  login: (token?: string, userEmail?: string) => void;
   logout: () => void;
 }
 
@@ -15,16 +15,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return !!token;
   });
 
-  const login = (token?: string) => {
+  const login = (token?: string, userEmail?: string) => {
     setIsAuthenticated(true);
     if (token) {
       localStorage.setItem('authToken', token);
+    }
+    // Store email for later use by Redux integration
+    if (userEmail) {
+      localStorage.setItem('userEmail', userEmail);
     }
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem('authToken');
+    localStorage.removeItem('userEmail');
   };
 
   return (

@@ -107,7 +107,7 @@ const Login: React.FC = () => {
         
         // Store authentication data and mark user as logged in
         const token = (result as any).data?.token;
-        login(token);
+        login(token, email);
         console.log('🔑 User authenticated successfully');
         
         // Navigate to prompt page
