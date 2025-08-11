@@ -3,27 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Textarea, Button, Badge, Icon } from "../../components/atoms";
 import Logs from "./Logs";
 import Workspace from "./Workspace";
-
-type RecentApp = { id: string; name: string; description?: string };
-
-type LogEntry = {
-  message: string;
-  status: string;
-  format: string;
-};
-
-type PromptContentProps = {
-  prompt: string;
-  onPromptChange: (value: string) => void;
-  onSubmit: () => void;
-  building: boolean;
-  buildingAppName?: string;
-  recentApps: RecentApp[];
-  onSelectRecent: (app: RecentApp) => void;
-  setBuilding?: (value: boolean) => void;
-  logs: LogEntry[];
-  streamCompleted?: boolean;
-};
+import { PromptContentProps } from "../../types";
 
 const PromptContent: React.FC<PromptContentProps> = ({
   prompt = "",
@@ -36,26 +16,15 @@ const PromptContent: React.FC<PromptContentProps> = ({
   onSelectRecent = () => {},
   streamCompleted = false,
   logs = [],
+  setStreamingCompleted = () => {}
 }) => {
   const navigate = useNavigate();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-
-  const toggleDrawer = () => {
-    setIsDrawerOpen(!isDrawerOpen);
-  };
-
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      setIsDrawerOpen(false);
-    }
-  };
 
   const handleBackToPrompt = () => {
     setShowLogs(false);
-    setIsCompleted(false);
     setBuilding(false);
   };
 
@@ -81,9 +50,6 @@ const PromptContent: React.FC<PromptContentProps> = ({
   useEffect(() => {
     if (building) {
       setShowLogs(true);
-    }
-    if (logs.some((log) => log.status.toLowerCase() === "completed")) {
-      setIsCompleted(true);
     }
   }, [building, logs]);
 
@@ -211,6 +177,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
               onBackToPrompt={handleBackToPrompt}
               onViewOutput={handleViewOutput}
               streamCompleted={streamCompleted}
+              setStreamingCompleted={setStreamingCompleted}
             />
           )}
         </div>

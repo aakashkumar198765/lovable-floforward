@@ -12,16 +12,59 @@ type LogsProps = {
   onBackToPrompt: () => void;
   onViewOutput: () => void;
   streamCompleted?: boolean;
+  setStreamingCompleted?: (completed: boolean) => void;
 };
 
-const Logs: React.FC<LogsProps> = ({ logs, onBackToPrompt, onViewOutput, streamCompleted }) => {
+const Logs: React.FC<LogsProps> = ({ logs, onBackToPrompt, onViewOutput, streamCompleted, setStreamingCompleted = () => {} }) => {
   const logsEndRef = useRef<null | HTMLDivElement>(null);
+  const [displayedLogs, setDisplayedLogs] = useState<LogEntry[]>([]);
+  const [currentLogIndex, setCurrentLogIndex] = useState(0);
+  const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const [displayedMessage, setDisplayedMessage] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const messageLinesRef = useRef<string[]>([]); // To store lines of the current message
 
   const scrollToBottom = () => {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(scrollToBottom, [logs]); // Scroll to bottom when logs array updates
+  useEffect(() => {
+    if (currentLogIndex < logs.length && !isStreaming) {
+      setIsStreaming(true);
+      const currentLog = logs[currentLogIndex];
+      // Split message into lines for streaming
+      messageLinesRef.current = currentLog.message.split('\n');
+      setCurrentLineIndex(0);
+      setDisplayedMessage(""); // Reset message for new log
+    }
+  }, [currentLogIndex, logs, isStreaming]);
+
+  useEffect(() => {
+    if (isStreaming && currentLogIndex < logs.length) {
+      const currentLog = logs[currentLogIndex];
+      if (currentLineIndex < messageLinesRef.current.length) {
+        const timer = setTimeout(() => {
+          setDisplayedMessage(prev => {
+            const newLine = messageLinesRef.current[currentLineIndex];
+            return prev + (prev ? '\n' : '') + newLine;
+          });
+          setCurrentLineIndex(prev => prev + 1);
+        }, 50); // Adjust streaming speed here
+
+        return () => clearTimeout(timer);
+      } else {
+        // Current log message fully streamed
+        setDisplayedLogs(prev => [...prev, { ...currentLog, message: displayedMessage }]);
+        setIsStreaming(false);
+        setCurrentLogIndex(prev => prev + 1); // Move to next log
+      }
+    }
+  }, [isStreaming, currentLineIndex, currentLogIndex, logs, displayedMessage]);
+
+  // Adjust the existing scrollToBottom useEffect
+  useEffect(() => {
+    scrollToBottom();
+  }, [displayedLogs, displayedMessage]); // Scroll when new log is added or message streams
 
   const formatMessage = (message: string) => {
     // Simple markdown-like formatting
@@ -71,6 +114,12 @@ const Logs: React.FC<LogsProps> = ({ logs, onBackToPrompt, onViewOutput, streamC
     }
   };
 
+  const handleBackToPrompt = () => {
+    setIsStreaming(false);
+    setStreamingCompleted(false);
+    onBackToPrompt();
+  };
+
   return (
     <div className="top-0 left-0 h-[calc(100vh-8rem)] rounded-[6px] w-3/4 bg-transparent backdrop-blur-lg text-gray-800 p-8 flex flex-col z-30 shadow-2xl">
       <div className="flex-shrink-0 mb-6">
@@ -79,34 +128,68 @@ const Logs: React.FC<LogsProps> = ({ logs, onBackToPrompt, onViewOutput, streamC
         </h3>
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-3 pr-4">
-        {logs.map((log, index) => {
-          return (
-            <div
-              key={index}
-              className="bg-[rgba(255,255,255,0.8)] p-4 rounded-lg shadow-md mb-4 flex items-start space-x-3"
-            >
-              <span className="text-sm mt-0.5">
-                {getStatusIcon(log.status)}
-              </span>
-              <div className="flex-1">
-                <div
-                  className={`text-sm ${getStatusColor(
-                    log.status
-                  )} font-medium mb-1`}
-                >
-                  {log.status.charAt(0).toUpperCase() + log.status.slice(1)}
-                </div>
-                <div
-                  className="text-sm text-gray-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{
-                    __html: formatMessage(log.message),
-                  }}
-                />
+      <div className="flex-1 overflow-y-auto pr-4">
+        {displayedLogs.map((log, index) => (
+          <div
+            key={index}
+            className="bg-white p-4 rounded-lg shadow-md mb-4 flex items-start space-x-3"
+          >
+            <span className="text-sm mt-0.5">
+              {getStatusIcon(log.status)}
+            </span>
+            <div className="flex-1">
+              <div
+                className={`text-sm ${getStatusColor(
+                  log.status
+                )} font-medium mb-1`}
+              >
+                {log.status.charAt(0).toUpperCase() + log.status.slice(1)}
               </div>
+              <div
+                className="text-sm text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: formatMessage(log.message),
+                }}
+              />
             </div>
-          );
-        })}
+          </div>
+        ))}
+
+        {isStreaming && currentLogIndex < logs.length && (
+          <div
+            key={`streaming-${currentLogIndex}`}
+            className="bg-white p-4 rounded-lg shadow-md mb-4 flex items-start space-x-3"
+          >
+            <span className="text-sm mt-0.5">
+              {getStatusIcon(logs[currentLogIndex].status)}
+            </span>
+            <div className="flex-1">
+              <div
+                className={`text-sm ${getStatusColor(
+                  logs[currentLogIndex].status
+                )} font-medium mb-1`}
+              >
+                {logs[currentLogIndex].status.charAt(0).toUpperCase() + logs[currentLogIndex].status.slice(1)}
+              </div>
+              <div
+                className="text-sm text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: formatMessage(displayedMessage),
+                }}
+              />
+            </div>
+          </div>
+        )}
+        {!isStreaming && !streamCompleted && (
+          <div className="bg-white p-4 rounded-lg shadow-md mb-4 flex items-start space-x-3 shimmer-effect">
+            <span className="text-sm mt-0.5">⏳</span>
+            <div className="flex-1">
+              <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          </div>
+        )}
         <div ref={logsEndRef} />
       </div>
 
@@ -114,7 +197,7 @@ const Logs: React.FC<LogsProps> = ({ logs, onBackToPrompt, onViewOutput, streamC
         <div className="flex-shrink-0 pt-6 border-t border-gray-200">
           <div className="flex justify-center space-x-4">
             <Button
-              onClick={onBackToPrompt}
+              onClick={handleBackToPrompt}
               variant="secondary"
               className="px-8 py-3 bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 rounded-xl transition-all duration-300 hover:scale-105 shadow-sm"
               iconLeft={<Icon name="arrow-left" size="sm" />}
@@ -135,6 +218,6 @@ const Logs: React.FC<LogsProps> = ({ logs, onBackToPrompt, onViewOutput, streamC
       )}
     </div>
   );
-};
+}
 
 export default Logs;

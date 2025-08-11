@@ -57,27 +57,6 @@ const Prompt: React.FC = () => {
       files: [],
     };
 
-    // Initial mock logs to show immediate feedback
-    const initialSteps = [
-      {
-        message: `\`[INFO]\` **Initializing workspace for ${name}...**  
-- Setting up project environment  
-- Loading configuration files`,
-        status: "started",
-        format: "markdown",
-      },
-      {
-        message: `\`[INFO]\` **Analyzing prompt requirements...**  
-- Detected app type: *${name}*  
-- Generating schema for components`,
-        status: "pending",
-        format: "markdown",
-      },
-    ];
-
-    // Add initial logs immediately
-    setLogs(initialSteps);
-
     try {
       // Execute the mind and get job_id
       const response = await executeMind(mindName, args, responseStructure);
@@ -133,6 +112,33 @@ const Prompt: React.FC = () => {
             // Handle completion - stream is already closed
             console.log("Stream completed:", data);
             setStreamCompleted(true);
+            // Handle incoming stream data
+            let message = "";
+            let status = "completed";
+            let format = "text";
+            if (typeof data === "object" && data !== null) {
+              message = data.message || data.text || JSON.stringify(data);
+              status = data.status || "completed";
+              format = data.format || "text";
+            } else if (typeof data === "string") {
+              try {
+                const parsed = JSON.parse(data);
+                message = parsed.message || parsed.text || data;
+                status = parsed.status || "completed";
+                format = parsed.format || "text";
+              } catch (e) {
+                message = data;
+              }
+            }
+            // Add the streamed log to state
+            setLogs((prev) => [
+              ...prev,
+              {
+                message: `\`[STREAM]\` ${message}`,
+                status,
+                format,
+              },
+            ]);
           },
           onError: (error: any) => {
             console.error("Stream error:", error);
@@ -235,6 +241,7 @@ const Prompt: React.FC = () => {
         onSelectRecent={handleSelectRecent}
         logs={logs}
         streamCompleted={streamCompleted}
+        setStreamingCompleted={setStreamCompleted}
       />
     </div>
   );

@@ -2920,6 +2920,28 @@ export interface MarkdownRendererProps {
 }
 
 
+type RecentApp = { id: string; name: string; description?: string };
+
+type LogEntry = {
+  message: string;
+  status: string;
+  format: string;
+};
+
+export type PromptContentProps = {
+  prompt: string;
+  onPromptChange: (value: string) => void;
+  onSubmit: () => void;
+  building: boolean;
+  buildingAppName?: string;
+  recentApps: RecentApp[];
+  onSelectRecent: (app: RecentApp) => void;
+  setBuilding?: (value: boolean) => void;
+  logs: LogEntry[];
+  streamCompleted?: boolean;
+  setStreamingCompleted?: (value: boolean) => void;
+};
+
 export interface SubState {
   Start?: boolean;
   End?: boolean;
