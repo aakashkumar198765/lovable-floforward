@@ -1,9 +1,11 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Provider } from "react-redux";
 import "./App.css";
 import ToastContainer from "./components/atoms/feedback/ToastContainer";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { store } from "./store";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LibraryTemplate from "./libraryTemplate";
 import ProjectPlanScreen from "./pages/ProjectPlanScreen";
@@ -33,44 +35,46 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <Router>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Prompt />} />
-            <Route path="/prompt" element={
-              // <ProtectedRoute>
-                <Prompt />
-              // </ProtectedRoute>
-            } />
-            <Route path="/project-plan" element={
-              <ProtectedRoute>
-                <ProjectPlanScreen />
-              </ProtectedRoute>
-            } />
-            <Route path="/ai-configuration" element={
-              <ProtectedRoute>
-                <AIConfiguration />
-              </ProtectedRoute>
-            } />
-            <Route path="/workflow-preview" element={
-              <ProtectedRoute>
-                <WorkflowPreview />
-              </ProtectedRoute>
-            } />
-            <Route path="/create-deploy" element={
-              <ProtectedRoute>
-                <CreateDeployScreen />
-              </ProtectedRoute>
-            } />
-          </Routes>
+    <Provider store={store}>
+      <ThemeProvider>
+        <AuthProvider>
+          <Router>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<Prompt />} />
+              <Route path="/prompt" element={
+                // <ProtectedRoute>
+                  <Prompt />
+                // </ProtectedRoute>
+              } />
+              <Route path="/project-plan" element={
+                <ProtectedRoute>
+                  <ProjectPlanScreen />
+                </ProtectedRoute>
+              } />
+              <Route path="/ai-configuration" element={
+                <ProtectedRoute>
+                  <AIConfiguration />
+                </ProtectedRoute>
+              } />
+              <Route path="/workflow-preview" element={
+                <ProtectedRoute>
+                  <WorkflowPreview />
+                </ProtectedRoute>
+              } />
+              <Route path="/create-deploy" element={
+                <ProtectedRoute>
+                  <CreateDeployScreen />
+                </ProtectedRoute>
+              } />
+            </Routes>
 
-          {/* Global Toast Container */}
-          <ToastContainer position="top-right" />
-        </Router>
-      </AuthProvider>
-    </ThemeProvider>
+            {/* Global Toast Container */}
+            <ToastContainer position="top-right" />
+          </Router>
+        </AuthProvider>
+      </ThemeProvider>
+    </Provider>
   );
 }
 

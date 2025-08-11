@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Textarea, Button, Badge, Icon } from "../../components/atoms";
+import { useSelector } from "react-redux";
+import { Textarea, Button, Badge, Icon, Avatar } from "../../components/atoms";
+import { useAuth } from "../../contexts/AuthContext";
+import { RootState } from "../../store";
 import Logs from "./Logs";
 import Workspace from "./Workspace";
 import { PromptContentProps } from "../../types";
@@ -19,9 +22,52 @@ const PromptContent: React.FC<PromptContentProps> = ({
   setStreamingCompleted = () => {}
 }) => {
   const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth();
+  // Get user data from Redux store for detailed user information
+  const user = useSelector((state: RootState) => state.auth?.user);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Fallback user info when Redux user is not available
+  const getUserDisplayInfo = () => {
+    if (user) {
+      return {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        initials: user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || user.email?.[0]?.toUpperCase()
+      };
+    }
+    
+    // Fallback: try to get info from localStorage if authenticated
+    if (isAuthenticated) {
+      const userEmail = localStorage.getItem('userEmail');
+      const authToken = localStorage.getItem('authToken');
+      
+      if (userEmail) {
+        const name = userEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        return {
+          name,
+          email: userEmail,
+          role: null,
+          initials: name.split(' ').map(n => n[0]).join('').toUpperCase()
+        };
+      } else if (authToken) {
+        return {
+          name: 'User',
+          email: 'user@example.com',
+          role: null,
+          initials: 'U'
+        };
+      }
+    }
+    
+    return null;
+  };
+
+  const userInfo = getUserDisplayInfo();
 
   const handleBackToPrompt = () => {
     setShowLogs(false);
@@ -32,6 +78,31 @@ const PromptContent: React.FC<PromptContentProps> = ({
     console.log("View output clicked - navigating to project plan");
     navigate("/project-plan");
   };
+
+  const handleLogout = () => {
+    logout();
+    setShowUserMenu(false);
+    navigate("/login");
+  };
+
+  const toggleUserMenu = () => {
+    setShowUserMenu(!showUserMenu);
+  };
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.user-menu-container')) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [showUserMenu]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -94,15 +165,77 @@ const PromptContent: React.FC<PromptContentProps> = ({
               </h1>
             </div>
 
-            {/* Login Button */}
-            <Button
-              variant="secondary"
-              className="bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 transition-all duration-300 hover:scale-105 shadow-sm"
-              onClick={() => navigate("/login")}
-              iconLeft={<Icon name="user" size="sm" />}
-            >
-              Login
-            </Button>
+            {/* Login/User Section */}
+            {!isAuthenticated ? (
+              <Button
+                variant="secondary"
+                className="bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 transition-all duration-300 hover:scale-105 shadow-sm"
+                onClick={() => navigate("/login")}
+                iconLeft={<Icon name="user" size="sm" />}
+              >
+                Login
+              </Button>
+            ) : (
+              <div className="relative user-menu-container">
+                <Button
+                  variant="secondary"
+                  className="bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 transition-all duration-300 hover:scale-105 shadow-sm flex items-center space-x-2"
+                  onClick={toggleUserMenu}
+                >
+                  <Avatar 
+                    name={userInfo?.name || userInfo?.email || 'User'} 
+                    size="sm" 
+                    className="w-6 h-6"
+                  />
+                  <span className="hidden sm:inline text-sm font-medium">
+                    {userInfo?.name || userInfo?.email || 'User'}
+                  </span>
+                  <Icon name="chevron-down" size="sm" className={`transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                </Button>
+                
+                {/* User dropdown menu */}
+                {showUserMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <div className="flex items-center space-x-3">
+                        <Avatar 
+                          name={userInfo?.name || userInfo?.email || 'User'} 
+                          size="sm"
+                          className="w-10 h-10"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {userInfo?.name || 'User'}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {userInfo?.email || 'No email'}
+                          </p>
+                          {userInfo?.role && (
+                            <Badge 
+                              variant="secondary" 
+                              size="sm" 
+                              className="mt-1 text-xs"
+                            >
+                              {userInfo.role}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="py-1">
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <Icon name="logout" size="sm" className="mr-3" />
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -119,14 +252,6 @@ const PromptContent: React.FC<PromptContentProps> = ({
                     <h2 className="text-4xl font-bold text-gray-800 mb-4">
                       Build Apps With Natural Language
                     </h2>
-                    <div className="text-center mb-4">
-                      <button
-                        onClick={() => navigate('/project-plan')}
-                        className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
-                      >
-                        → Go to Project Plan
-                      </button>
-                    </div>
                     <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
                       Transform your ideas into fully functional applications
                       using the power of AI. Simply describe what you want to
@@ -161,8 +286,16 @@ const PromptContent: React.FC<PromptContentProps> = ({
                           !building ? <Icon name="arrow-right" /> : undefined
                         }
                       >
-                        {building ? "Building..." : "Build App"}
+                        {building ? "Building..." : "Build BRD"}
                       </Button>
+                    </div>
+                    <div className="text-center mb-4">
+                      <button
+                        onClick={() => navigate('/project-plan')}
+                        className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
+                      >
+                        → Go to Project Plan
+                      </button>
                     </div>
                   </div>
                 </div>
