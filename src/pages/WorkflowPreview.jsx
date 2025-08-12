@@ -7,35 +7,7 @@ import {
   EditableDataGrid,
   Icon
 } from '../components';
-import stateMachines from './sample_data/statemachines.json';
-
-// Import schema files
-import vendorPlanUploadSchema from './sample_data/schemas/vendorplanupload.json';
-import productionSchema from './sample_data/schemas/production.json';
-import poAmendmentSchema from './sample_data/schemas/poamendment.json';
-import planSchema from './sample_data/schemas/plan.json';
-import partnerEmpanelmentSchema from './sample_data/schemas/partnerempanelment.json';
-import invoiceSchema from './sample_data/schemas/invoice.json';
-import inventoryReportSchema from './sample_data/schemas/inventoryreport.json';
-import grnSchema from './sample_data/schemas/grn.json';
-import dispatchIntimationSchema from './sample_data/schemas/dispatchintimation.json';
-import costingSheetSchema from './sample_data/schemas/costingsheet.json';
-import catalogueSchema from './sample_data/schemas/catalogue.json';
-
-// Schema mapping
-const schemaMap = {
-  vendorplanupload: vendorPlanUploadSchema,
-  production: productionSchema,
-  poamendment: poAmendmentSchema,
-  plan: planSchema,
-  partnerempanelment: partnerEmpanelmentSchema,
-  invoice: invoiceSchema,
-  inventoryreport: inventoryReportSchema,
-  grn: grnSchema,
-  dispatchintimation: dispatchIntimationSchema,
-  costingsheet: costingSheetSchema,
-  catalogue: catalogueSchema
-};
+import SchemaPreview from './SchemaPreview';
 
 // Generate random data based on schema property type
 const generateRandomValue = (property) => {
@@ -93,8 +65,7 @@ const generateSchemaDocument = (schema, docNumber) => {
 };
 
 // Generate sample documents for a given schema
-const generateSampleDocuments = (schemaKey, count = 5) => {
-  const schema = schemaMap[schemaKey];
+const generateSampleDocuments = (schema, count = 5) => {
   if (!schema) return [];
   
   const documents = [];
@@ -104,8 +75,33 @@ const generateSampleDocuments = (schemaKey, count = 5) => {
   return documents;
 };
 
-const WorkflowPreview = () => {
-  const [selectedWorkflow, setSelectedWorkflow] = useState(Object.keys(stateMachines)[0]);
+// Extract documents from preview data for a given workflow and state
+const getDocumentsFromPreviewData = (previewData, workflowName, stateName) => {
+  if (!previewData || previewData.length === 0) return [];
+
+  const documents = [];
+  
+  previewData.forEach((instance, index) => {
+    // Find the workflow data in the instance
+    const workflowData = instance[workflowName];
+    if (workflowData && workflowData[stateName]) {
+      // Create a document from the state data
+      const document = {
+        _id: `preview_doc_${instance.instance_id || index + 1}`,
+        instance_id: instance.instance_id || index + 1,
+        ...workflowData[stateName]
+      };
+      documents.push(document);
+    }
+  });
+
+  return documents;
+};
+
+const WorkflowPreview = ({ stateMachines = {}, schemas = {}, previewData = [] }) => {
+  const [selectedWorkflow, setSelectedWorkflow] = useState(
+    Object.keys(stateMachines).length > 0 ? Object.keys(stateMachines)[0] : ''
+  );
   const [selectedState, setSelectedState] = useState(null);
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'detail'
@@ -238,7 +234,7 @@ const WorkflowPreview = () => {
     return result;
   }, [currentWorkflow]);
   
-  // Initialize selected state when workflow changes
+  // Initialize selected state when workflow changes or stateMachines data changes
   React.useEffect(() => {
     if (currentWorkflow && states.length > 0) {
       const firstState = states[0];
@@ -260,7 +256,15 @@ const WorkflowPreview = () => {
     // Reset view mode and selected document when workflow changes
     setViewMode('list');
     setSelectedDocument(null);
-  }, [selectedWorkflow]);
+  }, [selectedWorkflow, stateMachines, schemas]);
+
+  // Update selected workflow when stateMachines data changes
+  React.useEffect(() => {
+    const workflowKeys = Object.keys(stateMachines);
+    if (workflowKeys.length > 0 && (!selectedWorkflow || !stateMachines[selectedWorkflow])) {
+      setSelectedWorkflow(workflowKeys[0]);
+    }
+  }, [stateMachines]);
 
   // Reset view mode and selected document when state changes
   React.useEffect(() => {
@@ -268,11 +272,33 @@ const WorkflowPreview = () => {
       setViewMode('list');
       setSelectedDocument(null);
     }
-  }, [selectedState]);
+  }, [selectedState, previewData]);
 
-  // Function to extract schema ID from state Schema property and find matching schema
+  // Debug schema information
+  React.useEffect(() => {
+    console.log('📊 Schemas received in WorkflowPreview:', schemas);
+    console.log('📊 Schema keys:', Object.keys(schemas || {}));
+    console.log('📊 Preview data received:', previewData);
+    console.log('📊 Current workflow:', selectedWorkflow, currentWorkflow?.Name);
+    if (selectedState) {
+      const mainStateKey = selectedState.includes(':') ? selectedState.split(':')[0] : selectedState;
+      if (currentWorkflow && currentWorkflow.States && currentWorkflow.States[mainStateKey]) {
+        const workflowName = currentWorkflow.Name || selectedWorkflow;
+        const schemaKey = `${workflowName}-${mainStateKey}`.toLowerCase().replace(/\s+/g, '');
+        const schema = schemas[schemaKey];
+        console.log('📊 Schema key for selected state:', schemaKey);
+        console.log('📊 Schema for selected state:', selectedState, schema);
+        
+        // Check for preview data for this state
+        const previewDocs = getDocumentsFromPreviewData(previewData, workflowName, mainStateKey);
+        console.log('📊 Preview docs for selected state:', previewDocs);
+      }
+    }
+  }, [schemas, selectedWorkflow, selectedState, currentWorkflow, previewData]);
+
+  // Function to extract schema from state and find matching schema in dynamic schemas
   const getSchemaFromState = (stateKey) => {
-    if (!currentWorkflow || !stateKey) {
+    if (!currentWorkflow || !stateKey || !schemas) {
       return null;
     }
     
@@ -284,39 +310,40 @@ const WorkflowPreview = () => {
     }
     
     const state = currentWorkflow.States[mainStateKey];
-    const schemaProperty = state.Schema;
     
-    // Handle empty schema
-    if (!schemaProperty || schemaProperty === "") {
-      return null;
-    }
+    // Create schema key from workflow name and state name
+    const workflowName = currentWorkflow.Name || selectedWorkflow;
+    const schemaKey = `${workflowName}-${mainStateKey}`.toLowerCase().replace(/\s+/g, '');
     
-    // Extract schema ID from format: "@schema/Commerce:public:0x25c87a707f6ba5dadbfdff760edcb5f3a9445dc1257df5952da814bf237888a9"
-    // We need the part after the last ":"
-    const schemaId = schemaProperty.split(':').slice(-1)[0];
-    if (!schemaId) {
-      return null;
-    }
+    // Find schema in dynamic schemas object
+    const schema = schemas[schemaKey];
     
-    // Construct the full _id that schemas use: "public:0x..."
-    const fullSchemaId = `public:${schemaId}`;
-    
-    // Find schema by _id
-    const schema = Object.values(schemaMap).find(schema => schema._id === fullSchemaId);
-    
-    return schema;
+    return schema || null;
   };
 
-  // State to documents mapping - updated to use correct schema lookup
+  // State to documents mapping - updated to use real preview data
   const getStateDocuments = (stateKey) => {
+    if (!currentWorkflow || !stateKey) return [];
+
+    // Handle both "State" and "State:SubState" formats
+    const mainStateKey = stateKey.includes(':') ? stateKey.split(':')[0] : stateKey;
+    const workflowName = currentWorkflow.Name || selectedWorkflow;
+
+    // Get documents from preview data first
+    const previewDocs = getDocumentsFromPreviewData(previewData, workflowName, mainStateKey);
+    
+    if (previewDocs.length > 0) {
+      console.log(`📊 Using ${previewDocs.length} preview documents for ${workflowName}-${mainStateKey}`);
+      return previewDocs;
+    }
+
+    // If no preview data available, fall back to generating sample data
     const schema = getSchemaFromState(stateKey);
     if (schema) {
-      // Find the schema key in schemaMap by comparing _id
-      const schemaKey = Object.keys(schemaMap).find(key => schemaMap[key]._id === schema._id);
-      if (schemaKey) {
-        return generateSampleDocuments(schemaKey);
-      }
+      console.warn(`No preview data found for ${workflowName}-${mainStateKey}, falling back to generated data`);
+      return generateSampleDocuments(schema, 3);
     }
+
     return [];
   };
 
@@ -377,35 +404,17 @@ const WorkflowPreview = () => {
         render: (value, record) => {
           const nestedValue = record[field.groupKey]?.[field.propKey];
           
-          if (field?.key?.includes('D_OrderNumber') || field?.key?.includes('I_Name') || field?.key?.includes('C_InternalID')) {
-            // First column is clickable like D_OrderNumber was
+          // All columns now show plain data since row is clickable
+          if (field.property.type === 'boolean') {
             return (
-              <Button 
-                variant="ghost" 
-                className="p-0 h-auto font-medium text-blue-600 hover:text-blue-800"
-                onClick={() => {
-                  // Generate full document with all schema properties
-                  const fullDocument = generateSchemaDocument(schema, record._id?.slice(-1) || '1');
-                  setSelectedDocument(fullDocument);
-                  setViewMode('detail');
-                }}
-              >
-                {nestedValue || '-'}
-              </Button>
+              <Badge variant={nestedValue ? "success" : "secondary"}>
+                {nestedValue ? "Yes" : "No"}
+              </Badge>
             );
+          } else if (field.property.format === 'date' && nestedValue) {
+            return new Date(nestedValue).toLocaleDateString();
           } else {
-            // Other columns are just text
-            if (field.property.type === 'boolean') {
-              return (
-                <Badge variant={nestedValue ? "success" : "secondary"}>
-                  {nestedValue ? "Yes" : "No"}
-                </Badge>
-              );
-            } else if (field.property.format === 'date' && nestedValue) {
-              return new Date(nestedValue).toLocaleDateString();
-            } else {
-              return nestedValue || '-';
-            }
+            return nestedValue || '-';
           }
         }
       });
@@ -417,20 +426,7 @@ const WorkflowPreview = () => {
         key: '_id',
         title: 'Document ID',
         width: 180,
-        render: (value, record) => (
-          <Button 
-            variant="ghost" 
-            className="p-0 h-auto font-medium text-blue-600 hover:text-blue-800"
-            onClick={() => {
-              const schema = getSchemaFromState(selectedState);
-              const fullDocument = generateSchemaDocument(schema, record._id?.slice(-1) || '1');
-              setSelectedDocument(fullDocument);
-              setViewMode('detail');
-            }}
-          >
-            {record._id || '-'}
-          </Button>
-        )
+        render: (value, record) => record._id || '-'
       });
     }
     
@@ -633,7 +629,7 @@ const WorkflowPreview = () => {
     };
 
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-0">
         <div className="max-w-8xl mx-auto space-y-6">
 
           {/* Header Section */}
@@ -656,9 +652,6 @@ const WorkflowPreview = () => {
                   <span className="text-lg font-medium text-gray-900 dark:text-white">
                     {getDocumentTitle()}
                   </span>
-                  <Badge variant="primary" size="sm">
-                    {currentWorkflow?.States[selectedState]?.Desc || selectedState}
-                  </Badge>
                 </div>
               </div>
 
@@ -767,12 +760,24 @@ const WorkflowPreview = () => {
     );
   };
 
+  // Show loading state if no data
+  if (!stateMachines || Object.keys(stateMachines).length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Workflows...</h2>
+          <p className="text-gray-600">Please wait while workflow data is being loaded.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <h1 className="text-2xl font-bold text-gray-900">Workflow Preview</h1>
-        <p className="text-gray-600 mt-1">Browse workflows, states, and documents</p>
+        <p className="text-gray-600 mt-1">Browse workflows, states, schemas and documents</p>
       </div>
 
       {/* Workflow Tabs */}
@@ -849,10 +854,33 @@ const WorkflowPreview = () => {
         </div>
       )}
 
-      {/* Documents List */}
+      {/* View Toggle and Content */}
       <div className="px-6 py-6">
         {currentWorkflow && selectedState && (
           <>
+            {/* View Toggle Buttons - Only show in list/schema modes, not in detail view */}
+            {viewMode !== 'detail' && (
+              <div className="flex items-center gap-2 mb-6">
+                <Button
+                  variant={viewMode === 'list' ? 'primary' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  iconLeft={<Icon name="document" size="sm" />}
+                >
+                  Documents
+                </Button>
+                <Button
+                  variant={viewMode === 'schema' ? 'primary' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('schema')}
+                  iconLeft={<Icon name="settings" size="sm" />}
+                >
+                  Schema
+                </Button>
+              </div>
+            )}
+
+            {/* Content based on view mode */}
             {viewMode === 'list' ? (
               <EditableDataGrid
                 columns={getDocumentColumns()}
@@ -866,6 +894,19 @@ const WorkflowPreview = () => {
                 showExportButton={false}
                 showBulkActions={false}
                 className="bg-white rounded-lg shadow"
+                onRowClick={(record) => {
+                  // Generate full document with all schema properties
+                  const schema = getSchemaFromState(selectedState);
+                  const fullDocument = generateSchemaDocument(schema, record._id?.slice(-1) || '1');
+                  setSelectedDocument(fullDocument);
+                  setViewMode('detail');
+                }}
+                rowClassName="cursor-pointer hover:bg-gray-50 transition-colors"
+              />
+            ) : viewMode === 'schema' ? (
+              <SchemaPreview 
+                schema={getSchemaFromState(selectedState)} 
+                stateName={selectedState}
               />
             ) : (
               renderDocumentDetailView()
