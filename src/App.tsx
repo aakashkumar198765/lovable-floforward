@@ -22,11 +22,11 @@ function App() {
     // Initialize Param SDK when app loads
     const initializeSDK = async () => {
       try {
-        console.log('🚀 Initializing Param SDK on app startup...');
+        console.log("🚀 Initializing Param SDK on app startup...");
         await paramSDKService.initialize();
-        console.log('✅ Param SDK initialization complete');
+        console.log("✅ Param SDK initialization complete");
       } catch (error) {
-        console.error('❌ Failed to initialize Param SDK on startup:', error);
+        console.error("❌ Failed to initialize Param SDK on startup:", error);
         // Don't block the app if SDK fails to initialize
       }
     };
@@ -42,31 +42,46 @@ function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/" element={<Prompt />} />
-              <Route path="/prompt" element={
-                // <ProtectedRoute>
+              <Route
+                path="/prompt"
+                element={
+                  // <ProtectedRoute>
                   <Prompt />
-                // </ProtectedRoute>
-              } />
-              <Route path="/project-plan/:projectId/:projectName" element={
-                <ProtectedRoute>
-                  <ProjectPlanScreen />
-                </ProtectedRoute>
-              } />
-              <Route path="/ai-configuration" element={
-                <ProtectedRoute>
-                  <AIConfiguration />
-                </ProtectedRoute>
-              } />
-              <Route path="/workflow-preview" element={
-                <ProtectedRoute>
-                  <WorkflowPreview />
-                </ProtectedRoute>
-              } />
-              <Route path="/create-deploy/:projectId/:projectName" element={
-                <ProtectedRoute>
-                  <CreateDeployScreen />
-                </ProtectedRoute>
-              } />
+                  // </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/project-plan/:projectId/:projectName"
+                element={
+                  <ProtectedRoute>
+                    <ProjectPlanScreen />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/ai-configuration"
+                element={
+                  <ProtectedRoute>
+                    <AIConfiguration />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/workflow-preview"
+                element={
+                  <ProtectedRoute>
+                    <WorkflowPreview />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/create-deploy/:projectId/:projectName"
+                element={
+                  <ProtectedRoute>
+                    <CreateDeployScreen />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
 
             {/* Global Toast Container */}
