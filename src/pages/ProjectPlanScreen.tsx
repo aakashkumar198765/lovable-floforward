@@ -78,7 +78,7 @@ const ProjectPlanScreen: React.FC = () => {
   const [Brd, setBrd]: any = useState({});
   const [schemaWorkflow, setSchemaWorkflow]: any = useState({});
   const [plan, setPlan]: any = useState({});
-  const [preview, setPreview] = useState({});
+  const [preview, setPreview]: any = useState({});
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [showSchemaPanel, setShowSchemaPanel] = useState(false);
 
