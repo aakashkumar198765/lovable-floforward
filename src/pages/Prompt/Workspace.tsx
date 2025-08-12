@@ -84,20 +84,19 @@ const ProjectImageFallback = ({ projectName, index }: { projectName: string; ind
       </div>
       
       {/* Content */}
-      <div className="text-center text-white z-10">
+      {/* <div className="text-center text-white z-10">
         <Icon name={selectedIcon} size="xl" className="mb-3 opacity-90 drop-shadow-sm" />
         <div className="text-sm font-medium opacity-95 px-3 leading-tight">
           {projectName?.slice(0, 20) || "Project"}
           {projectName?.length > 20 && "..."}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
 
 const Workspace: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("last-edited");
   const [date, setDate] = useState("newest-first");
   const [creator, setCreator] = useState("all-creators");
   const [loading, setLoading] = useState(false);
@@ -125,10 +124,25 @@ const Workspace: React.FC = () => {
   };
 
   const filteredProjects = useMemo(() => {
-    return projects.filter((project) =>
+    let filtered = projects.filter((project) =>
+      project?.name?.startsWith("P_") &&
       project?.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [searchTerm, creator, projects]);
+
+    // Sort by created_at date (newest first by default)
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+      
+      if (date === "oldest-first") {
+        return dateA - dateB; // oldest first
+      } else {
+        return dateB - dateA; // newest first (default)
+      }
+    });
+
+    return filtered;
+  }, [searchTerm, creator, projects, date]);
 
   return (
     <div className="text-gray-800 py-8 px-[4rem] w-full">
@@ -149,15 +163,6 @@ const Workspace: React.FC = () => {
             />
             <Select
               className="bg-white/70 backdrop-blur-sm border-white/50 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={sortBy}
-              onChange={(value) => setSortBy(value as string)}
-              options={[
-                { value: "last-edited", label: "Last edited" },
-                { value: "created-date", label: "Created date" },
-              ]}
-            />
-            <Select
-              className="bg-white/70 backdrop-blur-sm border-white/50 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={date}
               onChange={(value) => setDate(value as string)}
               options={[
@@ -171,9 +176,7 @@ const Workspace: React.FC = () => {
               onChange={(value) => setCreator(value as string)}
               options={[
                 { value: "all-creators", label: "All creators" },
-                { value: "John", label: "John" },
-                { value: "John Doe", label: "John Doe" },
-                { value: "Jane Smith", label: "Jane Smith" },
+                { value: "self", label: "Self" },
               ]}
             />
           </div>
@@ -197,26 +200,26 @@ const Workspace: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {filteredProjects.map((project) => (
+            {filteredProjects.map((project, index) => (
               <div
-                key={project.id}
+                key={project._id}
                 className="bg-white/50 backdrop-blur-md rounded-lg overflow-hidden group border border-white/50 shadow-md hover:shadow-xl transition-shadow duration-300"
                 onClick={() => handleProjectClick(project)}
               >
                 <div className="relative h-48 overflow-hidden group-hover:scale-105 transition-transform duration-300">
                   <ProjectImageFallback 
                     projectName={project?.name || "Project"} 
-                    index={project.id || 0}
+                    index={index}
                   />
                 </div>
                 <div className="p-4">
                   <div className="flex items-center">
-                    <Avatar
-                      src={project?.avatarUrl || `https://via.placeholder.com/30?text=${project?.creator}`}
-                      alt="avatar"
-                      size="sm"
-                      className="mr-3 flex-shrink-0"
-                    />
+                    <div className="mr-3 flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Icon 
+                        name="package" 
+                        className="w-4 h-4 text-blue-600" 
+                      />
+                    </div>
                     <div className="flex-1 w-0">
                       <h3 className="text-base font-semibold truncate text-gray-900">
                         {project?.name}
