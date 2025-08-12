@@ -19,6 +19,7 @@ import MarkdownRenderer from "../utils/MarkdownRenderer";
 import { testMarkdown } from "./sample_data/brd";
 import AIConfiguration from "./AIConfiguration";
 import WorkflowPreview from "./WorkflowPreview";
+import JsonSchemaPreview from "./JsonSchemaPreview";
 import { FlowEdge, FlowNode, StateMachine, SubState } from "../types";
 import { stateMachineExampleDummyData } from "../utils/stateMachine";
 import stateMachinesJson from "../pages/sample_data/statemachines.json";
@@ -28,7 +29,7 @@ import {
   streamSSE,
 } from "../services/paramai_browsersdk";
 import ValidUtils from "../utils/ValidUtils";
-import { LoadingState, Spinner } from "../components";
+import { LoadingState, Spinner, Icon } from "../components";
 
 const nodeColor = (node: any) => {
   // First check if node has style with backgroundColor
@@ -78,6 +79,8 @@ const ProjectPlanScreen: React.FC = () => {
   const [schemaWorkflow, setSchemaWorkflow]: any = useState({});
   const [plan, setPlan]: any = useState({});
   const [preview, setPreview] = useState({});
+  const [selectedNode, setSelectedNode] = useState<string | null>(null);
+  const [showSchemaPanel, setShowSchemaPanel] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -958,6 +961,72 @@ const ProjectPlanScreen: React.FC = () => {
     return testMarkdown;
   };
 
+  // Helper function to get schema from node ID
+  const getSchemaFromNodeId = (nodeId: string) => {
+    if (!nodeId || !schemas) return null;
+    
+    // Skip root node and workflow nodes
+    if (nodeId === "project-plan-node" || nodeId.endsWith("-node")) {
+      return null;
+    }
+    
+    // Parse node ID to extract workflow and state information
+    // Format: "WorkflowName-StateName" or "WorkflowName-StateName-SubStateName"
+    const parts = nodeId.split("-");
+    if (parts.length < 2) return null;
+    
+    // Get workflow name and state name
+    const workflowName = parts[0];
+    const stateName = parts[1];
+    
+    // Create schema key
+    const schemaKey = `${workflowName}-${stateName}`.toLowerCase().replace(/\s+/g, '');
+    
+    return schemas[schemaKey] || null;
+  };
+
+  // Helper function to get state machine data from node ID
+  const getStateMachineDataFromNodeId = (nodeId: string) => {
+    if (!nodeId) return null;
+    
+    const stateMachines = getStateMachines(null);
+    if (!stateMachines) return null;
+    
+    // For workflow nodes, return the entire state machine
+    if (nodeId.endsWith("-node") && !nodeId.includes("project-plan")) {
+      const workflowName = nodeId.replace("-node", "");
+      return Object.values(stateMachines).find((sm: any) => sm.Name === workflowName) || null;
+    }
+    
+    // For state nodes, return the specific state
+    const parts = nodeId.split("-");
+    if (parts.length >= 2) {
+      const workflowName = parts[0];
+      const stateName = parts[1];
+      
+      const stateMachine = Object.values(stateMachines).find((sm: any) => sm.Name === workflowName);
+      if (stateMachine && (stateMachine as any).States?.[stateName]) {
+        return {
+          workflowName,
+          stateName,
+          stateData: (stateMachine as any).States[stateName],
+          fullStateMachine: stateMachine
+        };
+      }
+    }
+    
+    return null;
+  };
+
+  // Handle node click
+  const handleNodeClick = (event: any, node: any) => {
+    console.log("Node clicked:", node.id);
+    setSelectedNode(node.id);
+    setShowSchemaPanel(true);
+  };
+
+  const schemas = getCurrentSchemas();
+
   const getWorkflowSchemaCsv = (paramSchema: any) => {
     if (paramSchema) {
       if (ValidUtils.isEmptyObj(paramSchema)) return "";
@@ -981,81 +1050,147 @@ const ProjectPlanScreen: React.FC = () => {
       case "plan":
         return (
           <ReactFlowProvider>
-            <div className="h-full w-full relative">
-              {!isFlowReady && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-20">
-                  <div className="text-gray-500">Loading flow diagram...</div>
-                </div>
-              )}
-              <div
-                className="flow-builder h-full w-full relative"
-                id="reactflow-container"
-                style={{
-                  touchAction: "none",
-                  outline: "none",
-                  opacity: isFlowReady ? 1 : 0,
-                  transition: "opacity 0.3s ease-in-out",
-                }}
-              >
-                <ReactFlow
-                  className="reactflow h-full w-full"
-                  nodes={flowNodes}
-                  edges={flowEdges}
-                  onNodesChange={onNodesChange}
-                  onEdgesChange={onEdgesChange}
-                  onInit={(instance) => {
-                    reactFlowInstance.current = instance;
-                    // Just set ready state without fitting
-                    requestAnimationFrame(() => {
-                      setIsFlowReady(true);
-                    });
+            <div className="h-full w-full flex relative">
+              {/* ReactFlow Container */}
+              <div className={`transition-all duration-300 ${showSchemaPanel ? 'w-2/3' : 'w-full'} relative`}>
+                {!isFlowReady && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-20">
+                    <div className="text-gray-500">Loading flow diagram...</div>
+                  </div>
+                )}
+                <div
+                  className="flow-builder h-full w-full relative"
+                  id="reactflow-container"
+                  style={{
+                    touchAction: "none",
+                    outline: "none",
+                    opacity: isFlowReady ? 1 : 0,
+                    transition: "opacity 0.3s ease-in-out",
                   }}
-                  defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-                  attributionPosition="bottom-left"
-                  proOptions={{ hideAttribution: true }}
-                  panOnScroll={true}
-                  selectionOnDrag={true}
-                  panOnDrag={[1, 2]}
-                  zoomOnScroll={true}
-                  zoomOnPinch={true}
-                  zoomOnDoubleClick={true}
-                  minZoom={0.3}
-                  maxZoom={2}
                 >
-                  <CustomMiniMap />
-                  <Controls position="bottom-left" />
-                  <Background color={"#f1f5f9"} gap={20} />
+                  <ReactFlow
+                    className="reactflow h-full w-full"
+                    nodes={flowNodes}
+                    edges={flowEdges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onNodeClick={handleNodeClick}
+                    onInit={(instance) => {
+                      reactFlowInstance.current = instance;
+                      // Just set ready state without fitting
+                      requestAnimationFrame(() => {
+                        setIsFlowReady(true);
+                      });
+                    }}
+                    defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+                    attributionPosition="bottom-left"
+                    proOptions={{ hideAttribution: true }}
+                    panOnScroll={true}
+                    selectionOnDrag={true}
+                    panOnDrag={[1, 2]}
+                    zoomOnScroll={true}
+                    zoomOnPinch={true}
+                    zoomOnDoubleClick={true}
+                    minZoom={0.3}
+                    maxZoom={2}
+                  >
+                    <CustomMiniMap />
+                    <Controls position="bottom-left" />
+                    <Background color={"#f1f5f9"} gap={20} />
 
-                  {/* Legend Card */}
-                  <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg border p-4 z-10 min-w-[200px]">
-                    <h3 className="text-sm font-semibold mb-3 text-gray-800">
-                      Flow Legend
-                    </h3>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded border-2 border-blue-500 bg-blue-50"></div>
-                        <span className="text-xs text-gray-700">
-                          Project Name
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded border-2 border-amber-500 bg-amber-50"></div>
-                        <span className="text-xs text-gray-700">Workflow</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded border-2 border-green-600 bg-green-100"></div>
-                        <span className="text-xs text-gray-700">States</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 rounded border-2 border-pink-500 bg-pink-100"></div>
-                        <span className="text-xs text-gray-700">
-                          Sub-States
-                        </span>
+                    {/* Legend Card */}
+                    <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg border p-4 z-10 min-w-[200px]">
+                      <h3 className="text-sm font-semibold mb-3 text-gray-800">
+                        Flow Legend
+                      </h3>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 rounded border-2 border-blue-500 bg-blue-50"></div>
+                          <span className="text-xs text-gray-700">
+                            Project Name
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 rounded border-2 border-amber-500 bg-amber-50"></div>
+                          <span className="text-xs text-gray-700">Workflow</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 rounded border-2 border-green-600 bg-green-100"></div>
+                          <span className="text-xs text-gray-700">States</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 rounded border-2 border-pink-500 bg-pink-100"></div>
+                          <span className="text-xs text-gray-700">
+                            Sub-States
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </ReactFlow>
+                  </ReactFlow>
+                </div>
               </div>
+
+              {/* Schema Panel */}
+              {showSchemaPanel && selectedNode && (
+                <div className="w-1/3 border-l border-gray-300 bg-gray-50 flex flex-col shadow-lg">
+                  {/* Panel Content - Direct rendering without wrapper */}
+                  <div className="flex-1 overflow-hidden">
+                    {(() => {
+                      const schema = getSchemaFromNodeId(selectedNode);
+                      const nodeData = getStateMachineDataFromNodeId(selectedNode);
+                      
+                      // Show schema if available
+                      if (schema) {
+                        const parts = selectedNode.split("-");
+                        const stateName = parts.length >= 2 ? parts.slice(0, 2).join("-") : selectedNode;
+                        
+                        return (
+                          <JsonSchemaPreview
+                            schema={schema}
+                            stateName={stateName}
+                            title="Schema Details"
+                            onClose={() => {
+                              setShowSchemaPanel(false);
+                              setSelectedNode(null);
+                            }}
+                          />
+                        );
+                      }
+                      
+                      // Show state machine data for workflow nodes or state nodes without schema
+                      if (nodeData) {
+                        return (
+                          <JsonSchemaPreview
+                            data={Object.keys(nodeData).length > 0 ? nodeData : null}
+                            stateName={selectedNode}
+                            title="State Machine Data"
+                            onClose={() => {
+                              setShowSchemaPanel(false);
+                              setSelectedNode(null);
+                            }}
+                          />
+                        );
+                      }
+                      
+                      // Direct rendering for root node or other nodes
+                      return (
+                        <JsonSchemaPreview
+                          stateName={selectedNode}
+                          title="Node Information"
+                          data={selectedNode === "project-plan-node" ? { 
+                            projectData: getCurrentStateMachines(),
+                            schemas: getCurrentSchemas()
+                          } : null}
+                          onClose={() => {
+                            setShowSchemaPanel(false);
+                            setSelectedNode(null);
+                          }}
+                        />
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
             </div>
           </ReactFlowProvider>
         );
