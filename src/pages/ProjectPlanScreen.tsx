@@ -19,7 +19,7 @@ import MarkdownRenderer from "../utils/MarkdownRenderer";
 import { testMarkdown } from "./sample_data/brd";
 import AIConfiguration from "./AIConfiguration";
 import WorkflowPreview from "./WorkflowPreview";
-import JsonSchemaPreview from "./JsonSchemaPreview";
+import JsonPreview from "./JsonPreview";
 import { FlowEdge, FlowNode, StateMachine, SubState } from "../types";
 import { stateMachineExampleDummyData } from "../utils/stateMachine";
 import stateMachinesJson from "../pages/sample_data/statemachines.json";
@@ -1145,7 +1145,7 @@ const ProjectPlanScreen: React.FC = () => {
                         const stateName = parts.length >= 2 ? parts.slice(0, 2).join("-") : selectedNode;
                         
                         return (
-                          <JsonSchemaPreview
+                          <JsonPreview
                             schema={schema}
                             stateName={stateName}
                             title="Schema Details"
@@ -1160,7 +1160,7 @@ const ProjectPlanScreen: React.FC = () => {
                       // Show state machine data for workflow nodes or state nodes without schema
                       if (nodeData) {
                         return (
-                          <JsonSchemaPreview
+                          <JsonPreview
                             data={Object.keys(nodeData).length > 0 ? nodeData : null}
                             stateName={selectedNode}
                             title="State Machine Data"
@@ -1174,7 +1174,7 @@ const ProjectPlanScreen: React.FC = () => {
                       
                       // Direct rendering for root node or other nodes
                       return (
-                        <JsonSchemaPreview
+                        <JsonPreview
                           stateName={selectedNode}
                           title="Node Information"
                           data={selectedNode === "project-plan-node" ? { 
