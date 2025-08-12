@@ -1250,6 +1250,20 @@ const ProjectPlanScreen: React.FC = () => {
               <Button
                 variant="primary"
                 size="sm"
+                className="bg-transparent text-gray-800 hover:text-white"
+                onClick={() =>
+                  navigate(
+                    `/create-deploy/${projectId || "default-id"}/${
+                      projectName || "default-project"
+                    }`
+                  )
+                }
+              >
+                Re-run
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
                 className="bg-gray-800 hover:bg-gray-900"
                 onClick={() =>
                   navigate(
