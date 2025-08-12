@@ -49,6 +49,52 @@ const dummyProjects = [
   },
 ];
 
+// Generate beautiful gradient fallback for project images
+const ProjectImageFallback = ({ projectName, index }: { projectName: string; index: number }) => {
+  const gradients = [
+    "from-blue-400 via-purple-500 to-purple-600",
+    "from-emerald-400 via-cyan-500 to-blue-500", 
+    "from-pink-400 via-red-500 to-yellow-500",
+    "from-indigo-400 via-purple-500 to-pink-500",
+    "from-green-400 via-blue-500 to-purple-600",
+    "from-yellow-400 via-red-500 to-pink-500",
+    "from-blue-500 via-teal-500 to-green-500",
+    "from-purple-400 via-pink-500 to-red-500"
+  ];
+
+  const icons = [
+    "code", "star", "heart", "zap", "rocket", "sparkles", "globe", "shield"
+  ];
+
+  const selectedGradient = gradients[index % gradients.length];
+  const selectedIcon = icons[index % icons.length];
+
+  return (
+    <div className={`w-full h-full bg-gradient-to-br ${selectedGradient} flex items-center justify-center relative overflow-hidden`}>
+      {/* Background pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div 
+          className="w-full h-full"
+          style={{
+            backgroundImage: `radial-gradient(circle at 20% 80%, rgba(255,255,255,0.2) 1px, transparent 1px), 
+                             radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 1px, transparent 1px)`,
+            backgroundSize: "20px 20px, 30px 30px"
+          }}
+        />
+      </div>
+      
+      {/* Content */}
+      <div className="text-center text-white z-10">
+        <Icon name={selectedIcon} size="xl" className="mb-3 opacity-90 drop-shadow-sm" />
+        <div className="text-sm font-medium opacity-95 px-3 leading-tight">
+          {projectName?.slice(0, 20) || "Project"}
+          {projectName?.length > 20 && "..."}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Workspace: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("last-edited");
@@ -157,17 +203,16 @@ const Workspace: React.FC = () => {
                 className="bg-white/50 backdrop-blur-md rounded-lg overflow-hidden group border border-white/50 shadow-md hover:shadow-xl transition-shadow duration-300"
                 onClick={() => handleProjectClick(project)}
               >
-                <div className="relative h-48">
-                  <img
-                    src={"https://i.imgur.com/mJ8Z3d1.png"}
-                    alt={project.name}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                <div className="relative h-48 overflow-hidden group-hover:scale-105 transition-transform duration-300">
+                  <ProjectImageFallback 
+                    projectName={project?.name || "Project"} 
+                    index={project.id || 0}
                   />
                 </div>
                 <div className="p-4">
                   <div className="flex items-center">
                     <Avatar
-                      src={"https://i.imgur.com/mJ8Z3d1.png"}
+                      src={project?.avatarUrl || `https://via.placeholder.com/30?text=${project?.creator}`}
                       alt="avatar"
                       size="sm"
                       className="mr-3 flex-shrink-0"
