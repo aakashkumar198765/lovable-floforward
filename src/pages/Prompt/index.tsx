@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import PromptContent from "./content";
 import {
   executeMind,
@@ -30,6 +30,7 @@ const Prompt: React.FC = () => {
   const [logs, setLogs] = React.useState<
     { message: string; status: string; format: string }[]
   >([]);
+  const [project, setProject] = useState("");
 
   const handleSubmit = React.useCallback(async () => {
     if (!isAuthenticated) {
@@ -43,7 +44,11 @@ const Prompt: React.FC = () => {
     setBuildingAppName(name);
     setLogs([]);
 
-    const mindName = "newMind";
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const mindName = `P_${pad(now.getDate())}${pad(
+      now.getMonth() + 1
+    )}${now.getFullYear()}_${pad(now.getHours())}${pad(now.getMinutes())}`;
     const responseStructure = {
       api: {},
       ui: {
@@ -59,6 +64,7 @@ const Prompt: React.FC = () => {
 
     try {
       // Execute the mind and get job_id
+      setProject(mindName);
       const response = await executeMind(mindName, args, responseStructure);
       const { job_id, session_id } = response;
 
@@ -242,6 +248,7 @@ const Prompt: React.FC = () => {
         logs={logs}
         streamCompleted={streamCompleted}
         setStreamingCompleted={setStreamCompleted}
+        ProjectId={project}
       />
     </div>
   );

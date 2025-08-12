@@ -5,7 +5,7 @@
 
 
 const defaultMindId = "98b50fe2-54df-47f0-acee-b33f8dbeb78e";
-const shareKey = "94a5bcfa7fbcf707f434e63d7ce6c44d1e7b1bc0d45e3923ab8746feef66bcbb"; 
+const defaultShareKey = "94a5bcfa7fbcf707f434e63d7ce6c44d1e7b1bc0d45e3923ab8746feef66bcbb"; 
 
 /**
  * Execute mind using browser fetch API
@@ -23,7 +23,7 @@ async function executeMind(mindName, args, responseStructure , mindID) {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
-      'Share-Key': shareKey,
+      'Share-Key': defaultShareKey,
       'Origin': 'https://lab.paramai.studio',
       'Referer': 'https://lab.paramai.studio/',
       'X-Mind-Id': mindID ? mindID : defaultMindId,
@@ -44,15 +44,15 @@ async function executeMind(mindName, args, responseStructure , mindID) {
  * If sessionId is provided, gets one session; otherwise, gets all sessions
  */
 async function fetchSessions(mindId, shareKey, sessionId = null) {
-  const url = sessionId ? `https://dev.paramai.studio:5012/mindflow/${mindId}/${sessionId}/get_session` : `https://dev.paramai.studio:5012/mindflow/${mindId}/get_session`;
+  const url = sessionId ? `https://dev.paramai.studio:5012/mindflow/${mindId ? mindId : defaultMindId}/${sessionId}/get_session` : `https://dev.paramai.studio:5012/mindflow/${mindId ? mindId : defaultMindId}/get_session`;
 
   const response = await fetch(url, {
     headers: {
       'Accept': 'application/json',
-      'share-key': shareKey,
+      'share-key': shareKey ? shareKey : defaultShareKey,
       'Origin': 'https://lab.paramai.studio',
       'Referer': 'https://lab.paramai.studio/',
-      'X-Mind-Id': mindId,
+      'X-Mind-Id': mindId ? mindId : defaultMindId,
     },
   });
   if (!response.ok) {
@@ -72,7 +72,7 @@ async function getAllSessions(mindId, shareKey) {
 /**
  * Get session data using browser fetch API
  */
-async function getSession(mindId, sessionId, shareKey) {
+async function getSession(mindId, shareKey , sessionId) {
   return fetchSessions(mindId, shareKey, sessionId);
 }
 

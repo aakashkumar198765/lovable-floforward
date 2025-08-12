@@ -2940,6 +2940,7 @@ export type PromptContentProps = {
   logs: LogEntry[];
   streamCompleted?: boolean;
   setStreamingCompleted?: (value: boolean) => void;
+  ProjectId : string
 };
 
 export interface SubState {
@@ -2966,10 +2967,12 @@ export interface State {
   Props?: {
     Flip?: boolean;
     Edit?: boolean;
+    AlwaysEdit?: boolean;
     diff?: {
       from?: string;
       to?: string;
     };
+    [key: string]: any; // Allow additional properties
   } | null;
   SubStates?: Record<string, SubState>;
   NextState?: string;

@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Textarea, Button, Badge, Icon, Avatar, Modal } from "../../components/atoms";
+import {
+  Textarea,
+  Button,
+  Badge,
+  Icon,
+  Avatar,
+  Modal,
+} from "../../components/atoms";
 import { useAuth } from "../../contexts/AuthContext";
 import { RootState } from "../../store";
 import Logs from "./Logs";
@@ -19,7 +26,8 @@ const PromptContent: React.FC<PromptContentProps> = ({
   onSelectRecent = () => {},
   streamCompleted = false,
   logs = [],
-  setStreamingCompleted = () => {}
+  setStreamingCompleted = () => {},
+  ProjectId,
 }) => {
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
@@ -45,33 +53,45 @@ const PromptContent: React.FC<PromptContentProps> = ({
         name: user.name,
         email: user.email,
         role: user.role,
-        initials: user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || user.email?.[0]?.toUpperCase()
+        initials:
+          user.name
+            ?.split(" ")
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase() || user.email?.[0]?.toUpperCase(),
       };
     }
-    
+
     // Fallback: try to get info from localStorage if authenticated
     if (isAuthenticated) {
-      const userEmail = localStorage.getItem('userEmail');
-      const authToken = localStorage.getItem('authToken');
-      
+      const userEmail = localStorage.getItem("userEmail");
+      const authToken = localStorage.getItem("authToken");
+
       if (userEmail) {
-        const name = userEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const name = userEmail
+          .split("@")[0]
+          .replace(/[._-]/g, " ")
+          .replace(/\b\w/g, (l) => l.toUpperCase());
         return {
           name,
           email: userEmail,
           role: null,
-          initials: name.split(' ').map(n => n[0]).join('').toUpperCase()
+          initials: name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase(),
         };
       } else if (authToken) {
         return {
-          name: 'User',
-          email: 'user@example.com',
+          name: "User",
+          email: "user@example.com",
           role: null,
-          initials: 'U'
+          initials: "U",
         };
       }
     }
-    
+
     return null;
   };
 
@@ -83,18 +103,10 @@ const PromptContent: React.FC<PromptContentProps> = ({
   };
 
   const handleViewOutput = () => {
-    console.log("View output clicked - navigating to project plan");
-    // Generate project ID in format P_DDMMYYYY_HHMM
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const year = now.getFullYear();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const projectId = `P_${day}${month}${year}_${hours}${minutes}`;
-    
-    const projectNameForUrl = buildingAppName ? encodeURIComponent(buildingAppName.replace(/\s+/g, '-')) : 'default-project';
-    navigate(`/project-plan/${projectId}/${projectNameForUrl}`);
+    const projectNameForUrl = buildingAppName
+      ? encodeURIComponent(buildingAppName.replace(/\s+/g, "-"))
+      : "default-project";
+    navigate(`/project-plan/${ProjectId}/${projectNameForUrl}`);
   };
 
   const handleLogout = () => {
@@ -111,14 +123,14 @@ const PromptContent: React.FC<PromptContentProps> = ({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
-      if (!target.closest('.user-menu-container')) {
+      if (!target.closest(".user-menu-container")) {
         setShowUserMenu(false);
       }
     };
 
     if (showUserMenu) {
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
     }
   }, [showUserMenu]);
 
@@ -200,38 +212,44 @@ const PromptContent: React.FC<PromptContentProps> = ({
                   className="bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 transition-all duration-300 hover:scale-105 shadow-sm flex items-center space-x-2"
                   onClick={toggleUserMenu}
                 >
-                  <Avatar 
-                    name={userInfo?.name || userInfo?.email || 'User'} 
-                    size="sm" 
+                  <Avatar
+                    name={userInfo?.name || userInfo?.email || "User"}
+                    size="sm"
                     className="w-6 h-6"
                   />
                   <span className="hidden sm:inline text-sm font-medium">
-                    {userInfo?.name || userInfo?.email || 'User'}
+                    {userInfo?.name || userInfo?.email || "User"}
                   </span>
-                  <Icon name="chevron-down" size="sm" className={`transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                  <Icon
+                    name="chevron-down"
+                    size="sm"
+                    className={`transition-transform ${
+                      showUserMenu ? "rotate-180" : ""
+                    }`}
+                  />
                 </Button>
-                
+
                 {/* User dropdown menu */}
                 {showUserMenu && (
                   <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                     <div className="px-4 py-3 border-b border-gray-100">
                       <div className="flex items-center space-x-3">
-                        <Avatar 
-                          name={userInfo?.name || userInfo?.email || 'User'} 
+                        <Avatar
+                          name={userInfo?.name || userInfo?.email || "User"}
                           size="sm"
                           className="w-10 h-10"
                         />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">
-                            {userInfo?.name || 'User'}
+                            {userInfo?.name || "User"}
                           </p>
                           <p className="text-xs text-gray-500 truncate">
-                            {userInfo?.email || 'No email'}
+                            {userInfo?.email || "No email"}
                           </p>
                           {userInfo?.role && (
-                            <Badge 
-                              variant="secondary" 
-                              size="sm" 
+                            <Badge
+                              variant="secondary"
+                              size="sm"
                               className="mt-1 text-xs"
                             >
                               {userInfo.role}
@@ -240,7 +258,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="py-1">
                       <button
                         onClick={handleLogout}
@@ -312,15 +330,27 @@ const PromptContent: React.FC<PromptContentProps> = ({
                         onClick={() => {
                           // Generate project ID in format P_DDMMYYYY_HHMM
                           const now = new Date();
-                          const day = String(now.getDate()).padStart(2, '0');
-                          const month = String(now.getMonth() + 1).padStart(2, '0');
+                          const day = String(now.getDate()).padStart(2, "0");
+                          const month = String(now.getMonth() + 1).padStart(
+                            2,
+                            "0"
+                          );
                           const year = now.getFullYear();
-                          const hours = String(now.getHours()).padStart(2, '0');
-                          const minutes = String(now.getMinutes()).padStart(2, '0');
+                          const hours = String(now.getHours()).padStart(2, "0");
+                          const minutes = String(now.getMinutes()).padStart(
+                            2,
+                            "0"
+                          );
                           const projectId = `P_${day}${month}${year}_${hours}${minutes}`;
-                          
-                          const projectNameForUrl = buildingAppName ? encodeURIComponent(buildingAppName.replace(/\s+/g, '-')) : 'default-project';
-                          navigate(`/project-plan/${projectId}/${projectNameForUrl}`);
+
+                          const projectNameForUrl = buildingAppName
+                            ? encodeURIComponent(
+                                buildingAppName.replace(/\s+/g, "-")
+                              )
+                            : "default-project";
+                          navigate(
+                            `/project-plan/${projectId}/${projectNameForUrl}`
+                          );
                         }}
                         className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
                       >
@@ -354,8 +384,14 @@ const PromptContent: React.FC<PromptContentProps> = ({
           size="lg"
         >
           <div className="text-center p-4">
-            <Icon name="lock" size="lg" className="mx-auto mb-4 text-blue-500" />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Unlock Full Features</h3>
+            <Icon
+              name="lock"
+              size="lg"
+              className="mx-auto mb-4 text-blue-500"
+            />
+            <h3 className="text-xl font-bold text-gray-800 mb-2">
+              Unlock Full Features
+            </h3>
             <p className="text-gray-600 mb-6">
               To access the "Build BRD" functionality and save your projects,
               please log in.
@@ -383,7 +419,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
         </Modal>
       )}
     </div>
-  )
+  );
 };
 
 export default PromptContent;
