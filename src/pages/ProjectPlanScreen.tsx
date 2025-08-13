@@ -78,7 +78,7 @@ const ProjectPlanScreen: React.FC = () => {
   const [Brd, setBrd]: any = useState({});
   const [schemaWorkflow, setSchemaWorkflow]: any = useState({});
   const [plan, setPlan]: any = useState({});
-  const [preview, setPreview] = useState({});
+  const [preview, setPreview]: any = useState({});
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [showSchemaPanel, setShowSchemaPanel] = useState(false);
 
@@ -331,7 +331,7 @@ const ProjectPlanScreen: React.FC = () => {
   const ROOT_X = 800; // Move root further to accommodate more workflows
   const ROOT_Y = 100;
 
-  function parseJsonString(jsonString: string): any | null {
+  const parseJsonString = (jsonString: string): any | null => {
     try {
       // Remove Markdown code block markers if present
       const cleanedString = jsonString.replace(/^```json\n|```$/g, "");
@@ -340,7 +340,7 @@ const ProjectPlanScreen: React.FC = () => {
       console.error("Error parsing JSON:", error);
       return null;
     }
-  }
+  };
 
   const getStateMachines = (param: any) => {
     if (param) {
@@ -366,11 +366,11 @@ const ProjectPlanScreen: React.FC = () => {
   const parseSchemaCSV = (csvContent: string) => {
     if (!csvContent) return {};
 
-    const lines = csvContent.split('\n').filter(line => line.trim());
+    const lines = csvContent.split("\n").filter((line) => line.trim());
     if (lines.length === 0) return {};
 
     // Get headers
-    const headers = lines[0].split(',').map(h => h.trim());
+    const headers = lines[0].split(",").map((h) => h.trim());
     const schemaData: Record<string, any> = {};
 
     // Process each data row
@@ -379,13 +379,13 @@ const ProjectPlanScreen: React.FC = () => {
         // Better CSV parsing to handle commas within quoted fields
         const line = lines[i];
         const values: string[] = [];
-        let currentValue = '';
+        let currentValue = "";
         let inQuotes = false;
         let j = 0;
 
         while (j < line.length) {
           const char = line[j];
-          
+
           if (char === '"') {
             if (inQuotes && line[j + 1] === '"') {
               // Escaped quote
@@ -396,17 +396,17 @@ const ProjectPlanScreen: React.FC = () => {
               inQuotes = !inQuotes;
               j++;
             }
-          } else if (char === ',' && !inQuotes) {
+          } else if (char === "," && !inQuotes) {
             // Field separator
             values.push(currentValue.trim());
-            currentValue = '';
+            currentValue = "";
             j++;
           } else {
             currentValue += char;
             j++;
           }
         }
-        
+
         // Add the last value
         values.push(currentValue.trim());
 
@@ -421,21 +421,23 @@ const ProjectPlanScreen: React.FC = () => {
         const description = values[6];
         const propertyType = values[7];
         const format = values[8];
-        const required = values[9] === 'true';
-        const options = values[10] || '';
+        const required = values[9] === "true";
+        const options = values[10] || "";
 
         // Create unique schema key combining workflow and state
-        const schemaKey = `${workflow}-${state}`.toLowerCase().replace(/\s+/g, '');
-        
+        const schemaKey = `${workflow}-${state}`
+          .toLowerCase()
+          .replace(/\s+/g, "");
+
         if (!schemaData[schemaKey]) {
           schemaData[schemaKey] = {
             _id: `public:${workflow}-${state}`,
             title: `${workflow} - ${state}`,
-            type: 'object',
+            type: "object",
             properties: {},
             order: [],
             workflow: workflow,
-            state: state
+            state: state,
           };
         }
 
@@ -445,7 +447,7 @@ const ProjectPlanScreen: React.FC = () => {
             type: subSchemaType,
             title: subSchema,
             properties: {},
-            order: []
+            order: [],
           };
           schemaData[schemaKey].order.push(subSchema);
         }
@@ -453,7 +455,9 @@ const ProjectPlanScreen: React.FC = () => {
         // Add property to subSchema
         if (keyProperty && propertyTitle) {
           // Generate a simple index based on position (for compatibility with existing logic)
-          const currentIndex = Object.keys(schemaData[schemaKey].properties[subSchema].properties).length;
+          const currentIndex = Object.keys(
+            schemaData[schemaKey].properties[subSchema].properties
+          ).length;
           const index = currentIndex > 3 ? 100 + currentIndex : currentIndex; // Ensure some fields have index > 99
 
           // Parse options safely
@@ -461,33 +465,44 @@ const ProjectPlanScreen: React.FC = () => {
           if (options && options.length > 0) {
             try {
               // Handle the double-quoted strings in the options
-              if (options.startsWith('[') && options.endsWith(']')) {
+              if (options.startsWith("[") && options.endsWith("]")) {
                 // Replace double quotes with single quotes for JSON parsing
                 const cleanOptions = options.replace(/\"\"/g, '"');
                 enumValues = JSON.parse(cleanOptions);
               }
             } catch (e) {
-              console.warn('Failed to parse options for', keyProperty, ':', options, e);
+              console.warn(
+                "Failed to parse options for",
+                keyProperty,
+                ":",
+                options,
+                e
+              );
               enumValues = undefined;
             }
           }
 
-          schemaData[schemaKey].properties[subSchema].properties[keyProperty] = {
-            type: propertyType,
-            title: propertyTitle,
-            description: description,
-            format: format || undefined,
-            required: required,
-            index: index,
-            enum: enumValues
-          };
+          schemaData[schemaKey].properties[subSchema].properties[keyProperty] =
+            {
+              type: propertyType,
+              title: propertyTitle,
+              description: description,
+              format: format || undefined,
+              required: required,
+              index: index,
+              enum: enumValues,
+            };
 
-          if (!schemaData[schemaKey].properties[subSchema].order.includes(keyProperty)) {
+          if (
+            !schemaData[schemaKey].properties[subSchema].order.includes(
+              keyProperty
+            )
+          ) {
             schemaData[schemaKey].properties[subSchema].order.push(keyProperty);
           }
         }
       } catch (error) {
-        console.warn('Error parsing CSV line', i, ':', lines[i], error);
+        console.warn("Error parsing CSV line", i, ":", lines[i], error);
         continue;
       }
     }
@@ -500,19 +515,32 @@ const ProjectPlanScreen: React.FC = () => {
       if (ValidUtils.isEmptyObj(param)) return {};
       const schemaResponse = param?.output?.content?.["SchemaAnalyst__001"][0];
       if (schemaResponse?.type === "markdown") {
-        console.log("📊 Schema CSV content preview:", schemaResponse?.content?.substring(0, 200));
+        console.log(
+          "📊 Schema CSV content preview:",
+          schemaResponse?.content?.substring(0, 200)
+        );
         const parsedSchemas = parseSchemaCSV(schemaResponse?.content);
-        console.log("📊 Parsed schemas from param:", Object.keys(parsedSchemas));
+        console.log(
+          "📊 Parsed schemas from param:",
+          Object.keys(parsedSchemas)
+        );
         return parsedSchemas;
       }
       return {};
     }
     if (ValidUtils.isEmptyObj(schemaWorkflow)) return {};
-    const schemaResponse = schemaWorkflow?.output?.content?.["SchemaAnalyst__001"][0];
+    const schemaResponse =
+      schemaWorkflow?.output?.content?.["SchemaAnalyst__001"][0];
     if (schemaResponse?.type === "markdown") {
-      console.log("📊 Schema CSV content preview:", schemaResponse?.content?.substring(0, 200));
+      console.log(
+        "📊 Schema CSV content preview:",
+        schemaResponse?.content?.substring(0, 200)
+      );
       const parsedSchemas = parseSchemaCSV(schemaResponse?.content);
-      console.log("📊 Parsed schemas from schemaWorkflow:", Object.keys(parsedSchemas));
+      console.log(
+        "📊 Parsed schemas from schemaWorkflow:",
+        Object.keys(parsedSchemas)
+      );
       return parsedSchemas;
     }
     return {};
@@ -530,7 +558,9 @@ const ProjectPlanScreen: React.FC = () => {
       return [];
     }
     if (ValidUtils.isEmptyObj(preview)) return [];
-    const previewResponse = (preview as any)?.output?.content?.["response"]?.[0];
+    const previewResponse = (preview as any)?.output?.content?.[
+      "response"
+    ]?.[0];
     if (previewResponse?.type === "markdown") {
       const previewContent = parseJsonString(previewResponse?.content);
       console.log("📊 Preview data from preview state:", previewContent);
@@ -544,7 +574,10 @@ const ProjectPlanScreen: React.FC = () => {
     console.log("🔄 State machines data:", stateMachines);
     console.log("🔄 Type of stateMachines:", typeof stateMachines);
     console.log("🔄 Is array:", Array.isArray(stateMachines));
-    console.log("🔄 Keys:", stateMachines ? Object.keys(stateMachines) : "null/undefined");
+    console.log(
+      "🔄 Keys:",
+      stateMachines ? Object.keys(stateMachines) : "null/undefined"
+    );
 
     const data: Record<string, any> = stateMachines;
     const nodes: FlowNode[] = [];
@@ -703,34 +736,46 @@ const ProjectPlanScreen: React.FC = () => {
           animated: true,
         });
 
-                  // Process the StartAt state with global positioning
-          const startStateName = sm.StartAt;
-          console.log(`🚀 Processing StartAt state: ${startStateName} for ${sm.Name}`);
-          if (startStateName && sm.States[startStateName]) {
-            console.log(`📍 StartAt state exists, calling processStateWithLayout...`);
-            globalStateXPosition = processStateWithLayout(
-              sm,
-              startStateName,
-              sm.Name,
-              nodes,
-              edges,
-              globalStateXPosition, // Use global X position
-              smY + LEVEL_HEIGHT,
-              0,
-              sm,
-              true // This is the StartAt state - should always be added
-            );
-            console.log(`✅ Finished processing StartAt state, globalStateXPosition: ${globalStateXPosition}`);
-          } else {
-            console.log(`❌ StartAt state ${startStateName} not found in States`);
-          }
+        // Process the StartAt state with global positioning
+        const startStateName = sm.StartAt;
+        console.log(
+          `🚀 Processing StartAt state: ${startStateName} for ${sm.Name}`
+        );
+        if (startStateName && sm.States[startStateName]) {
+          console.log(
+            `📍 StartAt state exists, calling processStateWithLayout...`
+          );
+          globalStateXPosition = processStateWithLayout(
+            sm,
+            startStateName,
+            sm.Name,
+            nodes,
+            edges,
+            globalStateXPosition, // Use global X position
+            smY + LEVEL_HEIGHT,
+            0,
+            sm,
+            true // This is the StartAt state - should always be added
+          );
+          console.log(
+            `✅ Finished processing StartAt state, globalStateXPosition: ${globalStateXPosition}`
+          );
+        } else {
+          console.log(`❌ StartAt state ${startStateName} not found in States`);
+        }
 
         stateMachineIndex++;
       }
     }
 
-    console.log("Final nodes:", nodes.map(n => n.id));
-    console.log("Final edges:", edges.map(e => `${e.source} -> ${e.target}`));
+    console.log(
+      "Final nodes:",
+      nodes.map((n) => n.id)
+    );
+    console.log(
+      "Final edges:",
+      edges.map((e) => `${e.source} -> ${e.target}`)
+    );
     return { nodes, edges };
   };
 
@@ -756,7 +801,8 @@ const ProjectPlanScreen: React.FC = () => {
     // BUT this should not apply to the StartAt state
     const hasCommerceSchema = state.Schema?.includes("Commerce");
     const flipValue = state.Props?.Flip ?? false; // Treat missing Flip as false
-    const shouldTerminateChain = !isStartAtState && hasCommerceSchema && flipValue === false;
+    const shouldTerminateChain =
+      !isStartAtState && hasCommerceSchema && flipValue === false;
 
     console.log(`🔍 Processing state: ${stateName}`);
     console.log(`   - isStartAt: ${isStartAtState}`);
@@ -768,7 +814,9 @@ const ProjectPlanScreen: React.FC = () => {
 
     // If chain should terminate, don't add this state and stop processing
     if (shouldTerminateChain) {
-      console.log(`Chain terminated BEFORE adding state: ${stateName} (Commerce + Flip≠true)`);
+      console.log(
+        `Chain terminated BEFORE adding state: ${stateName} (Commerce + Flip≠true)`
+      );
       return currentXPosition;
     }
 
@@ -964,57 +1012,65 @@ const ProjectPlanScreen: React.FC = () => {
   // Helper function to get schema from node ID
   const getSchemaFromNodeId = (nodeId: string) => {
     if (!nodeId || !schemas) return null;
-    
+
     // Skip root node and workflow nodes
     if (nodeId === "project-plan-node" || nodeId.endsWith("-node")) {
       return null;
     }
-    
+
     // Parse node ID to extract workflow and state information
     // Format: "WorkflowName-StateName" or "WorkflowName-StateName-SubStateName"
     const parts = nodeId.split("-");
     if (parts.length < 2) return null;
-    
+
     // Get workflow name and state name
     const workflowName = parts[0];
     const stateName = parts[1];
-    
+
     // Create schema key
-    const schemaKey = `${workflowName}-${stateName}`.toLowerCase().replace(/\s+/g, '');
-    
+    const schemaKey = `${workflowName}-${stateName}`
+      .toLowerCase()
+      .replace(/\s+/g, "");
+
     return schemas[schemaKey] || null;
   };
 
   // Helper function to get state machine data from node ID
   const getStateMachineDataFromNodeId = (nodeId: string) => {
     if (!nodeId) return null;
-    
+
     const stateMachines = getStateMachines(null);
     if (!stateMachines) return null;
-    
+
     // For workflow nodes, return the entire state machine
     if (nodeId.endsWith("-node") && !nodeId.includes("project-plan")) {
       const workflowName = nodeId.replace("-node", "");
-      return Object.values(stateMachines).find((sm: any) => sm.Name === workflowName) || null;
+      return (
+        Object.values(stateMachines).find(
+          (sm: any) => sm.Name === workflowName
+        ) || null
+      );
     }
-    
+
     // For state nodes, return the specific state
     const parts = nodeId.split("-");
     if (parts.length >= 2) {
       const workflowName = parts[0];
       const stateName = parts[1];
-      
-      const stateMachine = Object.values(stateMachines).find((sm: any) => sm.Name === workflowName);
+
+      const stateMachine = Object.values(stateMachines).find(
+        (sm: any) => sm.Name === workflowName
+      );
       if (stateMachine && (stateMachine as any).States?.[stateName]) {
         return {
           workflowName,
           stateName,
           stateData: (stateMachine as any).States[stateName],
-          fullStateMachine: stateMachine
+          fullStateMachine: stateMachine,
         };
       }
     }
-    
+
     return null;
   };
 
@@ -1041,6 +1097,102 @@ const ProjectPlanScreen: React.FC = () => {
     }
   };
 
+  const handleReRun = async () => {
+    try {
+      setLoading(true);
+      const mindName = projectId;
+      const responseStructure = {
+        api: {},
+        ui: {
+          type: "tabs",
+          tabs: [],
+          content: {},
+        },
+      };
+
+      let sessionId = "";
+      let args = {};
+      let mindId = "";
+
+      // Determine the mind to rerun based on active tab
+      switch (activeProjectTab) {
+        case "brd":
+          sessionId = Brd?._id;
+          args = { ...Brd?.args };
+          mindId = ""; // BRD doesn't use a specific mindId
+          break;
+
+        case "plan":
+          sessionId = plan?._id;
+          args = {
+            csv_input: getWorkflowSchemaCsv(schemaWorkflow),
+            workflow_tree: getBrdContent(),
+            files: [],
+          };
+          mindId = mindsConfig?.jsonOutput;
+          break;
+
+        case "preview":
+          sessionId = preview?._id;
+          args = {
+            prompts: getBrdContent(),
+            csv_file: getWorkflowSchemaCsv(schemaWorkflow),
+            n_instances: 1,
+          };
+          mindId = mindsConfig?.syntheticData;
+          break;
+
+        case "smart-ai":
+          sessionId = schemaWorkflow?._id;
+          args = {
+            workflow_tree: getBrdContent(),
+            files: [],
+          };
+          mindId = mindsConfig?.schemaAnalysis;
+          break;
+
+        default:
+          throw new Error("Invalid active tab for rerun");
+      }
+
+      // Execute the mind with the appropriate parameters
+      const execution = await executeMind(
+        mindName,
+        args,
+        responseStructure,
+        mindId
+      );
+
+      const { job_id, session_id } = execution;
+
+      // Wait for the SSE stream to complete
+      await streamSSE(job_id);
+
+      // Fetch the updated response
+      const response = await getSession(mindId, "", session_id);
+
+      // Update the appropriate state based on the tab
+      switch (activeProjectTab) {
+        case "brd":
+          setBrd(response?.response || {});
+          break;
+        case "plan":
+          setPlan(response?.response || {});
+          break;
+        case "preview":
+          setPreview(response?.response || {});
+          break;
+        case "smart-ai":
+          setSchemaWorkflow(response?.response || {});
+          break;
+      }
+    } catch (error) {
+      console.error("❌ Error in handleReRun:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const renderContent = () => {
     switch (activeProjectTab) {
       case "brd":
@@ -1052,7 +1204,11 @@ const ProjectPlanScreen: React.FC = () => {
           <ReactFlowProvider>
             <div className="h-full w-full flex relative">
               {/* ReactFlow Container */}
-              <div className={`transition-all duration-300 ${showSchemaPanel ? 'w-2/3' : 'w-full'} relative`}>
+              <div
+                className={`transition-all duration-300 ${
+                  showSchemaPanel ? "w-2/3" : "w-full"
+                } relative`}
+              >
                 {!isFlowReady && (
                   <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-20">
                     <div className="text-gray-500">Loading flow diagram...</div>
@@ -1112,7 +1268,9 @@ const ProjectPlanScreen: React.FC = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 rounded border-2 border-amber-500 bg-amber-50"></div>
-                          <span className="text-xs text-gray-700">Workflow</span>
+                          <span className="text-xs text-gray-700">
+                            Workflow
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 rounded border-2 border-green-600 bg-green-100"></div>
@@ -1137,13 +1295,17 @@ const ProjectPlanScreen: React.FC = () => {
                   <div className="flex-1 overflow-hidden">
                     {(() => {
                       const schema = getSchemaFromNodeId(selectedNode);
-                      const nodeData = getStateMachineDataFromNodeId(selectedNode);
-                      
+                      const nodeData =
+                        getStateMachineDataFromNodeId(selectedNode);
+
                       // Show schema if available
                       if (schema) {
                         const parts = selectedNode.split("-");
-                        const stateName = parts.length >= 2 ? parts.slice(0, 2).join("-") : selectedNode;
-                        
+                        const stateName =
+                          parts.length >= 2
+                            ? parts.slice(0, 2).join("-")
+                            : selectedNode;
+
                         return (
                           <JsonPreview
                             schema={schema}
@@ -1156,12 +1318,14 @@ const ProjectPlanScreen: React.FC = () => {
                           />
                         );
                       }
-                      
+
                       // Show state machine data for workflow nodes or state nodes without schema
                       if (nodeData) {
                         return (
                           <JsonPreview
-                            data={Object.keys(nodeData).length > 0 ? nodeData : null}
+                            data={
+                              Object.keys(nodeData).length > 0 ? nodeData : null
+                            }
                             stateName={selectedNode}
                             title="State Machine Data"
                             onClose={() => {
@@ -1171,16 +1335,20 @@ const ProjectPlanScreen: React.FC = () => {
                           />
                         );
                       }
-                      
+
                       // Direct rendering for root node or other nodes
                       return (
                         <JsonPreview
                           stateName={selectedNode}
                           title="Node Information"
-                          data={selectedNode === "project-plan-node" ? { 
-                            projectData: getCurrentStateMachines(),
-                            schemas: getCurrentSchemas()
-                          } : null}
+                          data={
+                            selectedNode === "project-plan-node"
+                              ? {
+                                  projectData: getCurrentStateMachines(),
+                                  schemas: getCurrentSchemas(),
+                                }
+                              : null
+                          }
                           onClose={() => {
                             setShowSchemaPanel(false);
                             setSelectedNode(null);
@@ -1197,7 +1365,13 @@ const ProjectPlanScreen: React.FC = () => {
       case "smart-ai":
         return <AIConfiguration />;
       case "preview":
-        return <WorkflowPreview stateMachines={getCurrentStateMachines()} schemas={getCurrentSchemas()} previewData={getCurrentPreviewData()} />;
+        return (
+          <WorkflowPreview
+            stateMachines={getCurrentStateMachines()}
+            schemas={getCurrentSchemas()}
+            previewData={getCurrentPreviewData()}
+          />
+        );
       default:
         return <MarkdownRenderer content={testMarkdown} className="w-full" />;
     }
@@ -1247,6 +1421,14 @@ const ProjectPlanScreen: React.FC = () => {
 
             {/* Right side - Deploy button */}
             <FlexLayout direction="row" align="center" gap="md">
+              <Button
+                variant="primary"
+                size="sm"
+                className="bg-transparent text-gray-800 hover:text-white"
+                onClick={() => handleReRun()}
+              >
+                Re-run
+              </Button>
               <Button
                 variant="primary"
                 size="sm"
