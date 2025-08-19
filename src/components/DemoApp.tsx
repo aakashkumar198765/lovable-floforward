@@ -8,28 +8,33 @@ const DemoApp: React.FC = () => {
     { id: 2, title: "This is a sample task", completed: true },
     { id: 3, title: "Add your own tasks below", completed: false },
   ]);
-  
+
   const [newTask, setNewTask] = useState("");
 
   const addTask = () => {
     if (newTask.trim()) {
-      setTasks(prev => [...prev, {
-        id: Date.now(),
-        title: newTask,
-        completed: false
-      }]);
+      setTasks((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          title: newTask,
+          completed: false,
+        },
+      ]);
       setNewTask("");
     }
   };
 
   const toggleTask = (id: number) => {
-    setTasks(prev => prev.map(task => 
-      task.id === id ? { ...task, completed: !task.completed } : task
-    ));
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100">
+    <div className="min-h-screen">
       <div className="container mx-auto p-6">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
@@ -47,15 +52,15 @@ const DemoApp: React.FC = () => {
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">
               Task Manager Demo
             </h2>
-            
+
             {/* Add Task Form */}
             <FlexLayout direction="row" gap="sm" className="mb-6">
-                             <Input
+              <Input
                 type="text"
                 placeholder="Add a new task..."
                 value={newTask}
                 onChange={(e) => setNewTask(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && addTask()}
+                onKeyDown={(e) => e.key === "Enter" && addTask()}
                 className="flex-1"
               />
               <Button onClick={addTask} variant="primary">
@@ -65,13 +70,13 @@ const DemoApp: React.FC = () => {
 
             {/* Tasks List */}
             <div className="space-y-3">
-              {tasks.map(task => (
+              {tasks.map((task) => (
                 <div
                   key={task.id}
                   className={`flex items-center gap-3 p-3 rounded-lg border ${
-                    task.completed 
-                      ? 'bg-green-50 border-green-200' 
-                      : 'bg-gray-50 border-gray-200'
+                    task.completed
+                      ? "bg-green-50 border-green-200"
+                      : "bg-gray-50 border-gray-200"
                   }`}
                 >
                   <input
@@ -82,9 +87,9 @@ const DemoApp: React.FC = () => {
                   />
                   <span
                     className={`flex-1 ${
-                      task.completed 
-                        ? 'text-gray-500 line-through' 
-                        : 'text-gray-800'
+                      task.completed
+                        ? "text-gray-500 line-through"
+                        : "text-gray-800"
                     }`}
                   >
                     {task.title}
@@ -108,13 +113,13 @@ const DemoApp: React.FC = () => {
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-green-600">
-                    {tasks.filter(t => t.completed).length}
+                    {tasks.filter((t) => t.completed).length}
                   </div>
                   <div className="text-sm text-green-700">Completed</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-orange-600">
-                    {tasks.filter(t => !t.completed).length}
+                    {tasks.filter((t) => !t.completed).length}
                   </div>
                   <div className="text-sm text-orange-700">Remaining</div>
                 </div>
@@ -133,4 +138,4 @@ const DemoApp: React.FC = () => {
   );
 };
 
-export default DemoApp; 
+export default DemoApp;

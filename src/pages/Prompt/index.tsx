@@ -223,9 +223,9 @@ const Prompt: React.FC = () => {
   );
 
   return (
-    <div className="relative bg-gradient-to-br from-blue-100 to-purple-100 h-screen">
+    <div className="relative bg-white h-screen">
       {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden z-0">
+      {/* <div className="absolute inset-0 overflow-hidden z-0">
         <div className="absolute -top-10 -right-10 w-80 h-80 bg-blue-200 rounded-full filter blur-2xl opacity-40 animate-pulse"></div>
         <div
           className="absolute -bottom-10 -left-10 w-80 h-80 bg-purple-200 rounded-full filter blur-2xl opacity-40 animate-pulse"
@@ -235,7 +235,7 @@ const Prompt: React.FC = () => {
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-200 rounded-full filter blur-2xl opacity-40 animate-pulse"
           style={{ animationDelay: "4s" }}
         ></div>
-      </div>
+      </div> */}
       <PromptContent
         prompt={prompt}
         onPromptChange={setPrompt}

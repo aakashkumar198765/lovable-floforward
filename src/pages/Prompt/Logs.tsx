@@ -15,7 +15,13 @@ type LogsProps = {
   setStreamingCompleted?: (completed: boolean) => void;
 };
 
-const Logs: React.FC<LogsProps> = ({ logs, onBackToPrompt, onViewOutput, streamCompleted, setStreamingCompleted = () => {} }) => {
+const Logs: React.FC<LogsProps> = ({
+  logs,
+  onBackToPrompt,
+  onViewOutput,
+  streamCompleted,
+  setStreamingCompleted = () => {},
+}) => {
   const logsEndRef = useRef<null | HTMLDivElement>(null);
   const [displayedLogs, setDisplayedLogs] = useState<LogEntry[]>([]);
   const [currentLogIndex, setCurrentLogIndex] = useState(0);
@@ -33,7 +39,7 @@ const Logs: React.FC<LogsProps> = ({ logs, onBackToPrompt, onViewOutput, streamC
       setIsStreaming(true);
       const currentLog = logs[currentLogIndex];
       // Split message into lines for streaming
-      messageLinesRef.current = currentLog.message.split('\n');
+      messageLinesRef.current = currentLog.message.split("\n");
       setCurrentLineIndex(0);
       setDisplayedMessage(""); // Reset message for new log
     }
@@ -44,19 +50,22 @@ const Logs: React.FC<LogsProps> = ({ logs, onBackToPrompt, onViewOutput, streamC
       const currentLog = logs[currentLogIndex];
       if (currentLineIndex < messageLinesRef.current.length) {
         const timer = setTimeout(() => {
-          setDisplayedMessage(prev => {
+          setDisplayedMessage((prev) => {
             const newLine = messageLinesRef.current[currentLineIndex];
-            return prev + (prev ? '\n' : '') + newLine;
+            return prev + (prev ? "\n" : "") + newLine;
           });
-          setCurrentLineIndex(prev => prev + 1);
+          setCurrentLineIndex((prev) => prev + 1);
         }, 50); // Adjust streaming speed here
 
         return () => clearTimeout(timer);
       } else {
         // Current log message fully streamed
-        setDisplayedLogs(prev => [...prev, { ...currentLog, message: displayedMessage }]);
+        setDisplayedLogs((prev) => [
+          ...prev,
+          { ...currentLog, message: displayedMessage },
+        ]);
         setIsStreaming(false);
-        setCurrentLogIndex(prev => prev + 1); // Move to next log
+        setCurrentLogIndex((prev) => prev + 1); // Move to next log
       }
     }
   }, [isStreaming, currentLineIndex, currentLogIndex, logs, displayedMessage]);
@@ -121,7 +130,7 @@ const Logs: React.FC<LogsProps> = ({ logs, onBackToPrompt, onViewOutput, streamC
   };
 
   return (
-    <div className="top-0 left-0 h-[calc(100vh-8rem)] rounded-[6px] w-3/4 bg-transparent backdrop-blur-lg text-gray-800 p-8 flex flex-col z-30 shadow-2xl">
+    <div className="top-0 left-0 bg-gray-50 h-[calc(100vh-8rem)] rounded-[6px] w-3/4 backdrop-blur-lg text-gray-800 p-8 flex flex-col z-30 shadow-2xl">
       <div className="flex-shrink-0 mb-6">
         <h3 className="text-2xl font-bold text-gray-800">
           Building - setting up the process
@@ -134,9 +143,7 @@ const Logs: React.FC<LogsProps> = ({ logs, onBackToPrompt, onViewOutput, streamC
             key={index}
             className="bg-white p-4 rounded-lg shadow-md mb-4 flex items-start space-x-3"
           >
-            <span className="text-sm mt-0.5">
-              {getStatusIcon(log.status)}
-            </span>
+            <span className="text-sm mt-0.5">{getStatusIcon(log.status)}</span>
             <div className="flex-1">
               <div
                 className={`text-sm ${getStatusColor(
@@ -169,7 +176,8 @@ const Logs: React.FC<LogsProps> = ({ logs, onBackToPrompt, onViewOutput, streamC
                   logs[currentLogIndex].status
                 )} font-medium mb-1`}
               >
-                {logs[currentLogIndex].status.charAt(0).toUpperCase() + logs[currentLogIndex].status.slice(1)}
+                {logs[currentLogIndex].status.charAt(0).toUpperCase() +
+                  logs[currentLogIndex].status.slice(1)}
               </div>
               <div
                 className="text-sm text-gray-700 leading-relaxed"
@@ -208,7 +216,7 @@ const Logs: React.FC<LogsProps> = ({ logs, onBackToPrompt, onViewOutput, streamC
               onClick={onViewOutput}
               disabled={!streamCompleted}
               variant="primary"
-              className="px-8 py-3 bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+              className="px-8 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
               iconRight={<Icon name="arrow-right" size="sm" />}
             >
               View Output
@@ -218,6 +226,6 @@ const Logs: React.FC<LogsProps> = ({ logs, onBackToPrompt, onViewOutput, streamC
       )}
     </div>
   );
-}
+};
 
 export default Logs;

@@ -1432,7 +1432,7 @@ const ProjectPlanScreen: React.FC = () => {
               <Button
                 variant="primary"
                 size="sm"
-                className="bg-gray-800 hover:bg-gray-900"
+                className=""
                 onClick={() =>
                   navigate(
                     `/create-deploy/${projectId || "default-id"}/${

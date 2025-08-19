@@ -158,9 +158,9 @@ const PromptContent: React.FC<PromptContentProps> = ({
     <div className="h-full relative overflow-y-auto overflow-x-hidden">
       {/* Grid overlay */}
       <div
-        className="absolute inset-0 opacity-20 z-0"
+        className="absolute inset-0 opacity-10 z-0"
         style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255,255,255,0.3) 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 2px 2px, rgba(0,0,0,0.1) 1px, transparent 0)`,
           backgroundSize: "30px 30px",
         }}
       ></div>
@@ -168,12 +168,10 @@ const PromptContent: React.FC<PromptContentProps> = ({
       {/* Header */}
       <header
         className={`sticky top-0 z-20 transition-all duration-300 ${
-          scrolled
-            ? "bg-white/80 backdrop-blur-lg shadow-md"
-            : "bg-white/0 backdrop-blur-none shadow-none"
-        } border-b border-gray-200 backdrop-blur-[2px]`}
+          scrolled ? "bg-white shadow-sm" : "bg-white"
+        } border-b border-gray-200`}
       >
-        <div className="bg-white/70 mx-auto px-6 py-4">
+        <div className="mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center space-x-3">
@@ -190,7 +188,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
                   />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-gray-800">
+              <h1 className="text-2xl font-bold text-gray-900">
                 Lovable FloForward
               </h1>
             </div>
@@ -199,7 +197,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
             {!isAuthenticated ? (
               <Button
                 variant="secondary"
-                className="bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 transition-all duration-300 hover:scale-105 shadow-sm"
+                className="bg-white hover:bg-gray-100 text-gray-800 border border-gray-300"
                 onClick={() => navigate("/login")}
                 iconLeft={<Icon name="user" size="sm" />}
               >
@@ -209,7 +207,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
               <div className="relative user-menu-container">
                 <Button
                   variant="secondary"
-                  className="bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 transition-all duration-300 hover:scale-105 shadow-sm flex items-center space-x-2"
+                  className="bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 flex items-center space-x-2"
                   onClick={toggleUserMenu}
                 >
                   <Avatar
@@ -282,10 +280,10 @@ const PromptContent: React.FC<PromptContentProps> = ({
           {!showLogs ? (
             <div className="flex flex-col items-center justify-center w-full">
               <div className="w-full flex justify-center">
-                <div className="max-w-4xl bg-white/50 backdrop-blur-xl border border-gray-200 rounded-2xl p-4 sm:p-8 shadow-lg mt-8">
+                <div className="max-w-4xl border border-gray-200 rounded-lg p-4 sm:p-8 mt-8 shadow-lg">
                   {/* Hero Section */}
                   <div className="text-center mb-8">
-                    <h2 className="text-4xl font-bold text-gray-800 mb-4">
+                    <h2 className="text-4xl font-bold text-gray-900 mb-4">
                       Build Apps With Natural Language
                     </h2>
                     <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
@@ -304,7 +302,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
                         value={prompt}
                         onChange={(e) => onPromptChange(e.target.value)}
                         rows={6}
-                        className="w-full bg-white/70 backdrop-blur-sm border border-white/50 rounded-xl text-gray-800 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-lg p-4 shadow-inner"
+                        className="w-full bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-gray-500 focus:border-transparent resize-none text-lg p-4"
                       />
                       <div className="absolute bottom-4 right-4 text-gray-500 text-sm">
                         {prompt.length}/1000
@@ -315,7 +313,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
                       <Button
                         onClick={handleBuildBRDClick}
                         variant="primary"
-                        className="bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-4 rounded-xl font-semibold text-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-12 py-4 rounded-lg font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={!prompt.trim() || building}
                         loading={building}
                         iconLeft={
@@ -368,7 +366,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
               <Button
                 variant="secondary"
                 onClick={() => setShowLoginModal(false)}
-                className="px-6 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 text-gray-800 transition-all duration-300"
+                className="px-6 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 text-gray-800"
               >
                 Cancel
               </Button>
@@ -378,7 +376,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
                   setShowLoginModal(false);
                   navigate("/login");
                 }}
-                className="px-6 py-2 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-md transition-all duration-300"
+                className="px-6 py-2 rounded-lg bg-gray-800 hover:bg-gray-900 text-white font-semibold"
               >
                 Login Now
               </Button>
