@@ -279,8 +279,8 @@ const PromptContent: React.FC<PromptContentProps> = ({
         <div className="flex flex-col items-center justify-center p-6">
           {!showLogs ? (
             <div className="flex flex-col items-center justify-center w-full">
-              <div className="w-full flex justify-center">
-                <div className="max-w-4xl border border-gray-200 rounded-lg p-4 sm:p-8 mt-8 shadow-lg">
+              <div className="w-full px-[4rem]">
+                <div className="w-full border border-gray-200 rounded-lg p-4 sm:p-8 mt-8 shadow-lg">
                   {/* Hero Section */}
                   <div className="text-center mb-8">
                     <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -325,8 +325,6 @@ const PromptContent: React.FC<PromptContentProps> = ({
                     </div>
                   </div>
                 </div>
-                {/* Features Grid */}
-                {/* <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">...</div> */}
               </div>
               <Workspace />
             </div>

@@ -41,13 +41,20 @@ function App() {
           <Router>
             <Routes>
               <Route path="/login" element={<Login />} />
-              <Route path="/" element={<Prompt />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <Prompt />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/prompt"
                 element={
-                  // <ProtectedRoute>
-                  <Prompt />
-                  // </ProtectedRoute>
+                  <ProtectedRoute>
+                    <Prompt />
+                  </ProtectedRoute>
                 }
               />
               <Route
