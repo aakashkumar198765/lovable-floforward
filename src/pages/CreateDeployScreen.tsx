@@ -5,6 +5,8 @@ import { Button, LoadingState, Alert } from "../components/atoms";
 import paramSDKService from "../services/ParamSDKService";
 import appCreationService from "../services/AppCreationService";
 import DemoApp from "../components/DemoApp";
+import { executeMind, streamSSE } from "../services/paramai_browsersdk";
+import Logs from "./CreateDeployScreen/Logs";
 
 interface ConversationMessage {
   id: string;
@@ -13,6 +15,12 @@ interface ConversationMessage {
   timestamp: string;
   status?: "sending" | "sent" | "processing";
   suggestions?: string[];
+}
+
+interface LogEntry {
+  message: string;
+  status: string;
+  format: string;
 }
 
 const CreateDeployScreen: React.FC = () => {
@@ -24,13 +32,18 @@ const CreateDeployScreen: React.FC = () => {
   const [deploymentStatus, setDeploymentStatus] = useState<
     "idle" | "creating" | "created" | "deploying" | "deployed" | "failed"
   >("idle");
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    "https://www.paramai.studio/"
+  );
   const [deploymentProgress, setDeploymentProgress] = useState(0);
   const [showLocalDemo, setShowLocalDemo] = useState(false);
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [userInput, setUserInput] = useState("");
   const [isAgentTyping, setIsAgentTyping] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [streamCompleted, setStreamCompleted] = useState(false);
+  const [project, setProject] = useState("");
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -142,61 +155,190 @@ const CreateDeployScreen: React.FC = () => {
     simulateAgentResponse(suggestion);
   };
 
+  const handleBackToPrompt = () => {
+    navigate(
+      `/project-plan/${projectId || "default-id"}/${
+        projectName || "default-project"
+      }`
+    );
+  };
+
+  const handleViewOutput = () => {
+    setDeploymentStatus("created");
+  };
+
   const createApplication = async () => {
     setDeploymentStatus("creating");
     setMessages([]);
+    setLogs([]);
     setDeploymentProgress(0);
     setIsProcessing(true);
 
-    // Welcome message
-    addMessage(
-      "agent",
-      "👋 Hi! I'm your AI development assistant. I'm starting to create your application based on your project plan. Let me walk you through the process!",
-      [
-        "What features are you adding?",
-        "Can I customize the design?",
-        "How long will this take?",
-      ]
-    );
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const mindName = `CD_${pad(now.getDate())}${pad(
+      now.getMonth() + 1
+    )}${now.getFullYear()}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+
+    setProject(mindName);
+
+    const responseStructure = {
+      api: {},
+      ui: {
+        type: "tabs",
+        tabs: [],
+        content: {},
+      },
+    };
+
+    const args = {
+      project_id: projectId,
+      project_name: projectName,
+      files: [],
+    };
 
     try {
-      // Simulate application creation with conversational updates
-      const steps = [
-        "🔍 Analyzing your project requirements and specifications...",
-        "⚙️ Setting up the React application structure...",
-        "🧩 Generating components based on your workflow...",
-        "🎨 Applying styling and UI components...",
-        "🔗 Setting up routing and navigation...",
-        "📦 Configuring dependencies and build tools...",
-        "✅ Application created successfully! Ready for preview.",
-      ];
+      // Add initial log entry
+      setLogs((prev) => [
+        ...prev,
+        {
+          message: `\`[API]\` **Connected to build service...**  
+- Job ID: \`${mindName}\`  
+- Project: \`${projectName}\``,
+          status: "started",
+          format: "markdown",
+        },
+      ]);
 
-      for (let i = 0; i < steps.length; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        addMessage("system", steps[i]);
-        setDeploymentProgress(((i + 1) / steps.length) * 100);
+      // Execute the mind
+      const response = await executeMind(mindName, args, responseStructure);
+      const { job_id, session_id } = response;
+
+      // Add execution log
+      setLogs((prev) => [
+        ...prev,
+        {
+          message: `\`[EXECUTE]\` **Mind execution started**  
+- Job ID: \`${job_id}\`  
+- Session: \`${session_id}\``,
+          status: "pending",
+          format: "markdown",
+        },
+      ]);
+
+      // Start streaming logs
+      try {
+        await streamSSE(job_id, {
+          onEvent: (data: any) => {
+            let message = "";
+            let status = "pending";
+            let format = "text";
+
+            if (typeof data === "object" && data !== null) {
+              message = data.message || data.text || JSON.stringify(data);
+              status = data.status || "pending";
+              format = data.format || "text";
+            } else if (typeof data === "string") {
+              try {
+                const parsed = JSON.parse(data);
+                message = parsed.message || parsed.text || data;
+                status = parsed.status || "pending";
+                format = parsed.format || "text";
+              } catch (e) {
+                message = data;
+              }
+            }
+
+            setLogs((prev) => [
+              ...prev,
+              {
+                message: `\`[STREAM]\` ${message}`,
+                status,
+                format,
+              },
+            ]);
+          },
+          onComplete: (data: any) => {
+            console.log("Stream completed:", data);
+            setStreamCompleted(true);
+
+            let message = "";
+            let status = "completed";
+            let format = "text";
+
+            if (typeof data === "object" && data !== null) {
+              message = data.message || data.text || JSON.stringify(data);
+              status = data.status || "completed";
+              format = data.format || "text";
+            } else if (typeof data === "string") {
+              try {
+                const parsed = JSON.parse(data);
+                message = parsed.message || parsed.text || data;
+                status = parsed.status || "completed";
+                format = parsed.format || "text";
+              } catch (e) {
+                message = data;
+              }
+            }
+
+            setLogs((prev) => [
+              ...prev,
+              {
+                message: `\`[STREAM]\` ${message}`,
+                status,
+                format,
+              },
+            ]);
+
+            setDeploymentStatus("created");
+            setIsProcessing(false);
+          },
+          onError: (error: any) => {
+            console.error("Stream error:", error);
+            setLogs((prev) => [
+              ...prev,
+              {
+                message: `\`[ERROR]\` **Stream connection failed**  
+- Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+                status: "error",
+                format: "markdown",
+              },
+            ]);
+            setDeploymentStatus("failed");
+            setIsProcessing(false);
+          },
+          maxRetries: 3,
+          retryDelay: 2000,
+        });
+      } catch (streamError) {
+        console.error("Stream error:", streamError);
+        setLogs((prev) => [
+          ...prev,
+          {
+            message: `\`[ERROR]\` **Stream connection failed**  
+- Error: ${
+              streamError instanceof Error
+                ? streamError.message
+                : "Unknown error"
+            }`,
+            status: "error",
+            format: "markdown",
+          },
+        ]);
+        setDeploymentStatus("failed");
+        setIsProcessing(false);
       }
-
-      setDeploymentStatus("created");
-      setIsProcessing(false);
-
-      addMessage(
-        "agent",
-        "🎉 Your application has been created successfully! You can now preview it on the right. Would you like to make any changes to the design, add features, or deploy it?",
-        [
-          "Change the color scheme",
-          "Add more features",
-          "Deploy to production",
-          "Modify the layout",
-        ]
-      );
     } catch (error) {
       console.error("App creation failed:", error);
-      addMessage(
-        "agent",
-        `❌ Oops! Something went wrong during creation: ${error}. Let me try again or we can troubleshoot this together.`,
-        ["Try again", "Check the logs", "Contact support"]
-      );
+      setLogs((prev) => [
+        ...prev,
+        {
+          message: `\`[ERROR]\` **Build failed**  
+- Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+          status: "error",
+          format: "markdown",
+        },
+      ]);
       setDeploymentStatus("failed");
       setIsProcessing(false);
     }
@@ -343,21 +485,28 @@ const CreateDeployScreen: React.FC = () => {
   };
 
   const renderPreview = () => {
-    if (deploymentStatus === "creating" || deploymentStatus === "deploying") {
-      const isCreating = deploymentStatus === "creating";
+    if (deploymentStatus === "creating") {
+      return (
+        <Logs
+          logs={logs}
+          onBackToPrompt={handleBackToPrompt}
+          onViewOutput={handleViewOutput}
+          streamCompleted={streamCompleted}
+          setStreamingCompleted={setStreamCompleted}
+        />
+      );
+    }
+
+    if (deploymentStatus === "deploying") {
       return (
         <div className="h-full flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-600 mx-auto mb-4"></div>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              {isCreating
-                ? "Creating Your Application"
-                : "Deploying Your Application"}
+              Deploying Your Application
             </h3>
             <p className="text-gray-600 mb-4">
-              {isCreating
-                ? "Generating your React application from the project plan..."
-                : "Building and deploying your application to the cloud..."}
+              Building and deploying your application to the cloud...
             </p>
             <div className="w-64 bg-gray-200 rounded-full h-2 mx-auto">
               <div
@@ -389,7 +538,14 @@ const CreateDeployScreen: React.FC = () => {
           </div>
 
           <div className="h-full overflow-auto">
-            <DemoApp />
+            {/* <DemoApp /> */}
+            <iframe
+              src={previewUrl || "https://www.paramai.studio"}
+              className="w-full h-full border-0"
+              title="Application Preview"
+              onLoad={() => console.log("Preview loaded successfully")}
+              onError={() => console.error("Failed to load preview")}
+            />
           </div>
         </div>
       );
@@ -434,11 +590,11 @@ const CreateDeployScreen: React.FC = () => {
           </div>
 
           <div className="h-full overflow-auto">
-            {showLocalDemo ? (
+            {false ? (
               <DemoApp />
-            ) : previewUrl ? (
+            ) : true ? (
               <iframe
-                src={previewUrl}
+                src={previewUrl || "https://www.paramai.studio"}
                 className="w-full h-full border-0"
                 title="Application Preview"
                 onLoad={() => console.log("Preview loaded successfully")}

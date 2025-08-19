@@ -1,0 +1,230 @@
+import React, { useEffect, useRef, useState } from "react";
+import { Button, Icon } from "../../components/atoms";
+
+type LogEntry = {
+  message: string;
+  status: string;
+  format: string;
+};
+
+type LogsProps = {
+  logs: LogEntry[];
+  onBackToPrompt: () => void;
+  onViewOutput: () => void;
+  streamCompleted?: boolean;
+  setStreamingCompleted?: (completed: boolean) => void;
+};
+
+const Logs: React.FC<LogsProps> = ({
+  logs,
+  onBackToPrompt,
+  onViewOutput,
+  streamCompleted,
+  setStreamingCompleted = () => {},
+}) => {
+  const logsEndRef = useRef<null | HTMLDivElement>(null);
+  const [displayedLogs, setDisplayedLogs] = useState<LogEntry[]>([]);
+  const [currentLogIndex, setCurrentLogIndex] = useState(0);
+  const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const [displayedMessage, setDisplayedMessage] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const messageLinesRef = useRef<string[]>([]);
+
+  const scrollToBottom = () => {
+    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (currentLogIndex < logs.length && !isStreaming) {
+      setIsStreaming(true);
+      const currentLog = logs[currentLogIndex];
+      messageLinesRef.current = currentLog.message.split("\n");
+      setCurrentLineIndex(0);
+      setDisplayedMessage("");
+    }
+  }, [currentLogIndex, logs, isStreaming]);
+
+  useEffect(() => {
+    if (isStreaming && currentLogIndex < logs.length) {
+      const currentLog = logs[currentLogIndex];
+      if (currentLineIndex < messageLinesRef.current.length) {
+        const timer = setTimeout(() => {
+          setDisplayedMessage((prev) => {
+            const newLine = messageLinesRef.current[currentLineIndex];
+            return prev + (prev ? "\n" : "") + newLine;
+          });
+          setCurrentLineIndex((prev) => prev + 1);
+        }, 50);
+
+        return () => clearTimeout(timer);
+      } else {
+        setDisplayedLogs((prev) => [
+          ...prev,
+          { ...currentLog, message: displayedMessage },
+        ]);
+        setIsStreaming(false);
+        setCurrentLogIndex((prev) => prev + 1);
+      }
+    }
+  }, [isStreaming, currentLineIndex, currentLogIndex, logs, displayedMessage]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [displayedLogs, displayedMessage]);
+
+  const formatMessage = (message: string) => {
+    return message
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.*?)\*/g, "<em>$1</em>")
+      .replace(/`([^`]+)`/g, '<code class="bg-gray-200 px-1 rounded">$1</code>')
+      .replace(
+        /```([\s\S]*?)```/g,
+        '<pre class="bg-gray-100 p-2 rounded text-sm overflow-x-auto"><code>$1</code></pre>'
+      )
+      .replace(
+        /#{1,6}\s+(.*)/g,
+        '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>'
+      )
+      .replace(/- (.*)/g, '<li class="ml-4">$1</li>')
+      .replace(/\n/g, "<br />");
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "started":
+        return "text-blue-600";
+      case "pending":
+        return "text-yellow-700";
+      case "completed":
+        return "text-green-600";
+      case "error":
+        return "text-red-600";
+      default:
+        return "text-gray-600";
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "started":
+        return "▶️";
+      case "pending":
+        return "⏳";
+      case "completed":
+        return "✅";
+      case "error":
+        return "❌";
+      default:
+        return "ℹ️";
+    }
+  };
+
+  const handleBackToPrompt = () => {
+    setIsStreaming(false);
+    if (setStreamingCompleted) {
+      setStreamingCompleted(false);
+    }
+    onBackToPrompt();
+  };
+
+  return (
+    <div className="h-full bg-gray-50 rounded-lg p-6 flex flex-col">
+      <div className="flex-shrink-0 mb-6">
+        <h3 className="text-2xl font-bold text-gray-800">
+          Creating Application - AI is building your app
+        </h3>
+      </div>
+
+      <div className="flex-1 overflow-y-auto pr-4">
+        {displayedLogs.map((log, index) => (
+          <div
+            key={index}
+            className="bg-white p-4 rounded-lg shadow-sm mb-4 flex items-start space-x-3"
+          >
+            <span className="text-sm mt-0.5">{getStatusIcon(log.status)}</span>
+            <div className="flex-1">
+              <div
+                className={`text-sm ${getStatusColor(
+                  log.status
+                )} font-medium mb-1`}
+              >
+                {log.status.charAt(0).toUpperCase() + log.status.slice(1)}
+              </div>
+              <div
+                className="text-sm text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: formatMessage(log.message),
+                }}
+              />
+            </div>
+          </div>
+        ))}
+
+        {isStreaming && currentLogIndex < logs.length && (
+          <div
+            key={`streaming-${currentLogIndex}`}
+            className="bg-white p-4 rounded-lg shadow-sm mb-4 flex items-start space-x-3"
+          >
+            <span className="text-sm mt-0.5">
+              {getStatusIcon(logs[currentLogIndex].status)}
+            </span>
+            <div className="flex-1">
+              <div
+                className={`text-sm ${getStatusColor(
+                  logs[currentLogIndex].status
+                )} font-medium mb-1`}
+              >
+                {logs[currentLogIndex].status.charAt(0).toUpperCase() +
+                  logs[currentLogIndex].status.slice(1)}
+              </div>
+              <div
+                className="text-sm text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: formatMessage(displayedMessage),
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {!isStreaming && !streamCompleted && (
+          <div className="bg-white p-4 rounded-lg shadow-sm mb-4 flex items-start space-x-3">
+            <span className="text-sm mt-0.5">⏳</span>
+            <div className="flex-1">
+              <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          </div>
+        )}
+        <div ref={logsEndRef} />
+      </div>
+
+      {logs.length > 0 && (
+        <div className="flex-shrink-0 pt-6 border-t border-gray-200">
+          <div className="flex justify-center space-x-4">
+            <Button
+              onClick={handleBackToPrompt}
+              variant="secondary"
+              className="px-8 py-3 bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 rounded-lg"
+              iconLeft={<Icon name="arrow-left" size="sm" />}
+            >
+              Back to Project
+            </Button>
+            <Button
+              onClick={onViewOutput}
+              disabled={!streamCompleted}
+              variant="primary"
+              className="px-8 py-3 rounded-lg font-semibold"
+              iconRight={<Icon name="arrow-right" size="sm" />}
+            >
+              View Demo App
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Logs;
