@@ -38,6 +38,11 @@ const Prompt: React.FC = () => {
   const [showUserStory, setShowUserStory] = useState(false);
   const [userStoryLoading, setUserStoryLoading] = useState(false);
   const [userStoryMindName, setUserStoryMindName] = useState<string>("");
+  
+  // New state for regeneration options
+  const [showRegenerationOptions, setShowRegenerationOptions] = useState(false);
+  const [regenerationType, setRegenerationType] = useState<"same" | "edit" | null>(null);
+  const [editPrompt, setEditPrompt] = useState<string>("");
 
   const userStoryMindId = "033e0168-bc64-4833-bc22-bd3e3992501a";
 
@@ -148,6 +153,11 @@ const Prompt: React.FC = () => {
           
           console.log("🔍 Final parsed user story:", finalUserStory);
           setUserStory(finalUserStory);
+          
+          // Reset regeneration state when user story is successfully generated
+          setRegenerationType(null);
+          setEditPrompt("");
+          setShowRegenerationOptions(false);
           
         } catch (streamError) {
           console.error("User story stream error:", streamError);
@@ -367,9 +377,43 @@ const Prompt: React.FC = () => {
   );
 
   const handleUserStoryEdit = React.useCallback(async () => {
-    // Use the current prompt to regenerate the user story
-    await executeUserStoryMind(prompt, userStory);
+    // Show regeneration options instead of directly regenerating
+    setShowRegenerationOptions(true);
+  }, []);
+
+  const handleRegenerationOption = React.useCallback(async (type: "same" | "edit") => {
+    setRegenerationType(type);
+    
+    if (type === "same") {
+      // Regenerate with same prompt
+      setShowRegenerationOptions(false);
+      await executeUserStoryMind(prompt, userStory);
+    } else if (type === "edit") {
+      // Show edit prompt input
+      setEditPrompt(prompt);
+      setShowRegenerationOptions(false);
+    }
   }, [executeUserStoryMind, prompt, userStory]);
+
+  const handleEditPromptSubmit = React.useCallback(async () => {
+    if (editPrompt.trim()) {
+      // Immediately exit edit mode when regeneration starts
+      setRegenerationType(null);
+      setEditPrompt("");
+      
+      // Start the regeneration
+      await executeUserStoryMind(editPrompt, userStory);
+    }
+  }, [executeUserStoryMind, editPrompt, userStory]);
+
+  const handleCancelEdit = React.useCallback(() => {
+    setEditPrompt("");
+    setRegenerationType(null);
+  }, []);
+
+  const handleCloseRegenerationOptions = React.useCallback(() => {
+    setShowRegenerationOptions(false);
+  }, []);
 
   const handleProceedToBRD = React.useCallback(async () => {
     console.log("🔍 handleProceedToBRD called");
@@ -425,6 +469,15 @@ const Prompt: React.FC = () => {
         onUserStoryEdit={handleUserStoryEdit}
         onProceedToBRD={handleProceedToBRD}
         onGenerateStory={() => executeUserStoryMind(prompt)}
+        // New regeneration props
+        showRegenerationOptions={showRegenerationOptions}
+        regenerationType={regenerationType}
+        editPrompt={editPrompt}
+        onRegenerationOption={handleRegenerationOption}
+        onEditPromptSubmit={handleEditPromptSubmit}
+        onCancelEdit={handleCancelEdit}
+        onEditPromptChange={setEditPrompt}
+        onCloseRegenerationOptions={handleCloseRegenerationOptions}
       />
     </div>
   );

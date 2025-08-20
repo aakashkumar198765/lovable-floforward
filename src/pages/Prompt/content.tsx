@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
@@ -36,7 +36,39 @@ const PromptContent: React.FC<PromptContentProps> = ({
   onUserStoryEdit = () => {},
   onProceedToBRD = () => {},
   onGenerateStory = () => {},
+  // New regeneration props
+  showRegenerationOptions = false,
+  regenerationType = null,
+  editPrompt = "",
+  onRegenerationOption = () => {},
+  onEditPromptSubmit = () => {},
+  onCancelEdit = () => {},
+  onEditPromptChange = () => {},
+  onCloseRegenerationOptions = () => {},
 }) => {
+  // Ref for the prompt input section
+  const promptInputRef = useRef<HTMLDivElement>(null);
+
+  // Function to scroll to prompt input
+  const scrollToPromptInput = () => {
+    if (promptInputRef.current) {
+      promptInputRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
+  // Expose scroll function to parent component
+  React.useEffect(() => {
+    if (regenerationType === "edit") {
+      // Small delay to ensure state updates are processed
+      setTimeout(() => {
+        scrollToPromptInput();
+      }, 150);
+    }
+  }, [regenerationType]);
+
   // Debug: Log the userStory prop value
   React.useEffect(() => {
     console.log("🔍 PromptContent received userStory:", userStory);
@@ -184,6 +216,15 @@ const PromptContent: React.FC<PromptContentProps> = ({
     }
   }, [building, logs]);
 
+  const handleCancelEdit = () => {
+    onCancelEdit();
+  };
+
+  const handleCloseRegenerationOptions = () => {
+    // This will be handled by the parent component
+    // For now, we'll use a callback if needed
+  };
+
   return (
     <div className="h-full relative overflow-y-auto overflow-x-hidden">
       {/* Grid overlay */}
@@ -324,20 +365,67 @@ const PromptContent: React.FC<PromptContentProps> = ({
                   </div>
 
                   {/* Prompt Input */}
-                  <div className="space-y-6">
+                  <div className="space-y-6" ref={promptInputRef}>
+                    {/* Edit Mode Indicator */}
+                    {regenerationType === "edit" && !userStoryLoading && (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                        <div className="flex items-center space-x-2">
+                          <Icon name="edit" size="sm" className="text-yellow-600" />
+                          <span className="text-sm font-medium text-yellow-800">
+                            Edit Mode: Modify your prompt below to regenerate the user story
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="relative">
                       <Textarea
                         id="prompt"
-                        placeholder="Describe the app you want to build... (e.g., 'A task management app with drag-and-drop functionality and team collaboration features')"
-                        value={prompt}
-                        onChange={(e) => onPromptChange(e.target.value)}
+                        placeholder={
+                          regenerationType === "edit" && !userStoryLoading
+                            ? "Describe what you want to change in your user story..."
+                            : "Describe the app you want to build... (e.g., 'A task management app with drag-and-drop functionality and team collaboration features')"
+                        }
+                        value={regenerationType === "edit" && !userStoryLoading ? editPrompt : prompt}
+                        onChange={(e) => 
+                          regenerationType === "edit" && !userStoryLoading
+                            ? onEditPromptChange(e.target.value)
+                            : onPromptChange(e.target.value)
+                        }
                         rows={6}
-                        className="w-full bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-gray-500 focus:border-transparent resize-none text-lg p-4"
+                        disabled={userStoryLoading}
+                        className={`w-full bg-white border rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:border-transparent resize-none text-lg p-4 ${
+                          regenerationType === "edit" && !userStoryLoading
+                            ? "border-yellow-300 focus:ring-yellow-500" 
+                            : "border-gray-300 focus:ring-gray-500"
+                        } ${userStoryLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                       />
                       <div className="absolute bottom-4 right-4 text-gray-500 text-sm">
-                        {prompt.length}/1000
+                        {(regenerationType === "edit" && !userStoryLoading ? editPrompt : prompt).length}/1000
                       </div>
                     </div>
+
+                    {/* Edit Mode Submit Button */}
+                    {regenerationType === "edit" && !userStoryLoading && (
+                      <div className="flex justify-center space-x-4">
+                        <Button
+                          onClick={onEditPromptSubmit}
+                          variant="primary"
+                          className="px-8 py-3 rounded-lg font-semibold text-base"
+                          disabled={!editPrompt.trim()}
+                          iconLeft={<Icon name="refresh" />}
+                        >
+                          Regenerate with New Prompt
+                        </Button>
+                        <Button
+                          onClick={onCancelEdit}
+                          variant="secondary"
+                          className="px-6 py-3 rounded-lg font-semibold text-base"
+                        >
+                          Cancel Edit
+                        </Button>
+                      </div>
+                    )}
 
                     {/* User Story Section */}
                     {showUserStory && (
@@ -374,10 +462,17 @@ const PromptContent: React.FC<PromptContentProps> = ({
 
                               {/* Edit User Story Section */}
                               <div className="space-y-3">
-                                <h4 className="text-sm font-medium text-gray-700">
-                                  Want to modify the user story? Edit the prompt
-                                  above and click "Regenerate User Story"
-                                </h4>
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                  <h4 className="text-sm font-medium text-blue-800 mb-2">
+                                    Current Prompt
+                                  </h4>
+                                  <p className="text-sm text-blue-700 mb-3">
+                                    {prompt}
+                                  </p>
+                                  <p className="text-xs text-blue-600">
+                                    Want to modify the user story? Click "Regenerate User Story" to choose how to proceed, or edit the prompt above directly.
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           )}
@@ -385,7 +480,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
 
                         {/* Action Buttons */}
                         <div className="flex justify-center space-x-4">
-                          {userStory && (
+                          {userStory && !userStoryLoading && (
                             <Button
                               onClick={onProceedToBRD}
                               variant="primary"
@@ -395,28 +490,30 @@ const PromptContent: React.FC<PromptContentProps> = ({
                               Generate BRD
                             </Button>
                           )}
-                          <Button
-                            onClick={
-                              userStory ? onUserStoryEdit : onGenerateStory
-                            }
-                            variant="secondary"
-                            className="px-8 py-3 rounded-lg font-semibold text-base"
-                            disabled={!prompt.trim() || userStoryLoading}
-                            loading={userStoryLoading}
-                            iconLeft={
-                              !userStoryLoading ? (
-                                <Icon
-                                  name={userStory ? "refresh" : "arrow-right"}
-                                />
-                              ) : undefined
-                            }
-                          >
-                            {userStoryLoading
-                              ? "Generating..."
-                              : userStory
-                              ? "Regenerate User Story"
-                              : "Generate Story"}
-                          </Button>
+                          {!regenerationType && (
+                            <Button
+                              onClick={
+                                userStory ? onUserStoryEdit : onGenerateStory
+                              }
+                              variant="secondary"
+                              className="px-8 py-3 rounded-lg font-semibold text-base"
+                              disabled={!prompt.trim() || userStoryLoading}
+                              loading={userStoryLoading}
+                              iconLeft={
+                                !userStoryLoading ? (
+                                  <Icon
+                                    name={userStory ? "refresh" : "arrow-right"}
+                                  />
+                                ) : undefined
+                              }
+                            >
+                              {userStoryLoading
+                                ? "Generating..."
+                                : userStory
+                                ? "Regenerate User Story"
+                                : "Generate User Story"}
+                            </Button>
+                          )}
                         </div>
                       </div>
                     )}
@@ -438,7 +535,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
                         >
                           {userStoryLoading
                             ? "Generating..."
-                            : "Generate Story"}
+                            : "Generate User Story"}
                         </Button>
                       </div>
                     )}
@@ -496,6 +593,55 @@ const PromptContent: React.FC<PromptContentProps> = ({
                 className="px-6 py-2 rounded-lg bg-gray-800 hover:bg-gray-900 text-white font-semibold"
               >
                 Login Now
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Regeneration Options Modal */}
+      {showRegenerationOptions && (
+        <Modal
+          isOpen={showRegenerationOptions}
+          onClose={onCloseRegenerationOptions}
+          title="Regenerate User Story"
+          size="lg"
+        >
+          <div className="text-center p-4">
+            <Icon
+              name="refresh"
+              size="lg"
+              className="mx-auto mb-4 text-blue-500"
+            />
+            <h3 className="text-xl font-bold text-gray-800 mb-2">
+              How would you like to regenerate?
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Choose whether to regenerate with the same prompt or edit your requirements in the prompt input above.
+            </p>
+            <div className="flex flex-col space-y-3">
+              <Button
+                variant="primary"
+                onClick={() => onRegenerationOption("same")}
+                className="px-8 py-3 rounded-lg font-semibold text-base"
+                iconLeft={<Icon name="refresh" />}
+              >
+                Regenerate with Same Prompt
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => onRegenerationOption("edit")}
+                className="px-8 py-3 rounded-lg font-semibold text-base"
+                iconLeft={<Icon name="edit" />}
+              >
+                Edit in Prompt Input
+              </Button>
+              <Button
+                variant="outline"
+                onClick={onCloseRegenerationOptions}
+                className="px-8 py-3 rounded-lg font-semibold text-base"
+              >
+                Cancel
               </Button>
             </div>
           </div>

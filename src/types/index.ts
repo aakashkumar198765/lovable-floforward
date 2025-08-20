@@ -2948,6 +2948,15 @@ export type PromptContentProps = {
   onUserStoryEdit?: () => void;
   onProceedToBRD?: () => void;
   onGenerateStory?: () => void;
+  // New regeneration props
+  showRegenerationOptions?: boolean;
+  regenerationType?: "same" | "edit" | null;
+  editPrompt?: string;
+  onRegenerationOption?: (type: "same" | "edit") => void;
+  onEditPromptSubmit?: () => void;
+  onCancelEdit?: () => void;
+  onEditPromptChange?: (value: string) => void;
+  onCloseRegenerationOptions?: () => void;
 };
 
 export interface SubState {
