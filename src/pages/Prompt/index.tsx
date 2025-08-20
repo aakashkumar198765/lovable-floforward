@@ -9,6 +9,24 @@ import {
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * TODO: Session Management for User Story Regeneration
+ * 
+ * Current Implementation:
+ * - First generation: Creates new mind name and session ID
+ * - Regeneration: Uses same mind name but creates NEW session ID
+ * 
+ * Future Improvement Needed:
+ * - Implement session updating instead of session creation for regeneration
+ * - This would require an updateSession API call in paramai_browsersdk
+ * - Benefits: Same session ID, better tracking, reduced API calls
+ * 
+ * Current Workaround:
+ * - Same mind name ensures consistency in naming convention
+ * - Different session IDs are logged for debugging
+ * - User experience remains consistent despite different sessions
+ */
+
 const MOCK_RECENTS = [
   { id: "1", name: "Meridian EXIM" },
   { id: "2", name: "Sales Insights" },
@@ -38,6 +56,7 @@ const Prompt: React.FC = () => {
   const [showUserStory, setShowUserStory] = useState(false);
   const [userStoryLoading, setUserStoryLoading] = useState(false);
   const [userStoryMindName, setUserStoryMindName] = useState<string>("");
+  const [userStorySessionId, setUserStorySessionId] = useState<string>(""); // Store session ID for regeneration
   
   // New state for regeneration options
   const [showRegenerationOptions, setShowRegenerationOptions] = useState(false);
@@ -92,13 +111,44 @@ const Prompt: React.FC = () => {
       };
 
       try {
-        const response = await executeMind(
-          mindName,
-          args,
-          responseStructure,
-          userStoryMindId
-        );
+        let response;
+        
+        // Check if we're regenerating and have an existing session ID
+        if (userStorySessionId && previousUserStory) {
+          console.log("🔄 Regenerating user story using existing session:", userStorySessionId);
+          console.log("🔄 Using existing mind name:", mindName);
+          console.log("🔄 Previous user story length:", previousUserStory?.length);
+          
+          // For regeneration, we'll create a new session but with the same mind name
+          // This ensures the mind name is consistent, though the session ID will be different
+          // In a future update, we could implement session updating if the API supports it
+          response = await executeMind(
+            mindName,
+            args,
+            responseStructure,
+            userStoryMindId
+          );
+          
+          console.log("🔄 New session created for regeneration with ID:", response.session_id);
+          console.log("🔄 Note: This is a new session, not updating the existing one");
+        } else {
+          console.log("🆕 Creating new user story session");
+          console.log("🆕 New mind name:", mindName);
+          response = await executeMind(
+            mindName,
+            args,
+            responseStructure,
+            userStoryMindId
+          );
+        }
+        
         const { job_id, session_id } = response;
+        
+        // Store the session ID for future regeneration
+        if (!userStorySessionId) {
+          setUserStorySessionId(session_id);
+          console.log("💾 Stored new session ID for regeneration:", session_id);
+        }
 
         // Start streaming logs from the event source
         try {
@@ -169,7 +219,7 @@ const Prompt: React.FC = () => {
         setUserStoryLoading(false);
       }
     },
-    [isAuthenticated, navigate]
+    [isAuthenticated, navigate, userStorySessionId, userStoryMindName, userStoryMindId]
   );
 
   const handleSubmit = React.useCallback(async () => {
