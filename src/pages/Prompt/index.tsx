@@ -66,7 +66,7 @@ const Prompt: React.FC = () => {
       const finalPrompt = userPrompt;
 
       // Use existing mind name if regenerating, otherwise create new one
-      let mindName = "Test_Session";
+      let mindName = userStoryMindName;
       if (!mindName) {
         const now = new Date();
         const pad = (n: number) => String(n).padStart(2, "0");

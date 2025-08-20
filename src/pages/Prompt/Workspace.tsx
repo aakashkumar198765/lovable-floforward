@@ -10,6 +10,9 @@ import {
 import { getSession } from "../../services/paramai_browsersdk";
 import { useNavigate } from "react-router-dom";
 
+// User Story Mind ID (from the Prompt component)
+const USER_STORY_MIND_ID = "033e0168-bc64-4833-bc22-bd3e3992501a";
+
 const dummyProjects = [
   {
     id: 1,
@@ -44,7 +47,7 @@ const dummyProjects = [
     category: "Website",
     remixes: 7913,
     imageUrl: "https://i.imgur.com/aJk3pA4.png",
-    avatarUrl: "https://i.imgur.com/9lJdCqI.png",
+    avatarUrl: "https://i.imgur.com/aJk3pA4.png",
     creator: "John",
   },
 ];
@@ -68,34 +71,56 @@ const Workspace: React.FC = () => {
   const [creator, setCreator] = useState("all-creators");
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<any[]>([]);
+  const [userStories, setUserStories] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"projects" | "userStories">("projects");
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const Projects = await getSession();
-        setProjects(Projects?.response);
+        // Fetch BRD projects (from default mind)
+        const brdSessions = await getSession();
+        setProjects(brdSessions?.response || []);
+
+        // Fetch User Stories (from user story mind)
+        const userStorySessions = await getSession(USER_STORY_MIND_ID);
+        setUserStories(userStorySessions?.response || []);
       } catch (error) {
-        console.error("Error fetching projects:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProjects();
+    fetchData();
   }, []);
 
   const handleProjectClick = (project: any) => {
     navigate(`/project-plan/${project?.name}/${project?.name}`);
   };
 
-  const filteredProjects = useMemo(() => {
-    let filtered = projects.filter(
-      (project) =>
-        project?.name?.startsWith("P_") &&
-        project?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  const handleUserStoryClick = (userStory: any) => {
+    // Navigate to a user story detail view or back to prompt with the story loaded
+    // For now, we'll navigate back to prompt with the story ID
+    navigate(`/prompt?story=${userStory?._id}`);
+  };
+
+  const getFilteredData = useMemo(() => {
+    const data = activeTab === "projects" ? projects : userStories;
+    
+    let filtered = data.filter((item) => {
+      const name = item?.name || "";
+      const searchMatch = name.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      if (activeTab === "projects") {
+        // Filter BRD projects by "P_" prefix
+        return name.startsWith("P_") && searchMatch;
+      } else {
+        // Filter User Stories by "US_" prefix or other user story naming
+        return (name.startsWith("US_") || name.startsWith("Test_Session")) && searchMatch;
+      }
+    });
 
     // Sort by created_at date (newest first by default)
     filtered.sort((a, b) => {
@@ -110,99 +135,349 @@ const Workspace: React.FC = () => {
     });
 
     return filtered;
-  }, [searchTerm, creator, projects, date]);
+  }, [activeTab, searchTerm, creator, projects, userStories, date]);
 
   return (
     <div className="text-gray-800 py-8 px-[4rem] w-full">
-      <div className="mx-auto shadow-lg rounded-lg p-8 border border-gray-200 w-full">
-        <h1 className="text-3xl font-bold mb-6">Projects</h1>
+      <div className="mx-auto shadow-lg rounded-lg p-6 border border-gray-200 w-full">
+        <h1 className="text-2xl font-bold mb-4">Workspace</h1>
 
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
-            <Input
-              type="text"
-              placeholder="Search projects..."
-              className="bg-white border border-gray-300 rounded-md pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500 text-gray-800 placeholder-gray-500"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              leftIcon={
-                <Icon name="search" className="w-5 h-5 text-gray-400" />
-              }
-            />
-            <Select
-              className="bg-white border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
-              value={date}
-              onChange={(value) => setDate(value as string)}
-              options={[
-                { value: "newest-first", label: "Newest first" },
-                { value: "oldest-first", label: "Oldest first" },
-              ]}
-            />
-            <Select
-              className="bg-white border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
-              value={creator}
-              onChange={(value) => setCreator(value as string)}
-              options={[
-                { value: "all-creators", label: "All creators" },
-                { value: "self", label: "Self" },
-              ]}
-            />
+        {/* Modern Pill Tab System */}
+        <div className="mb-4">
+          {/* Tab Navigation */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={() => setActiveTab("projects")}
+                className={`relative px-6 py-3 font-medium text-sm transition-all duration-300 ease-in-out ${
+                  activeTab === "projects"
+                    ? "text-blue-700 border-b-2 border-blue-600"
+                    : "text-gray-600 hover:text-gray-900 hover:border-b-2 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    activeTab === "projects" 
+                      ? "bg-blue-100 text-blue-600" 
+                      : "bg-gray-100 text-gray-500 group-hover:bg-gray-200"
+                  }`}>
+                    <Icon name="package" size="sm" />
+                  </div>
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">BRD Projects</span>
+                    <span className="text-xs text-gray-500 font-normal">
+                      Business Requirements
+                    </span>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                    activeTab === "projects"
+                      ? "bg-blue-200 text-blue-700"
+                      : "bg-gray-200 text-gray-600"
+                  }`}>
+                    {projects.filter(p => p?.name?.startsWith("P_")).length}
+                  </span>
+                </div>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab("userStories")}
+                className={`relative px-6 py-3 font-medium text-sm transition-all duration-300 ease-in-out ${
+                  activeTab === "userStories"
+                    ? "text-purple-700 border-b-2 border-purple-600"
+                    : "text-gray-600 hover:text-gray-900 hover:border-b-2 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    activeTab === "userStories" 
+                      ? "bg-purple-100 text-purple-600" 
+                      : "bg-gray-100 text-gray-500 group-hover:bg-gray-200"
+                  }`}>
+                    <Icon name="file" size="sm" />
+                  </div>
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">User Stories</span>
+                    <span className="text-xs text-gray-500 font-normal">
+                      Requirements & Features
+                    </span>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                    activeTab === "userStories"
+                      ? "bg-purple-200 text-purple-700"
+                      : "bg-gray-200 text-purple-600"
+                  }`}>
+                    {userStories.filter(us => us?.name?.startsWith("US_") || us?.name?.startsWith("Test_Session")).length}
+                  </span>
+                </div>
+              </button>
+            </div>
+            
+            {/* Quick Stats */}
+            <div className="flex items-center space-x-3 text-sm text-gray-600">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>BRD Projects</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <span>User Stories</span>
+              </div>
+            </div>
           </div>
-          {/* <a href="#" className="text-gray-600 hover:text-gray-900">
-            View All
-          </a> */}
         </div>
 
-        {filteredProjects.length === 0 ? (
-          <div className="text-center py-20 border-t border-gray-200">
+        {/* Compact Search and Filter Controls */}
+        <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-semibold text-gray-900">Search & Filters</h3>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-500">
+                {getFilteredData.length} of {
+                  activeTab === "projects" 
+                    ? projects.filter(p => p?.name?.startsWith("P_")).length
+                    : userStories.filter(us => us?.name?.startsWith("US_") || us?.name?.startsWith("Test_Session")).length
+                } items
+              </span>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 flex-1">
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Icon name="search" className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <Input
+                    type="text"
+                    placeholder={
+                      activeTab === "projects" 
+                        ? "Search BRD projects..." 
+                        : "Search user stories..."
+                    }
+                    className="pl-9 pr-4 py-2.5 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 transition-all duration-200"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm font-medium text-gray-700">Sort:</label>
+                  <Select
+                    className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    value={date}
+                    onChange={(value) => setDate(value as string)}
+                    options={[
+                      { value: "newest-first", label: "Newest first" },
+                      { value: "oldest-first", label: "Oldest first" },
+                    ]}
+                  />
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm font-medium text-gray-700">Creator:</label>
+                  <Select
+                    className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    value={creator}
+                    onChange={(value) => setCreator(value as string)}
+                    options={[
+                      { value: "all-creators", label: "All creators" },
+                      { value: "self", label: "Self" },
+                    ]}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-2 ml-4">
+              <Button
+                onClick={() => {
+                  setLoading(true);
+                  // Refetch data
+                  const fetchData = async () => {
+                    try {
+                      const brdSessions = await getSession();
+                      setProjects(brdSessions?.response || []);
+                      const userStorySessions = await getSession(USER_STORY_MIND_ID);
+                      setUserStories(userStorySessions?.response || []);
+                    } catch (error) {
+                      console.error("Error refreshing data:", error);
+                    } finally {
+                      setLoading(false);
+                    }
+                  };
+                  fetchData();
+                }}
+                variant="secondary"
+                className="px-3 py-2 text-sm font-medium border border-gray-300 hover:border-gray-400 transition-all duration-200"
+                disabled={loading}
+                iconLeft={<Icon name="refresh" size="sm" />}
+              >
+                {loading ? "Refreshing..." : "Refresh"}
+              </Button>
+              {
+                searchTerm && (
+                <Button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setDate("newest-first");
+                    setCreator("all-creators");
+                  }}
+                  variant="outline"
+                  className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-all duration-200"
+                  iconLeft={<Icon name="x" size="sm" />}
+                >
+                  Clear
+                </Button>   
+                )
+              }
+            </div>
+          </div>
+        </div>
+
+        {getFilteredData.length === 0 ? (
+          <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
             <div className="flex flex-col items-center">
-              <Icon name="package" size="lg" className="text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-800">
-                No Projects Found
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
+                activeTab === "projects" ? "bg-blue-100" : "bg-purple-100"
+              }`}>
+                <Icon 
+                  name={activeTab === "projects" ? "package" : "file"} 
+                  size="lg" 
+                  className={activeTab === "projects" ? "text-blue-600" : "text-purple-600"} 
+                />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {activeTab === "projects" ? "No BRD Projects Found" : "No User Stories Found"}
               </h3>
-              <p className="text-gray-500 mt-2 max-w-md">
-                It seems there are no projects matching your search criteria.
-                Try adjusting your filters or create a new project.
+              <p className="text-gray-600 mb-4 max-w-md text-sm">
+                {activeTab === "projects" 
+                  ? "It seems there are no BRD projects matching your search criteria. Try adjusting your filters or create a new project."
+                  : "It seems there are no user stories matching your search criteria. Try adjusting your filters or generate a new user story."
+                }
               </p>
+              <div className="flex items-center space-x-3">
+                <Button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setDate("newest-first");
+                    setCreator("all-creators");
+                  }}
+                  variant="secondary"
+                  className="px-3 py-2 text-sm"
+                  iconLeft={<Icon name="refresh" size="sm" />}
+                >
+                  Clear Filters
+                </Button>
+                <Button
+                  onClick={() => navigate("/prompt")}
+                  variant="primary"
+                  className="px-3 py-2 text-sm"
+                  iconLeft={<Icon name="plus" size="sm" />}
+                >
+                  {activeTab === "projects" ? "Create New Project" : "Generate New Story"}
+                </Button>
+              </div>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {filteredProjects.map((project, index) => (
-              <div
-                key={project._id}
-                className="bg-white rounded-lg overflow-hidden group border border-gray-200 hover:shadow-md transition-shadow duration-300"
-                onClick={() => handleProjectClick(project)}
-              >
-                <div className="relative h-48 overflow-hidden">
-                  <ProjectImageFallback
-                    projectName={project?.name || "Project"}
-                    index={index}
-                  />
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center">
-                    <div className="mr-3 flex-shrink-0 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                      <Icon name="package" className="w-4 h-4 text-gray-600" />
+          <>
+            {/* Compact Loading State */}
+            {loading && (
+              <div className="bg-white border border-gray-200 rounded-lg p-6 text-center mb-4">
+                <div className="flex flex-col items-center">
+                  <div className="relative">
+                    <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+                    <div className="absolute inset-0 w-10 h-10 border-4 border-transparent border-t-purple-600 rounded-full animate-spin" style={{ animationDelay: '0.5s' }}></div>
+                  </div>
+                  <div className="mt-3 text-gray-600">
+                    <div className="text-base font-medium">
+                      Loading {activeTab === "projects" ? "BRD projects" : "user stories"}...
                     </div>
-                    <div className="flex-1 w-0">
-                      <h3 className="text-base font-semibold truncate text-gray-900">
-                        {project?.name}
-                      </h3>
-                      {/* <p className="text-gray-600 text-sm">{project.remixes.toLocaleString()} Remixes</p> */}
+                    <div className="text-xs text-gray-500 mt-1">
+                      Please wait while we fetch the latest data
                     </div>
-                    <Badge
-                      color="primary"
-                      variant="subtle"
-                      className="ml-auto flex-shrink-0"
-                    >
-                      {"website"}
-                    </Badge>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            )}
+            
+            {/* Compact Data Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {getFilteredData.map((item, index) => (
+                <div
+                  key={item._id}
+                  className="relative group bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
+                  onClick={() => {
+                    if (activeTab === "projects") {
+                      handleProjectClick(item);
+                    } else {
+                      handleUserStoryClick(item);
+                    }
+                  }}
+                >
+                  {/* Compact Card Header with Icon */}
+                  <div className="p-3 pb-2 border-b border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        activeTab === "projects" 
+                          ? "bg-blue-100 text-blue-600" 
+                          : "bg-purple-100 text-purple-600"
+                      }`}>
+                        <Icon 
+                          name={activeTab === "projects" ? "package" : "file"} 
+                          size="sm" 
+                        />
+                      </div>
+                      <Badge
+                        color={activeTab === "projects" ? "primary" : "secondary"}
+                        variant="subtle"
+                        className="text-xs font-medium"
+                      >
+                        {activeTab === "projects" ? "BRD" : "User Story"}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Compact Card Content */}
+                  <div className="p-3">
+                    <div className="mb-2">
+                      <h3 className="font-semibold text-gray-900 text-sm mb-1 truncate group-hover:text-blue-600 transition-colors duration-200">
+                        {item?.name}
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        {item?.created_at ? new Date(item.created_at).toLocaleDateString() : 'No date'}
+                      </p>
+                    </div>
+
+                    {/* Compact Card Footer */}
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                      <div className="flex items-center space-x-1.5">
+                        <div className="w-5 h-5 bg-gray-100 rounded-full flex items-center justify-center">
+                          <Icon name="user" size="xs" className="text-gray-500" />
+                        </div>
+                        <span className="text-xs text-gray-600">
+                          {item?.creator || 'Unknown'}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center space-x-1 text-xs text-gray-500">
+                        <Icon name="clock" size="xs" />
+                        <span>
+                          {item?.updated_at ? new Date(item.updated_at).toLocaleDateString() : 'Recently'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-blue-50/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
