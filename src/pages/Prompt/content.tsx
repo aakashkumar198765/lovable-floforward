@@ -37,6 +37,20 @@ const PromptContent: React.FC<PromptContentProps> = ({
   onProceedToBRD = () => {},
   onGenerateStory = () => {},
 }) => {
+  // Debug: Log the userStory prop value
+  React.useEffect(() => {
+    console.log("🔍 PromptContent received userStory:", userStory);
+    console.log("🔍 PromptContent userStory type:", typeof userStory);
+    console.log("🔍 PromptContent userStory length:", userStory?.length);
+  }, [userStory]);
+
+  // Debug: Log when userStory changes for rendering
+  React.useEffect(() => {
+    if (userStory) {
+      console.log("🔍 PromptContent rendering user story:", userStory);
+      console.log("🔍 User story length in render:", userStory.length);
+    }
+  }, [userStory]);
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
   // Get user data from Redux store for detailed user information
@@ -345,10 +359,12 @@ const PromptContent: React.FC<PromptContentProps> = ({
                             <div className="bg-gray-50 rounded-lg p-4">
                               <div className="mb-4">
                                 {userStory ? (
-                                  <MarkdownRenderer
-                                    content={userStory}
-                                    className="text-gray-700"
-                                  />
+                                  <div>
+                                    <MarkdownRenderer
+                                      content={userStory}
+                                      className="text-gray-700"
+                                    />
+                                  </div>
                                 ) : (
                                   <span className="text-gray-500">
                                     No user story generated yet.

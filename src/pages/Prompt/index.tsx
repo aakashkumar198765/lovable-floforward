@@ -41,6 +41,13 @@ const Prompt: React.FC = () => {
 
   const userStoryMindId = "033e0168-bc64-4833-bc22-bd3e3992501a";
 
+  // Debug: Monitor userStory state changes
+  React.useEffect(() => {
+    console.log("🔍 userStory state changed to:", userStory);
+    console.log("🔍 userStory length:", userStory?.length);
+    console.log("🔍 userStory type:", typeof userStory);
+  }, [userStory]);
+
   const executeUserStoryMind = React.useCallback(
     async (userPrompt: string, previousUserStory?: string) => {
       if (!isAuthenticated) {
@@ -92,10 +99,56 @@ const Prompt: React.FC = () => {
         try {
           await streamSSE(job_id, {});
           const mindResult = await getSession(userStoryMindId, "", session_id);
+          
+          // Debug: Log the entire response to see the structure
+          console.log("🔍 Full mindResult:", JSON.stringify(mindResult, null, 2));
+          console.log("🔍 Response path:", mindResult?.response);
+          console.log("🔍 Output path:", mindResult?.response?.output);
+          console.log("🔍 Content path:", mindResult?.response?.output?.content);
+          console.log("🔍 UserStory path:", mindResult?.response?.output?.content?.UserStory);
+          
           const userStory = mindResult?.response?.output?.content?.UserStory[0];
-          setUserStory(
-            userStory?.type === "markdown" ? userStory?.content : ""
-          );
+          console.log("🔍 Extracted userStory:", userStory);
+          
+          // More robust parsing - try different response structures
+          let finalUserStory = "";
+          if (userStory?.type === "markdown" && userStory?.content) {
+            finalUserStory = userStory.content;
+          } else if (userStory?.content) {
+            // If no type specified, assume it's the content directly
+            finalUserStory = userStory.content;
+          } else if (typeof userStory === "string") {
+            // If userStory is directly a string
+            finalUserStory = userStory;
+          } else {
+            // Try alternative response paths
+            const altPaths = [
+              mindResult?.response?.UserStory?.[0]?.content,
+              mindResult?.response?.UserStory?.[0],
+              mindResult?.UserStory?.[0]?.content,
+              mindResult?.UserStory?.[0],
+              mindResult?.output?.UserStory?.[0]?.content,
+              mindResult?.output?.UserStory?.[0],
+              mindResult?.content?.UserStory?.[0]?.content,
+              mindResult?.content?.UserStory?.[0],
+              mindResult?.response?.output?.UserStory?.[0]?.content,
+              mindResult?.response?.output?.UserStory?.[0],
+            ];
+            
+            console.log("🔍 Trying alternative paths:", altPaths);
+            
+            for (const path of altPaths) {
+              if (path && typeof path === "string") {
+                finalUserStory = path;
+                console.log("🔍 Found user story in alternative path:", path);
+                break;
+              }
+            }
+          }
+          
+          console.log("🔍 Final parsed user story:", finalUserStory);
+          setUserStory(finalUserStory);
+          
         } catch (streamError) {
           console.error("User story stream error:", streamError);
         } finally {
@@ -110,16 +163,23 @@ const Prompt: React.FC = () => {
   );
 
   const handleSubmit = React.useCallback(async () => {
+    console.log("🔍 handleSubmit called with userStory:", userStory);
+    console.log("🔍 userStory type:", typeof userStory);
+    console.log("🔍 userStory length:", userStory?.length);
+    console.log("🔍 userStory truthy check:", !!userStory);
+    
     if (!isAuthenticated) {
       return navigate("/login", { replace: true });
     }
 
     // If user story is not generated yet, execute user story mind first
     if (!userStory) {
+      console.log("🔍 No user story found, executing user story mind first");
       await executeUserStoryMind(prompt);
       return;
     }
 
+    console.log("🔍 Proceeding to build BRD with user story:", userStory);
     // Proceed to build BRD
     setLoading(true);
     if (!prompt.trim()) return;
@@ -297,7 +357,7 @@ const Prompt: React.FC = () => {
       // Keep building state true to show logs with action buttons
       // setBuilding(false); // Removed - logs should stay visible
     }
-  }, [prompt]);
+  }, [prompt, userStory, executeUserStoryMind]);
 
   const handleSelectRecent = React.useCallback(
     (app: { id: string; name: string }) => {
@@ -312,11 +372,22 @@ const Prompt: React.FC = () => {
   }, [executeUserStoryMind, prompt, userStory]);
 
   const handleProceedToBRD = React.useCallback(async () => {
+    console.log("🔍 handleProceedToBRD called");
+    console.log("🔍 Current userStory state:", userStory);
+    console.log("🔍 Current showUserStory state:", showUserStory);
+    
     // Proceed to BRD building
     setShowUserStory(false);
+    console.log("🔍 Set showUserStory to false");
+    
+    // Add a small delay to ensure state updates are processed
+    await new Promise(resolve => setTimeout(resolve, 100));
+    console.log("🔍 After delay - userStory state:", userStory);
+    
     // This will trigger the BRD building process
+    console.log("🔍 Calling handleSubmit for BRD generation");
     handleSubmit();
-  }, [handleSubmit]);
+  }, [handleSubmit, userStory, showUserStory]);
 
   // Remove auto-execution - user will click button to generate story
 
