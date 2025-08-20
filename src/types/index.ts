@@ -2940,7 +2940,14 @@ export type PromptContentProps = {
   logs: LogEntry[];
   streamCompleted?: boolean;
   setStreamingCompleted?: (value: boolean) => void;
-  ProjectId : string
+  ProjectId: string;
+  // New user story props
+  userStory?: string;
+  showUserStory?: boolean;
+  userStoryLoading?: boolean;
+  onUserStoryEdit?: () => void;
+  onProceedToBRD?: () => void;
+  onGenerateStory?: () => void;
 };
 
 export interface SubState {

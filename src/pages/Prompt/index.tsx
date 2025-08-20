@@ -3,6 +3,7 @@ import PromptContent from "./content";
 import {
   executeMind,
   executeMindAndGetResults,
+  getSession,
   streamSSE,
 } from "../../services/paramai_browsersdk";
 import { useAuth } from "../../contexts/AuthContext";
@@ -32,11 +33,94 @@ const Prompt: React.FC = () => {
   >([]);
   const [project, setProject] = useState("");
 
+  // New state for user story flow
+  const [userStory, setUserStory] = useState<string>("");
+  const [showUserStory, setShowUserStory] = useState(false);
+  const [userStoryLoading, setUserStoryLoading] = useState(false);
+  const [userStoryMindName, setUserStoryMindName] = useState<string>("");
+
+  const userStoryMindId = "033e0168-bc64-4833-bc22-bd3e3992501a";
+
+  const executeUserStoryMind = React.useCallback(
+    async (userPrompt: string, previousUserStory?: string) => {
+      if (!isAuthenticated) {
+        return navigate("/login", { replace: true });
+      }
+
+      setUserStoryLoading(true);
+      setShowUserStory(true);
+
+      // For regeneration, include the previous user story context
+      const finalPrompt = userPrompt;
+
+      // Use existing mind name if regenerating, otherwise create new one
+      let mindName = "Test_Session";
+      if (!mindName) {
+        const now = new Date();
+        const pad = (n: number) => String(n).padStart(2, "0");
+        mindName = `US_${pad(now.getDate())}${pad(
+          now.getMonth() + 1
+        )}${now.getFullYear()}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+        setUserStoryMindName(mindName);
+      }
+
+      const responseStructure = {
+        api: {},
+        ui: {
+          type: "tabs",
+          tabs: [],
+          content: {},
+        },
+      };
+
+      const args = {
+        user_query: finalPrompt,
+        user_story: previousUserStory || "",
+        files: [],
+      };
+
+      try {
+        const response = await executeMind(
+          mindName,
+          args,
+          responseStructure,
+          userStoryMindId
+        );
+        const { job_id, session_id } = response;
+
+        // Start streaming logs from the event source
+        try {
+          await streamSSE(job_id, {});
+          const mindResult = await getSession(userStoryMindId, "", session_id);
+          const userStory = mindResult?.response?.output?.content?.UserStory[0];
+          setUserStory(
+            userStory?.type === "markdown" ? userStory?.content : ""
+          );
+        } catch (streamError) {
+          console.error("User story stream error:", streamError);
+        } finally {
+          setUserStoryLoading(false);
+        }
+      } catch (error) {
+        console.error("User story mind execution failed:", error);
+        setUserStoryLoading(false);
+      }
+    },
+    [isAuthenticated, navigate]
+  );
+
   const handleSubmit = React.useCallback(async () => {
     if (!isAuthenticated) {
       return navigate("/login", { replace: true });
     }
 
+    // If user story is not generated yet, execute user story mind first
+    if (!userStory) {
+      await executeUserStoryMind(prompt);
+      return;
+    }
+
+    // Proceed to build BRD
     setLoading(true);
     if (!prompt.trim()) return;
     const name = prompt.trim();
@@ -222,6 +306,20 @@ const Prompt: React.FC = () => {
     []
   );
 
+  const handleUserStoryEdit = React.useCallback(async () => {
+    // Use the current prompt to regenerate the user story
+    await executeUserStoryMind(prompt, userStory);
+  }, [executeUserStoryMind, prompt, userStory]);
+
+  const handleProceedToBRD = React.useCallback(async () => {
+    // Proceed to BRD building
+    setShowUserStory(false);
+    // This will trigger the BRD building process
+    handleSubmit();
+  }, [handleSubmit]);
+
+  // Remove auto-execution - user will click button to generate story
+
   return (
     <div className="relative bg-white h-screen">
       {/* Animated background elements */}
@@ -249,6 +347,13 @@ const Prompt: React.FC = () => {
         streamCompleted={streamCompleted}
         setStreamingCompleted={setStreamCompleted}
         ProjectId={project}
+        // New user story props
+        userStory={userStory}
+        showUserStory={showUserStory}
+        userStoryLoading={userStoryLoading}
+        onUserStoryEdit={handleUserStoryEdit}
+        onProceedToBRD={handleProceedToBRD}
+        onGenerateStory={() => executeUserStoryMind(prompt)}
       />
     </div>
   );

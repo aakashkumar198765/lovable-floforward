@@ -14,6 +14,7 @@ import { RootState } from "../../store";
 import Logs from "./Logs";
 import Workspace from "./Workspace";
 import { PromptContentProps } from "../../types";
+import MarkdownRenderer from "../../utils/MarkdownRenderer";
 
 const PromptContent: React.FC<PromptContentProps> = ({
   prompt = "",
@@ -28,6 +29,13 @@ const PromptContent: React.FC<PromptContentProps> = ({
   logs = [],
   setStreamingCompleted = () => {},
   ProjectId,
+  // New user story props
+  userStory = "",
+  showUserStory = false,
+  userStoryLoading = false,
+  onUserStoryEdit = () => {},
+  onProceedToBRD = () => {},
+  onGenerateStory = () => {},
 }) => {
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
@@ -42,7 +50,15 @@ const PromptContent: React.FC<PromptContentProps> = ({
     if (!isAuthenticated) {
       setShowLoginModal(true);
     } else {
-      onSubmit();
+      // If we're in user story mode, this button regenerates the user story
+      // If we're not in user story mode, this button starts the BRD building process
+      if (showUserStory) {
+        // This will trigger user story regeneration
+        onSubmit();
+      } else {
+        // This will start the BRD building process
+        onSubmit();
+      }
     }
   };
 
@@ -309,20 +325,107 @@ const PromptContent: React.FC<PromptContentProps> = ({
                       </div>
                     </div>
 
-                    <div className="flex justify-center">
-                      <Button
-                        onClick={handleBuildBRDClick}
-                        variant="primary"
-                        className="px-12 py-4 rounded-lg font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={!prompt.trim() || building}
-                        loading={building}
-                        iconLeft={
-                          !building ? <Icon name="arrow-right" /> : undefined
-                        }
-                      >
-                        {building ? "Building..." : "Build BRD"}
-                      </Button>
-                    </div>
+                    {/* User Story Section */}
+                    {showUserStory && (
+                      <div className="border-t border-gray-200 pt-6">
+                        <div className="mb-4">
+                          <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                            Generated User Story
+                          </h3>
+                          {userStoryLoading ? (
+                            <div className="bg-gray-50 rounded-lg p-4">
+                              <div className="flex items-center space-x-2">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                                <span className="text-gray-600">
+                                  Generating user story...
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="bg-gray-50 rounded-lg p-4">
+                              <div className="mb-4">
+                                {userStory ? (
+                                  <MarkdownRenderer
+                                    content={userStory}
+                                    className="text-gray-700"
+                                  />
+                                ) : (
+                                  <span className="text-gray-500">
+                                    No user story generated yet.
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Edit User Story Section */}
+                              <div className="space-y-3">
+                                <h4 className="text-sm font-medium text-gray-700">
+                                  Want to modify the user story? Edit the prompt
+                                  above and click "Regenerate User Story"
+                                </h4>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex justify-center space-x-4">
+                          {userStory && (
+                            <Button
+                              onClick={onProceedToBRD}
+                              variant="primary"
+                              className="px-8 py-3 rounded-lg font-semibold text-base"
+                              iconLeft={<Icon name="arrow-right" />}
+                            >
+                              Generate BRD
+                            </Button>
+                          )}
+                          <Button
+                            onClick={
+                              userStory ? onUserStoryEdit : onGenerateStory
+                            }
+                            variant="secondary"
+                            className="px-8 py-3 rounded-lg font-semibold text-base"
+                            disabled={!prompt.trim() || userStoryLoading}
+                            loading={userStoryLoading}
+                            iconLeft={
+                              !userStoryLoading ? (
+                                <Icon
+                                  name={userStory ? "refresh" : "arrow-right"}
+                                />
+                              ) : undefined
+                            }
+                          >
+                            {userStoryLoading
+                              ? "Generating..."
+                              : userStory
+                              ? "Regenerate User Story"
+                              : "Generate Story"}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Original Button (only show when no user story) */}
+                    {!showUserStory && (
+                      <div className="flex justify-center">
+                        <Button
+                          onClick={onGenerateStory}
+                          variant="primary"
+                          className="px-12 py-4 rounded-lg font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={!prompt.trim() || userStoryLoading}
+                          loading={userStoryLoading}
+                          iconLeft={
+                            !userStoryLoading ? (
+                              <Icon name="arrow-right" />
+                            ) : undefined
+                          }
+                        >
+                          {userStoryLoading
+                            ? "Generating..."
+                            : "Generate Story"}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
