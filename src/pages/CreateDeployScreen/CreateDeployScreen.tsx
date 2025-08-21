@@ -100,7 +100,7 @@ const CreateDeployScreen: React.FC = () => {
 
     // Generate mind name based on project name format
     // Project format: "P_21082025_1429" -> Mind format: "A_21082025_1429"
-    const mindName = projectName || `A_${Date.now()}`;
+    const mindName = projectName ? projectName.replace(/^P_/, 'A_') : `A_${Date.now()}`;
     
     setProject(mindName);
 
