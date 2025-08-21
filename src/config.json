@@ -5,5 +5,15 @@
         "subdomainName": "param-ai-studio",
         "portalType": "web",
         "projectId": "ai-studio"
+    },
+    "paramAiSdk": {
+        "url": "https://dev.paramai.studio:5012",
+        "shareKey": "94a5bcfa7fbcf707f434e63d7ce6c44d1e7b1bc0d45e3923ab8746feef66bcbb",
+        "userStoryMindId": "033e0168-bc64-4833-bc22-bd3e3992501a",
+        "brdMindId": "98b50fe2-54df-47f0-acee-b33f8dbeb78e",
+        "schemaMindId": "4846edec-c789-4e2a-a018-0f5e4823921e",
+        "stateMachineMindId": "0a162d01-e526-41b4-aa50-9fb1bae3bc78",
+        "syntheticDataMindId": "a3ae4c7d-8ca7-4640-8bba-fbefb9a399ab",
+        "appBuilderMindId": "98b50fe2-54df-47f0-acee-b33f8dbeb78e"
     }
 }

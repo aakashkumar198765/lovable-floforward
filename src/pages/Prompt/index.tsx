@@ -8,6 +8,7 @@ import {
 } from "../../services/paramai_browsersdk";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import config from "../../config.json";
 
 /**
  * User Story Regeneration Session Management
@@ -76,7 +77,7 @@ const Prompt: React.FC = () => {
   const [regenerationType, setRegenerationType] = useState<"same" | "edit" | null>(null);
   const [editPrompt, setEditPrompt] = useState<string>("");
 
-  const userStoryMindId = "033e0168-bc64-4833-bc22-bd3e3992501a";
+  const userStoryMindId = config.paramAiSdk.userStoryMindId;
 
   // Function to reset user story state
   const resetUserStoryState = React.useCallback(() => {

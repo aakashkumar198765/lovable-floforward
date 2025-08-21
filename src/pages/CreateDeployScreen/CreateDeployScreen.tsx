@@ -7,6 +7,7 @@ import appCreationService from "../../services/AppCreationService";
 import DemoApp from "../../components/DemoApp";
 import { executeMind, streamSSE, getSession } from "../../services/paramai_browsersdk";
 import Logs from "./Logs";
+import config from "../../config.json";
 
 interface ConversationMessage {
   id: string;
@@ -97,12 +98,10 @@ const CreateDeployScreen: React.FC = () => {
     setIsProcessing(true);
     setSessionUrl(null);
 
-    const now = new Date();
-    const pad = (n: number) => String(n).padStart(2, "0");
-    const mindName = `CD_${pad(now.getDate())}${pad(
-      now.getMonth() + 1
-    )}${now.getFullYear()}_${pad(now.getHours())}${pad(now.getMinutes())}`;
-
+    // Generate mind name based on project name format
+    // Project format: "P_21082025_1429" -> Mind format: "A_21082025_1429"
+    const mindName = projectName || `A_${Date.now()}`;
+    
     setProject(mindName);
 
     const responseStructure = {
@@ -123,15 +122,15 @@ const CreateDeployScreen: React.FC = () => {
     try {
       // Add initial log entry
       const initialLog = {
-        message: `🚀 **Starting application build...**\n- Job ID: \`${mindName}\`\n- Project: \`${projectName}\``,
+        message: `🚀 **Starting application build...**\n- Mind Name: \`${mindName}\`\n- Project: \`${projectName}\`\n- Project ID: \`${projectId}\``,
         status: "started",
         format: "markdown",
       };
       setLogs((prev) => [...prev, initialLog]);
       addLogMessage(initialLog);
 
-      // Execute the mind
-      const response = await executeMind(mindName, args, responseStructure);
+      // Execute the mind using appBuilderMindId from config
+      const response = await executeMind(mindName, args, responseStructure, config.paramAiSdk.appBuilderMindId);
       const { job_id, session_id } = response;
 
       // Add execution log
@@ -210,11 +209,9 @@ const CreateDeployScreen: React.FC = () => {
             setDeploymentStatus("completed");
             setIsProcessing(false);
 
-            // Wait a bit for session to be fully created, then fetch session to get URL
+            // Try to fetch session URL once, then show iframe regardless
             addMessage("agent", "🔍 Searching for your application URL...");
-            setTimeout(async () => {
-              await fetchSessionUrl(session_id);
-            }, 2000); // Wait 2 seconds for session to be fully created
+            await fetchSessionUrl(session_id);
           },
           onError: (error: any) => {
             console.error("Stream error:", error);
@@ -261,11 +258,12 @@ const CreateDeployScreen: React.FC = () => {
     }
   };
 
-  const fetchSessionUrl = async (sessionId: string) => {
+    const fetchSessionUrl = async (sessionId: string) => {
     try {
       console.log("🔍 Fetching session URL for sessionId:", sessionId);
       console.log("🔍 Project ID:", projectId);
       console.log("🔍 Project Name:", projectName);
+      console.log("🔍 Mind Name:", project);
       
       // First try to get the specific session by sessionId
       const specificSession = await getSession("", "", sessionId);
@@ -278,7 +276,7 @@ const CreateDeployScreen: React.FC = () => {
         return;
       }
 
-      // If no URL in specific session, try to get all sessions and find by project name
+      // If no URL in specific session, try to get all sessions and find by mind name
       const allSessions = await getSession();
       console.log("All sessions response:", allSessions);
       console.log("All sessions count:", allSessions?.response?.length || 0);
@@ -290,35 +288,30 @@ const CreateDeployScreen: React.FC = () => {
       // Try multiple ways to find the project session
       let projectSession = null;
       
-      // Method 1: Look for exact project name match
+      // Method 1: Look for exact mind name match (this should be the primary method)
       projectSession = allSessions?.response?.find(
-        (session: any) => session?.name === projectName
+        (session: any) => session?.name === project
       );
 
-      // Method 2: Look for project name in session name (partial match)
+      // Method 2: Look for exact project name match
+      if (!projectSession) {
+        projectSession = allSessions?.response?.find(
+          (session: any) => session?.name === projectName
+        );
+      }
+
+      // Method 3: Look for project name in session name (partial match)
       if (!projectSession) {
         projectSession = allSessions?.response?.find(
           (session: any) => session?.name?.includes(projectName) || projectName?.includes(session?.name)
         );
       }
 
-      // Method 3: Look for project ID in session name
+      // Method 4: Look for project ID in session name
       if (!projectSession) {
         projectSession = allSessions?.response?.find(
           (session: any) => session?.name === projectId
         );
-      }
-
-      // Method 4: Look for the most recent session that might be our build
-      if (!projectSession && allSessions?.response?.length > 0) {
-        // Sort by creation time if available, otherwise take the last one
-        const sortedSessions = allSessions.response.sort((a: any, b: any) => {
-          if (a.createdAt && b.createdAt) {
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-          }
-          return 0;
-        });
-        projectSession = sortedSessions[0];
       }
 
       console.log("Found project session:", projectSession);
@@ -330,14 +323,9 @@ const CreateDeployScreen: React.FC = () => {
         // Log the session structure to debug
         console.log("Session structure:", projectSession);
         
-        // If no URL found, try again after a delay (session might still be processing)
+        // Only show message once, no retries
         if (!sessionUrl) {
-          addMessage("agent", `⏳ Application URL not ready yet. Retrying in 5 seconds...`);
-          setTimeout(async () => {
-            await fetchSessionUrl(sessionId);
-          }, 5000);
-        } else {
-          addMessage("agent", `✅ Build completed! The application is ready in the preview panel.`);
+          addMessage("agent", `✅ Build completed! The application is ready in the preview panel with fallback content.`);
         }
       }
     } catch (error) {
@@ -550,7 +538,7 @@ const CreateDeployScreen: React.FC = () => {
               {deploymentStatus === "creating" &&
                 "AI is building your application from the project plan"}
               {deploymentStatus === "completed" &&
-                "Your application is ready to use"}
+                "Your application has been built and is ready to use"}
               {deploymentStatus === "failed" &&
                 "Build failed - let's try again"}
               {deploymentStatus === "idle" &&

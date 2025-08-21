@@ -3,9 +3,11 @@
  * Provides mind execution functions for React environment
  */
 
+// Import config for dynamic mind IDs and share keys
+import config from '../config.json';
 
-const defaultMindId = "98b50fe2-54df-47f0-acee-b33f8dbeb78e";
-const defaultShareKey = "94a5bcfa7fbcf707f434e63d7ce6c44d1e7b1bc0d45e3923ab8746feef66bcbb"; 
+const defaultMindId = config.paramAiSdk.brdMindId;
+const defaultShareKey = config.paramAiSdk.shareKey; 
 
 /**
  * Execute mind using browser fetch API
@@ -25,7 +27,7 @@ async function executeMind(mindName, args, responseStructure , mindID, session_i
   
   formData.append('response_structure', JSON.stringify(responseStructure));
 
-  const response = await fetch('https://dev.paramai.studio:5012/mindflow/execute_mind', {
+  const response = await fetch(`${config.paramAiSdk.url}/mindflow/execute_mind`, {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
@@ -50,7 +52,7 @@ async function executeMind(mindName, args, responseStructure , mindID, session_i
  * If sessionId is provided, gets one session; otherwise, gets all sessions
  */
 async function fetchSessions(mindId, shareKey, sessionId = null) {
-  const url = sessionId ? `https://dev.paramai.studio:5012/mindflow/${mindId ? mindId : defaultMindId}/${sessionId}/get_session` : `https://dev.paramai.studio:5012/mindflow/${mindId ? mindId : defaultMindId}/get_session`;
+  const url = sessionId ? `${config.paramAiSdk.url}/mindflow/${mindId ? mindId : defaultMindId}/${sessionId}/get_session` : `${config.paramAiSdk.url}/mindflow/${mindId ? mindId : defaultMindId}/get_session`;
 
   const response = await fetch(url, {
     headers: {
@@ -95,7 +97,7 @@ async function streamSSE(jobID, options = {}) {
       try {
         // Note: EventSource has CORS limitations, so this might not work for all URLs
         // For production, you might need a proxy or server-side implementation
-        const eventSource = new EventSource(`https://dev.paramai.studio:5013/events/${jobID}?check=1`);
+        const eventSource = new EventSource(`${config.paramAiSdk.url.replace(':5012', ':5013')}/events/${jobID}?check=1`);
         
         eventSource.onmessage = (event) => {
           try {

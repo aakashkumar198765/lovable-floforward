@@ -30,6 +30,7 @@ import {
 } from "../services/paramai_browsersdk";
 import ValidUtils from "../utils/ValidUtils";
 import { LoadingState, Spinner, Icon } from "../components";
+import config from "../config.json";
 
 const nodeColor = (node: any) => {
   // First check if node has style with backgroundColor
@@ -60,10 +61,11 @@ const nodeColor = (node: any) => {
   return "#f1f5f9";
 };
 
+// Use config for mind IDs instead of hardcoded values
 const mindsConfig = {
-  schemaAnalysis: "4846edec-c789-4e2a-a018-0f5e4823921e",
-  jsonOutput: "0a162d01-e526-41b4-aa50-9fb1bae3bc78",
-  syntheticData: "a3ae4c7d-8ca7-4640-8bba-fbefb9a399ab",
+  schemaAnalysis: config.paramAiSdk.schemaMindId,
+  jsonOutput: config.paramAiSdk.stateMachineMindId,
+  syntheticData: config.paramAiSdk.syntheticDataMindId,
 };
 
 const ProjectPlanScreen: React.FC = () => {

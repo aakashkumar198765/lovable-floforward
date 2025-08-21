@@ -9,9 +9,10 @@ import {
 } from "../../components/atoms";
 import { getSession } from "../../services/paramai_browsersdk";
 import { useNavigate } from "react-router-dom";
+import config from "../../config.json";
 
-// User Story Mind ID (from the Prompt component)
-const USER_STORY_MIND_ID = "033e0168-bc64-4833-bc22-bd3e3992501a";
+// User Story Mind ID (from config)
+const USER_STORY_MIND_ID = config.paramAiSdk.userStoryMindId;
 
 const dummyProjects = [
   {
