@@ -337,7 +337,7 @@ const CreateDeployScreen: React.FC = () => {
         },
       };
 
-      const args = {
+      const args: any = {
         project_id: projectId,
         project_name: projectName,
         user_prompt: `Build ${workflowName}`,
@@ -355,6 +355,9 @@ const CreateDeployScreen: React.FC = () => {
         session_id: existingSessionId
       });
 
+      // Add codegen_id to args
+      args.codegen_id = mindName.replace(/^(US|P|A)/, 'P');
+      
       const response = await executeMind(
         mindName, 
         args, 
@@ -621,7 +624,7 @@ const CreateDeployScreen: React.FC = () => {
       },
     };
 
-    const args = {
+    const args: any = {
       project_id: projectId,
       project_name: projectName,
       user_prompt: isRebuild ? "Rebuild Application" : undefined,
@@ -651,6 +654,9 @@ const CreateDeployScreen: React.FC = () => {
         isRebuild,
         stored_session_id: sessionId
       });
+      
+      // Add codegen_id to args
+      args.codegen_id = mindName.replace(/^(US|P|A)/, 'P');
       
       const response = await executeMind(
         mindName, 
