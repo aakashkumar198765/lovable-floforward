@@ -15,6 +15,9 @@ const SchemaPreview = ({ schema, stateName }) => {
     );
   }
 
+  // Normalize schema for array types
+  const normalizedSchema = schema.type === 'array' ? schema.items : schema;
+
   const renderProperty = (propKey, property, groupKey) => {
     const getTypeColor = (type) => {
       switch (type) {
@@ -120,18 +123,25 @@ const SchemaPreview = ({ schema, stateName }) => {
     <div className="bg-white rounded-lg border border-gray-200 p-6">
       <div className="flex items-center justify-end mb-6">
         <Badge variant="outline" className="text-xs">
-          {Object.keys(schema.properties || {}).length} groups
+          {Object.keys(normalizedSchema.properties || {}).length} properties
         </Badge>
       </div>
 
-      {schema.order && schema.order.length > 0 ? (
+      {/* Case 1: Multi-group schema with 'order' */}
+      {normalizedSchema.order && normalizedSchema.order.length > 0 ? (
         <div>
-          {schema.order.map(groupKey => {
-            const group = schema.properties[groupKey];
+          {normalizedSchema.order.map(groupKey => {
+            const group = normalizedSchema.properties[groupKey];
             return group ? renderGroup(groupKey, group) : null;
           })}
         </div>
+      ) : /* Case 2 & 3: Single-group object or array schema */
+      normalizedSchema.properties && Object.keys(normalizedSchema.properties).length > 0 ? (
+        <div>
+          {renderGroup(normalizedSchema.title || schema.title || stateName, normalizedSchema)}
+        </div>
       ) : (
+        /* No properties found */
         <div className="text-center py-8">
           <p className="text-gray-500">No schema structure available</p>
         </div>
@@ -140,4 +150,4 @@ const SchemaPreview = ({ schema, stateName }) => {
   );
 };
 
-export default SchemaPreview; 
+export default SchemaPreview;
