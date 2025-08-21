@@ -307,7 +307,7 @@ const Prompt: React.FC = () => {
         },
       };
 
-      const args = {
+      const args: any = {
         user_query: finalPrompt,
         user_story: previousUserStory || "",
         files: [],
@@ -338,6 +338,9 @@ const Prompt: React.FC = () => {
           console.log("🔄 userStoryMindId:", userStoryMindId);
           console.log("🔄 userStorySessionId:", userStorySessionId);
           
+          // Add codegen_id to args
+          args.codegen_id = mindName.replace(/^(US|P|A)/, 'P');
+          
           response = await executeMind(
             mindName, // Same mind name for consistency
             args,
@@ -361,6 +364,9 @@ const Prompt: React.FC = () => {
           console.log("🆕 args:", args);
           console.log("🆕 responseStructure:", responseStructure);
           console.log("🆕 userStoryMindId:", userStoryMindId);
+          
+          // Add codegen_id to args
+          args.codegen_id = mindName.replace(/^(US|P|A)/, 'P');
           
           response = await executeMind(
             mindName,
@@ -534,7 +540,7 @@ const Prompt: React.FC = () => {
         content: {},
       },
     };
-    const args = {
+    const args: any = {
       user_query: prompt,
       files: [],
     };
@@ -542,6 +548,9 @@ const Prompt: React.FC = () => {
     try {
       // Execute the mind and get job_id
       setProject(mindName);
+      
+      // Add codegen_id to args
+      args.codegen_id = mindName.replace(/^(US|P|A)/, 'P');
       
       // For BRD creation, we need to pass the mindID and undefined session_id for new session
       const response = await executeMind(

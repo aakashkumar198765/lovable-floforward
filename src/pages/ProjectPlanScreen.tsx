@@ -151,10 +151,13 @@ const ProjectPlanScreen: React.FC = () => {
             content: {},
           },
         };
-        const args = {
+        const args: any = {
           workflow_tree: getBrdContent(),
           files: [],
         };
+        // Add codegen_id to args
+        args.codegen_id = mindName?.replace(/^(US|P|A)/, 'P') || mindName;
+        
         const schemaWorkflowExecute = await executeMind(
           mindName,
           args,
@@ -173,12 +176,15 @@ const ProjectPlanScreen: React.FC = () => {
         setSchemaWorkflow(schemaWorkflowResponse?.response);
 
         // next just take schemaWorkflow details and brd details to run plans
-        const planArgs = {
+        const planArgs: any = {
           csv_input: getWorkflowSchemaCsv(schemaWorkflowResponse?.response),
           workflow_tree: getBrdContent(),
           files: [],
         };
 
+        // Add codegen_id to planArgs
+        planArgs.codegen_id = mindName?.replace(/^(US|P|A)/, 'P') || mindName;
+        
         const planExecution = await executeMind(
           mindName,
           planArgs,
@@ -232,11 +238,14 @@ const ProjectPlanScreen: React.FC = () => {
             content: {},
           },
         };
-        const args = {
+        const args: any = {
           prompts: getBrdContent(),
           csv_file: getWorkflowSchemaCsv(schemaWorkflow),
           n_instances: 1,
         };
+        // Add codegen_id to args
+        args.codegen_id = mindName?.replace(/^(US|P|A)/, 'P') || mindName;
+        
         const previewExecute = await executeMind(
           mindName,
           args,
@@ -1113,7 +1122,7 @@ const ProjectPlanScreen: React.FC = () => {
       };
 
       let sessionId = "";
-      let args = {};
+      let args: any = {};
       let mindId = "";
 
       // Determine the mind to rerun based on active tab
@@ -1157,6 +1166,9 @@ const ProjectPlanScreen: React.FC = () => {
           throw new Error("Invalid active tab for rerun");
       }
 
+      // Add codegen_id to args
+      args.codegen_id = mindName?.replace(/^(US|P|A)/, 'P') || mindName;
+      
       // Execute the mind with the appropriate parameters
       const execution = await executeMind(
         mindName,

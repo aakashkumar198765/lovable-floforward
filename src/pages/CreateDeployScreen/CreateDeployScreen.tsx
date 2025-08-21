@@ -337,10 +337,9 @@ const CreateDeployScreen: React.FC = () => {
         },
       };
 
-      const args = {
-        project_id: projectId,
-        project_name: projectName,
-        user_prompt: `Build ${workflowName}`,
+      const args: any = {
+        codegen_id: mindName.replace(/^(US|P|A)/, 'P'),
+        user_query: `Build ${workflowName}`,
         files: [],
       };
 
@@ -351,10 +350,10 @@ const CreateDeployScreen: React.FC = () => {
         args,
         responseStructure,
         mindId: config.paramAiSdk.appBuilderMindId,
-        user_prompt: workflowName,
+        user_query: `Build ${workflowName}`,
         session_id: existingSessionId
       });
-
+      
       const response = await executeMind(
         mindName, 
         args, 
@@ -621,10 +620,9 @@ const CreateDeployScreen: React.FC = () => {
       },
     };
 
-    const args = {
-      project_id: projectId,
-      project_name: projectName,
-      user_prompt: isRebuild ? "Rebuild Application" : undefined,
+    const args: any = {
+      codegen_id: mindName.replace(/^(US|P|A)/, 'P'),
+      user_query: isRebuild ? "Rebuild Application" : "Build Application",
       files: [],
     };
 
@@ -647,10 +645,13 @@ const CreateDeployScreen: React.FC = () => {
         responseStructure,
         mindId: config.paramAiSdk.appBuilderMindId,
         session_id: sessionIdToUse,
-        user_prompt: isRebuild ? "Rebuild Application" : undefined,
+        user_query: isRebuild ? "Rebuild Application" : "Build Application",
         isRebuild,
         stored_session_id: sessionId
       });
+      
+      // Add codegen_id to args
+      args.codegen_id = mindName.replace(/^(US|P|A)/, 'P');
       
       const response = await executeMind(
         mindName, 
