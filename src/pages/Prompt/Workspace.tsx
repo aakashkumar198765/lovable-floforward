@@ -123,8 +123,21 @@ const Workspace: React.FC = () => {
         // Filter BRD projects by "P_" prefix
         return name.startsWith("P_") && searchMatch;
       } else {
-        // Filter User Stories - show ONLY stories starting with "US_"
-        return name.startsWith("US_") && searchMatch;
+        // Filter User Stories - show ONLY stories starting with "US_" that don't have corresponding BRD projects
+        if (!name.startsWith("US_") || !searchMatch) {
+          return false;
+        }
+        
+        // Check if a corresponding BRD project exists (US_ replaced with P_)
+        const correspondingBrdName = name.replace("US_", "P_");
+        const hasBrdProject = projects.some(project => project?.name === correspondingBrdName);
+        
+        if (hasBrdProject) {
+          console.log("🔒 Hiding user story with existing BRD:", name, "→", correspondingBrdName);
+          return false; // Hide user stories that already have BRD projects
+        }
+        
+        return true; // Show user stories without BRD projects
       }
     });
 
@@ -142,6 +155,25 @@ const Workspace: React.FC = () => {
 
     return filtered;
   }, [activeTab, searchTerm, creator, projects, userStories, date]);
+
+  // Helper function to get available user stories count (excluding those with BRD projects)
+  const getAvailableUserStoriesCount = useMemo(() => {
+    const availableUserStories = userStories.filter((us: any) => {
+      const name = us?.name || "";
+      if (!name.startsWith("US_")) return false;
+      
+      // Check if corresponding BRD project exists
+      const correspondingBrdName = name.replace("US_", "P_");
+      const hasBrdProject = projects.some((project: any) => project?.name === correspondingBrdName);
+      
+      return !hasBrdProject; // Only count user stories without BRD projects
+    });
+    
+    console.log("📊 Available user stories (without BRD):", availableUserStories.length);
+    console.log("📊 Total user stories:", userStories.filter((us: any) => us?.name?.startsWith("US_")).length);
+    
+    return availableUserStories.length;
+  }, [userStories, projects]);
 
   return (
     <div className="text-gray-800 py-8 px-[4rem] w-full">
@@ -180,7 +212,7 @@ const Workspace: React.FC = () => {
                       ? "bg-purple-200 text-purple-700"
                       : "bg-gray-200 text-purple-600"
                   }`}>
-                    {userStories.filter((us: any) => us?.name?.startsWith("US_")).length}
+                    {getAvailableUserStoriesCount}
                   </span>
                 </div>
               </button>
@@ -241,7 +273,7 @@ const Workspace: React.FC = () => {
                 {getFilteredData.length} of {
                   activeTab === "projects" 
                     ? projects.filter((p: any) => p?.name?.startsWith("P_")).length
-                    : userStories.filter((us: any) => us?.name?.startsWith("US_")).length
+                    : getAvailableUserStoriesCount
                 } items
               </span>
             </div>
@@ -465,7 +497,7 @@ const Workspace: React.FC = () => {
                           <Icon name="user" size="xs" className="text-gray-500" />
                         </div>
                         <span className="text-xs text-gray-600">
-                          {item?.creator || 'Unknown'}
+                          {item?.creator || 'System'}
                         </span>
                       </div>
                       

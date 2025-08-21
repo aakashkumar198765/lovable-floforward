@@ -510,11 +510,21 @@ const Prompt: React.FC = () => {
     setBuildingAppName(name);
     setLogs([]);
 
-    const now = new Date();
-    const pad = (n: number) => String(n).padStart(2, "0");
-    const mindName = `P_${pad(now.getDate())}${pad(
-      now.getMonth() + 1
-    )}${now.getFullYear()}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+    // Create BRD project name based on user story session name
+    let mindName;
+    if (userStoryMindName && userStoryMindName.startsWith("US_")) {
+      // Replace "US_" with "P_" to maintain connection between user story and BRD
+      mindName = userStoryMindName.replace("US_", "P_");
+      console.log("🔗 Creating BRD project linked to user story:", userStoryMindName, "→", mindName);
+    } else {
+      // Fallback to old naming pattern if no user story session
+      const now = new Date();
+      const pad = (n: number) => String(n).padStart(2, "0");
+      mindName = `P_${pad(now.getDate())}${pad(
+        now.getMonth() + 1
+      )}${now.getFullYear()}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+      console.log("⚠️ No user story session found, using fallback BRD naming:", mindName);
+    }
     const responseStructure = {
       api: {},
       ui: {
@@ -531,8 +541,22 @@ const Prompt: React.FC = () => {
     try {
       // Execute the mind and get job_id
       setProject(mindName);
-      const response = await executeMind(mindName, args, responseStructure);
+      
+      // For BRD creation, we need to pass the mindID and undefined session_id for new session
+      const response = await executeMind(
+        mindName,           // BRD project name (P_...)
+        args,               // User query and files
+        responseStructure,  // Response structure
+        undefined,          // Use default mind ID for BRD creation
+        undefined           // No session_id for new BRD session
+      );
+      
       const { job_id, session_id } = response;
+      
+      console.log("🔍 BRD creation response:", response);
+      console.log("🔍 job_id:", job_id);
+      console.log("🔍 session_id:", session_id);
+      console.log("🔍 session_id type:", typeof session_id);
 
       // Add a log entry for the API call
       setLogs((prev) => [
@@ -540,7 +564,7 @@ const Prompt: React.FC = () => {
         {
           message: `\`[API]\` **Connected to build service...**  
 - Job ID: \`${job_id}\`  
-- Session: \`${session_id}\``,
+- Session: \`${session_id || 'New Session'}\``,
           status: "started",
           format: "markdown",
         },
@@ -679,7 +703,7 @@ const Prompt: React.FC = () => {
       // Keep building state true to show logs with action buttons
       // setBuilding(false); // Removed - logs should stay visible
     }
-  }, [prompt, userStory, executeUserStoryMind]);
+  }, [prompt, userStory, executeUserStoryMind, userStoryMindName]);
 
   const handleSelectRecent = React.useCallback(
     (app: { id: string; name: string }) => {

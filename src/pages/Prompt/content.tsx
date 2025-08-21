@@ -482,17 +482,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
 
                         {/* Action Buttons */}
                         <div className="flex justify-center space-x-4">
-                          {userStory && !userStoryLoading && !userStoryLoadingExisting && (
-                            <Button
-                              onClick={onProceedToBRD}
-                              variant="primary"
-                              className="px-8 py-3 rounded-lg font-semibold text-base"
-                              iconLeft={<Icon name="arrow-right" />}
-                            >
-                              Generate BRD
-                            </Button>
-                          )}
-                          {!regenerationType && (
+                        {!regenerationType && (
                             <Button
                               onClick={
                                 userStory ? onUserStoryEdit : onGenerateStory
@@ -503,7 +493,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
                               loading={userStoryLoading || userStoryLoadingExisting}
                               iconLeft={
                                 !userStoryLoading && !userStoryLoadingExisting ? (
-                                  <Icon name="arrow-right" />
+                                  <Icon name="refresh" />
                                 ) : undefined
                               }
                             >
@@ -512,6 +502,16 @@ const PromptContent: React.FC<PromptContentProps> = ({
                                 : userStory
                                 ? "Regenerate User Story"
                                 : "Generate User Story"}
+                            </Button>
+                          )}
+                          {userStory && !userStoryLoading && !userStoryLoadingExisting && (
+                            <Button
+                              onClick={onProceedToBRD}
+                              variant="primary"
+                              className="px-8 py-3 rounded-lg font-semibold text-base"
+                              iconLeft={<Icon name="arrow-right" />}
+                            >
+                              Generate BRD
                             </Button>
                           )}
                         </div>

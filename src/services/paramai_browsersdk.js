@@ -17,7 +17,12 @@ async function executeMind(mindName, args, responseStructure , mindID, session_i
   formData.append('is_default_ui_disabled', false);
   formData.append('args', JSON.stringify(args));
   formData.append('mind_id', mindID ? mindID : defaultMindId);
-  formData.append('session_id', session_id);
+  
+  // Only append session_id if it's provided (not undefined or null)
+  if (session_id) {
+    formData.append('session_id', session_id);
+  }
+  
   formData.append('response_structure', JSON.stringify(responseStructure));
 
   const response = await fetch('https://dev.paramai.studio:5012/mindflow/execute_mind', {
