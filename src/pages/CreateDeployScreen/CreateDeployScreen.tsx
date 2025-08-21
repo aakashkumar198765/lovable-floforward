@@ -42,6 +42,10 @@ const CreateDeployScreen: React.FC = () => {
   const [streamCompleted, setStreamCompleted] = useState(false);
   const [project, setProject] = useState("");
   const [sessionUrl, setSessionUrl] = useState<string | null>(null);
+  const [isRebuilding, setIsRebuilding] = useState(false);
+  const [stateMachineWorkflows, setStateMachineWorkflows] = useState<string[]>([]);
+  const [stateMachineSessionId, setStateMachineSessionId] = useState<string | null>(null);
+  const [currentlyBuildingWorkflow, setCurrentlyBuildingWorkflow] = useState<string | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const addMessage = (
@@ -66,6 +70,37 @@ const CreateDeployScreen: React.FC = () => {
     addMessage(messageType, logEntry.message);
   };
 
+  // Handle workflow selection
+  const handleWorkflowSelect = (workflowName: string) => {
+    // Prevent selection if already building a workflow
+    if (currentlyBuildingWorkflow) {
+      addMessage("agent", `⚠️ **Workflow in progress**: Currently building ${currentlyBuildingWorkflow}. Please wait for it to complete before selecting another workflow.`);
+      return;
+    }
+
+    console.log("🔍 Workflow selected:", workflowName);
+    
+    // Create the same format as the button text
+    const workflowText = workflowName.toLowerCase().includes('workflow') ? workflowName : `${workflowName} workflow`;
+    const fullMessage = `Build ${workflowText}`;
+    
+    // Set the currently building workflow
+    setCurrentlyBuildingWorkflow(workflowText);
+    
+    // Add the user message to chat immediately
+    addMessage("user", fullMessage);
+    
+    // Add a message to show the workflow was selected
+    addMessage("agent", `✅ **Workflow Selected:** ${workflowText}\n\nExecuting this workflow for your application...`);
+    
+    // Clear the input field
+    setUserInput("");
+    
+    // Directly execute the workflow
+    executeWorkflow(workflowText);
+  };
+
+  // Handle user message with workflow support
   const handleUserMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userInput.trim() || isAgentTyping) return;
@@ -75,12 +110,120 @@ const CreateDeployScreen: React.FC = () => {
 
     addMessage("user", message);
     
-    // Simple response for user messages
+    // Check if this is a workflow-related message
+    if (message.toLowerCase().startsWith("build ")) {
+      // Extract workflow name from the message - capture everything after "Build "
+      const workflowMatch = message.match(/^build\s+(.+)/i);
+      if (workflowMatch) {
+        const workflowName = workflowMatch[1].trim();
+        console.log("🔍 Executing workflow:", workflowName);
+        
+        // Execute the mind with the selected workflow
+        executeWorkflow(workflowName);
+        return;
+      }
+    }
+    
+    // Simple response for other user messages
     setIsAgentTyping(true);
     setTimeout(() => {
       setIsAgentTyping(false);
       addMessage("agent", "I'm currently building your application. Once it's ready, you'll be able to interact with it in the preview panel.");
     }, 1000);
+  };
+
+  // Execute workflow using executeMind
+  const executeWorkflow = async (workflowName: string) => {
+    try {
+      setIsAgentTyping(true);
+      addMessage("agent", `🚀 **Executing Workflow:** ${workflowName}\n\nI'm now executing this workflow for your application...`);
+      
+      const mindName = projectName ? 
+        (projectName.startsWith("P_") ? projectName.replace(/^P_/, 'A_') : `A_${projectName}`) 
+        : `A_${Date.now()}`;
+      
+      const responseStructure = {
+        api: {},
+        ui: {
+          type: "tabs",
+          tabs: [],
+          content: {},
+        },
+      };
+
+      const args = {
+        project_id: projectId,
+        project_name: projectName,
+        user_prompt: `Build ${workflowName}`,
+        files: [],
+      };
+
+      console.log(`🔧 Executing workflow with parameters:`, {
+        mindName,
+        args,
+        responseStructure,
+        mindId: config.paramAiSdk.appBuilderMindId,
+        user_prompt: workflowName
+      });
+
+      const response = await executeMind(
+        mindName, 
+        args, 
+        responseStructure, 
+        config.paramAiSdk.appBuilderMindId
+      );
+
+      const { job_id, session_id } = response;
+      
+      addMessage("agent", `⚡ **Workflow execution initiated**\n- Job ID: \`${job_id}\`\n- Session: \`${session_id}\``);
+
+      // Start streaming logs for the workflow execution
+      try {
+        await streamSSE(job_id, {
+          onEvent: (data: any) => {
+            let message = "";
+            if (typeof data === "object" && data !== null) {
+              message = data.message || data.text || JSON.stringify(data);
+            } else if (typeof data === "string") {
+              try {
+                const parsed = JSON.parse(data);
+                message = parsed.message || parsed.text || data;
+              } catch (e) {
+                message = data;
+              }
+            }
+
+            if (message) {
+              addMessage("agent", `📝 ${message}`);
+            }
+          },
+          onComplete: async (data: any) => {
+            console.log("Workflow execution completed:", data);
+            addMessage("agent", `✅ **Workflow execution completed successfully!**\n\nYour application has been updated with the ${workflowName} workflow.`);
+            setIsAgentTyping(false);
+            setCurrentlyBuildingWorkflow(null); // Clear the currently building workflow
+          },
+          onError: (error: any) => {
+            console.error("Workflow execution error:", error);
+            addMessage("agent", `❌ **Workflow execution failed**\n- Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+            setIsAgentTyping(false);
+            setCurrentlyBuildingWorkflow(null); // Clear the currently building workflow
+          },
+          maxRetries: 3,
+          retryDelay: 2000,
+        });
+      } catch (streamError) {
+        console.error("Workflow stream error:", streamError);
+        addMessage("agent", `❌ **Workflow stream connection failed**\n- Error: ${streamError instanceof Error ? streamError.message : "Unknown error"}`);
+        setIsAgentTyping(false);
+        setCurrentlyBuildingWorkflow(null); // Clear the currently building workflow
+      }
+    } catch (error) {
+      console.error("Workflow execution failed:", error);
+      addMessage("agent", `❌ **Workflow execution failed**\n- Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+      setIsAgentTyping(false);
+      setCurrentlyBuildingWorkflow(null); // Clear the currently building workflow
+    }
   };
 
   const handleBackToPrompt = () => {
@@ -91,16 +234,160 @@ const CreateDeployScreen: React.FC = () => {
     );
   };
 
-  const createApplication = async () => {
+  // Check for existing sessions first
+  const checkExistingSessions = async () => {
+    try {
+      console.log("🔍 Checking for existing sessions...");
+      console.log("🔍 Project Name:", projectName);
+      console.log("🔍 Project ID:", projectId);
+      
+      // Add initial message
+      addMessage("agent", "🔍 Checking for existing application sessions...");
+
+      // Get all sessions
+      const allSessions = await getSession(config.paramAiSdk.appBuilderMindId);
+      console.log("All sessions response:", allSessions);
+
+      if (!allSessions?.response || !Array.isArray(allSessions.response)) {
+        console.log("No sessions found or invalid response");
+        return false;
+      }
+
+      // Filter sessions starting with "A_"
+      const appSessions = allSessions.response.filter((session: any) => 
+        session?.name && session.name.startsWith("A_")
+      );
+      console.log("App sessions (starting with A_):", appSessions);
+
+      // Generate the expected mind name based on project name
+      // Project format: "P_21082025_1429" -> Mind format: "A_21082025_1429"
+      const expectedMindName = projectName ? 
+        (projectName.startsWith("P_") ? projectName.replace(/^P_/, 'A_') : `A_${projectName}`) 
+        : null;
+      console.log("Expected mind name:", expectedMindName);
+
+      if (!expectedMindName) {
+        console.log("No expected mind name generated");
+        return false;
+      }
+
+      // Find matching session
+      const matchingSession = appSessions.find((session: any) => 
+        session?.name === expectedMindName
+      );
+
+      if (matchingSession) {
+        console.log("✅ Found matching session:", matchingSession);
+        setProject(expectedMindName);
+        
+        // If session has a URL, set it
+        if (matchingSession.url) {
+          setSessionUrl(matchingSession.url);
+          addMessage("agent", `🎉 Found existing application! Your application is ready to use.`);
+        } else {
+          addMessage("agent", `✅ Found existing application session: ${expectedMindName}. Loading preview...`);
+        }
+        
+        setDeploymentStatus("completed");
+        setIsProcessing(false);
+        
+        // Fetch state machine workflows after finding the session
+        await fetchStateMachineWorkflows();
+        
+        return true;
+      } else {
+        console.log("No matching session found, will create new one");
+        addMessage("agent", "🔍 No existing application found. Starting to build a new one...");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error checking existing sessions:", error);
+      return false;
+    }
+  };
+
+  // Fetch state machine sessions and extract workflows
+  const fetchStateMachineWorkflows = async () => {
+    try {
+      console.log("🔍 Fetching state machine workflows for project:", projectName);
+      
+      // Get state machine sessions using the stateMachineMindId from config
+      const stateMachineSessions = await getSession(config.paramAiSdk.stateMachineMindId);
+      console.log("State machine sessions response:", stateMachineSessions);
+      
+      if (stateMachineSessions?.response && Array.isArray(stateMachineSessions.response)) {
+        // Find session that matches the project name
+        const matchingStateMachineSession = stateMachineSessions.response.find(
+          (session: any) => session?.name === projectName
+        );
+        
+        if (matchingStateMachineSession) {
+          console.log("✅ Found matching state machine session:", matchingStateMachineSession);
+          setStateMachineSessionId(matchingStateMachineSession._id);
+          
+          // Get the full session data using session ID
+          const fullStateMachineSession = await getSession(
+            config.paramAiSdk.stateMachineMindId,
+            "",
+            matchingStateMachineSession._id
+          );
+          console.log("Full state machine session:", fullStateMachineSession);
+          
+          // Extract workflows from the session response
+          if (fullStateMachineSession?.response?.output?.content?.["WorkflowResponse"]?.[0]) {
+            const workflowResponse = fullStateMachineSession.response.output.content["WorkflowResponse"][0];
+            if (workflowResponse?.type === "markdown") {
+              // Parse the JSON content to extract workflow names
+              try {
+                const workflowContent = workflowResponse.content.replace(/^```json\n|```$/g, "");
+                const parsedWorkflows = JSON.parse(workflowContent);
+                
+                if (parsedWorkflows?.consolidated_state_machines) {
+                  const workflowNames = Object.values(parsedWorkflows.consolidated_state_machines)
+                    .map((sm: any) => sm?.Name)
+                    .filter(Boolean);
+                  
+                  console.log("📊 Extracted workflow names:", workflowNames);
+                  setStateMachineWorkflows(workflowNames);
+                  
+                  if (workflowNames.length > 0) {
+                    addMessage("agent", `📋 **Available Workflows:**\nI found ${workflowNames.length} workflow(s) from your project plan. You can click on any workflow name below to use it in your application.`);
+                  }
+                }
+              } catch (parseError) {
+                console.error("Error parsing workflow response:", parseError);
+              }
+            }
+          }
+        } else {
+          console.log("No matching state machine session found for project:", projectName);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching state machine workflows:", error);
+    }
+  };
+
+  const createApplication = async (isRebuild = false, existingSessionId?: string) => {
+    console.log(`🚀 createApplication called - isRebuild: ${isRebuild}, existingSessionId: ${existingSessionId || 'none'}`);
+    
+    setIsRebuilding(isRebuild);
     setDeploymentStatus("creating");
     setMessages([]);
     setLogs([]);
     setIsProcessing(true);
     setSessionUrl(null);
 
+    // Add initial message for rebuild vs new build
+    if (isRebuild) {
+      addMessage("agent", `🔄 **Starting application rebuild...**\nThis will update your existing application with the latest changes.`);
+    }
+
     // Generate mind name based on project name format
     // Project format: "P_21082025_1429" -> Mind format: "A_21082025_1429"
-    const mindName = projectName ? projectName.replace(/^P_/, 'A_') : `A_${Date.now()}`;
+    const mindName = projectName ? 
+      (projectName.startsWith("P_") ? projectName.replace(/^P_/, 'A_') : `A_${projectName}`) 
+      : `A_${Date.now()}`;
     
     setProject(mindName);
 
@@ -122,7 +409,7 @@ const CreateDeployScreen: React.FC = () => {
     try {
       // Add initial log entry
       const initialLog = {
-        message: `🚀 **Starting application build...**\n- Mind Name: \`${mindName}\`\n- Project: \`${projectName}\`\n- Project ID: \`${projectId}\``,
+        message: `🚀 **${isRebuild ? 'Rebuilding' : 'Starting'} application build...**\n- Mind Name: \`${mindName}\`\n- Project: \`${projectName}\`\n- Project ID: \`${projectId}\`${isRebuild && existingSessionId ? `\n- Updating existing session: \`${existingSessionId}\`` : ''}`,
         status: "started",
         format: "markdown",
       };
@@ -130,12 +417,28 @@ const CreateDeployScreen: React.FC = () => {
       addLogMessage(initialLog);
 
       // Execute the mind using appBuilderMindId from config
-      const response = await executeMind(mindName, args, responseStructure, config.paramAiSdk.appBuilderMindId);
+      // If rebuilding, pass the existing session ID to update the same session
+      console.log(`🔧 Calling executeMind with parameters:`, {
+        mindName,
+        args,
+        responseStructure,
+        mindId: config.paramAiSdk.appBuilderMindId,
+        session_id: isRebuild ? existingSessionId : undefined,
+        isRebuild
+      });
+      
+      const response = await executeMind(
+        mindName, 
+        args, 
+        responseStructure, 
+        config.paramAiSdk.appBuilderMindId,
+        isRebuild ? existingSessionId : undefined
+      );
       const { job_id, session_id } = response;
 
       // Add execution log
       const executionLog = {
-        message: `⚡ **Build process initiated**\n- Job ID: \`${job_id}\`\n- Session: \`${session_id}\``,
+        message: `⚡ **Build process initiated**\n- Job ID: \`${job_id}\`\n- Session: \`${session_id}\`${isRebuild && existingSessionId ? `\n- Updating existing session: \`${existingSessionId}\`` : ''}`,
         status: "pending",
         format: "markdown",
       };
@@ -144,6 +447,9 @@ const CreateDeployScreen: React.FC = () => {
 
       // Start streaming logs
       try {
+        // Capture the rebuild parameters for use in the callback
+        const rebuildParams = { isRebuild, existingSessionId };
+        
         await streamSSE(job_id, {
           onEvent: (data: any) => {
             let message = "";
@@ -198,7 +504,7 @@ const CreateDeployScreen: React.FC = () => {
             }
 
             const completionLog = {
-              message: `✅ **Build completed successfully!**\n${message}`,
+              message: `✅ **${rebuildParams.isRebuild ? 'Rebuild' : 'Build'} completed successfully!**\n${message}`,
               status,
               format,
             };
@@ -211,7 +517,17 @@ const CreateDeployScreen: React.FC = () => {
 
             // Try to fetch session URL once, then show iframe regardless
             addMessage("agent", "🔍 Searching for your application URL...");
-            await fetchSessionUrl(session_id);
+            // If rebuilding, use the existing session ID; otherwise use the new one
+            const sessionIdToUse = rebuildParams.isRebuild && rebuildParams.existingSessionId ? rebuildParams.existingSessionId : session_id;
+            await fetchSessionUrl(sessionIdToUse);
+            
+            // Add completion message
+            if (rebuildParams.isRebuild) {
+              addMessage("agent", `🎉 **Rebuild completed successfully!** Your application has been updated with the latest changes.`);
+            }
+            
+            // Fetch state machine workflows after build completion
+            await fetchStateMachineWorkflows();
           },
           onError: (error: any) => {
             console.error("Stream error:", error);
@@ -266,7 +582,7 @@ const CreateDeployScreen: React.FC = () => {
       console.log("🔍 Mind Name:", project);
       
       // First try to get the specific session by sessionId
-      const specificSession = await getSession("", "", sessionId);
+      const specificSession = await getSession(config.paramAiSdk.appBuilderMindId, "", sessionId);
       console.log("Specific session response:", specificSession);
 
       if (specificSession?.response?.url) {
@@ -277,7 +593,7 @@ const CreateDeployScreen: React.FC = () => {
       }
 
       // If no URL in specific session, try to get all sessions and find by mind name
-      const allSessions = await getSession();
+      const allSessions = await getSession(config.paramAiSdk.appBuilderMindId);
       console.log("All sessions response:", allSessions);
       console.log("All sessions count:", allSessions?.response?.length || 0);
       
@@ -344,7 +660,17 @@ const CreateDeployScreen: React.FC = () => {
 
   // Start app creation automatically when component mounts
   useEffect(() => {
-    createApplication();
+    const initializeApp = async () => {
+      const sessionExists = await checkExistingSessions();
+      if (!sessionExists) {
+        await createApplication(false); // Not a rebuild
+      }
+      
+      // Always try to fetch state machine workflows
+      await fetchStateMachineWorkflows();
+    };
+    
+    initializeApp();
   }, []);
 
   const renderMessage = (message: ConversationMessage) => {
@@ -398,19 +724,40 @@ const CreateDeployScreen: React.FC = () => {
   };
 
   const renderPreview = () => {
-    if (deploymentStatus === "creating" || deploymentStatus === "idle") {
+    if (deploymentStatus === "creating") {
       return (
         <div className="h-full flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-600 mx-auto mb-4"></div>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Building Your Application
+              {isRebuilding ? 'Rebuilding Your Application' : 'Building Your Application'}
             </h3>
             <p className="text-gray-600 mb-4">
-              AI is creating your application from the project plan...
+              {isRebuilding 
+                ? 'AI is rebuilding your application from the project plan...'
+                : 'AI is creating your application from the project plan...'}
             </p>
             <div className="text-sm text-gray-500">
               This may take a few minutes
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (deploymentStatus === "idle") {
+      return (
+        <div className="h-full flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-600 mx-auto mb-4"></div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              Checking for Existing Applications
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Looking for previously built applications...
+            </p>
+            <div className="text-sm text-gray-500">
+              This should only take a moment
             </div>
           </div>
         </div>
@@ -437,6 +784,11 @@ const CreateDeployScreen: React.FC = () => {
                 : "Your application has been built successfully. Loading preview..."
               }
             </p>
+            {sessionUrl && (
+              <div className="mt-2 text-xs text-gray-500">
+                Found existing session: {project}
+              </div>
+            )}
           </div>
 
           <div className="h-full overflow-auto">
@@ -500,13 +852,16 @@ const CreateDeployScreen: React.FC = () => {
   const getStatusDisplay = () => {
     switch (deploymentStatus) {
       case "creating":
-        return { text: "Building...", color: "bg-blue-100 text-blue-800" };
+        return { 
+          text: isRebuilding ? "Rebuilding..." : "Building...", 
+          color: "bg-blue-100 text-blue-800" 
+        };
       case "completed":
         return { text: "Ready", color: "bg-green-100 text-green-800" };
       case "failed":
         return { text: "Failed", color: "bg-red-100 text-red-800" };
       default:
-        return { text: "Ready", color: "bg-gray-100 text-gray-800" };
+        return { text: "Checking...", color: "bg-gray-100 text-gray-800" };
     }
   };
 
@@ -536,18 +891,74 @@ const CreateDeployScreen: React.FC = () => {
             </h1>
             <p className="text-sm text-gray-600">
               {deploymentStatus === "creating" &&
-                "AI is building your application from the project plan"}
+                (isRebuilding 
+                  ? "AI is rebuilding your application from the project plan"
+                  : "AI is building your application from the project plan")}
               {deploymentStatus === "completed" &&
-                "Your application has been built and is ready to use"}
+                sessionUrl 
+                  ? "Your application is ready to use"
+                  : "Your application has been built and is ready to use"}
               {deploymentStatus === "failed" &&
                 "Build failed - let's try again"}
               {deploymentStatus === "idle" &&
-                "Preparing to build your application"}
+                "Checking for existing application sessions..."}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
+          {deploymentStatus === "completed" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                // Get the existing session ID before clearing the state
+                let existingSessionId;
+                if (sessionUrl && project) {
+                  // Try to get the actual session ID from the existing session
+                  try {
+                    console.log("🔍 Rebuild: Looking for existing session with project:", project);
+                    const allSessions = await getSession(config.paramAiSdk.appBuilderMindId);
+                    console.log("🔍 Rebuild: All sessions response:", allSessions);
+                    
+                    if (allSessions?.response) {
+                      console.log("🔍 Rebuild: Available sessions:", allSessions.response.map((s: any) => ({ 
+                        name: s.name, 
+                        id: s._id, 
+                        url: s.url 
+                      })));
+                      
+                      const existingSession = allSessions.response.find((session: any) => 
+                        session?.name === project
+                      );
+                      console.log("🔍 Rebuild: Found existing session:", existingSession);
+                      
+                      if (existingSession?._id) {
+                        existingSessionId = existingSession._id;
+                        console.log("🔍 Found existing session ID for rebuild:", existingSessionId);
+                      } else {
+                        console.log("⚠️ Rebuild: No session ID found in existing session");
+                      }
+                    }
+                  } catch (error) {
+                    console.error("Error getting existing session ID:", error);
+                  }
+                } else {
+                  console.log("⚠️ Rebuild: No sessionUrl or project available");
+                }
+                
+                setDeploymentStatus("idle");
+                setMessages([]);
+                setLogs([]);
+                setSessionUrl(null);
+                
+                // Pass the existing session ID for rebuilding
+                createApplication(true, existingSessionId);
+              }}
+            >
+              Rebuild App
+            </Button>
+          )}
           <div
             className={`px-3 py-1 rounded-full text-sm font-medium ${statusDisplay.color}`}
           >
@@ -570,7 +981,7 @@ const CreateDeployScreen: React.FC = () => {
                 <h2 className="font-semibold">Build Assistant</h2>
                 <p className="text-gray-400 text-xs">
                   {isProcessing
-                    ? "Building your application..."
+                    ? (isRebuilding ? "Rebuilding your application..." : "Building your application...")
                     : "Ready to help with your app"}
                 </p>
               </div>
@@ -634,6 +1045,50 @@ const CreateDeployScreen: React.FC = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Workflow Suggestions */}
+            {stateMachineWorkflows.length > 0 && (
+              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-blue-600">📋</span>
+                  <span className="text-sm font-medium text-blue-800">Available Workflows</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {stateMachineWorkflows.map((workflow, index) => {
+                    const workflowText = workflow.toLowerCase().includes('workflow') ? workflow : `${workflow} workflow`;
+                    const isCurrentlyBuilding = currentlyBuildingWorkflow === workflowText;
+                    const isDisabled = currentlyBuildingWorkflow !== null;
+                    
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => handleWorkflowSelect(workflow)}
+                        disabled={isDisabled}
+                        className={`px-3 py-2 text-sm font-medium rounded-md border transition-colors duration-200 ${
+                          isCurrentlyBuilding
+                            ? 'bg-yellow-100 border-yellow-300 text-yellow-800 animate-pulse'
+                            : isDisabled
+                            ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed'
+                            : 'bg-blue-100 hover:bg-blue-200 text-blue-800 border-blue-300 hover:shadow-sm cursor-pointer'
+                        }`}
+                      >
+                        {isCurrentlyBuilding ? (
+                          <span className="flex items-center gap-2">
+                            <div className="w-3 h-3 border-2 border-yellow-600 border-t-transparent rounded-full animate-spin"></div>
+                            Building {workflowText}...
+                          </span>
+                        ) : (
+                          `Build ${workflowText}`
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-blue-600 mt-2">
+                  Click on any workflow to build it in your application
+                </p>
               </div>
             )}
           </div>
