@@ -1050,11 +1050,12 @@ const CreateDeployScreen: React.FC = () => {
 
             {/* Workflow Suggestions */}
             {stateMachineWorkflows.length > 0 && (
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="mt-4 py-4 px-0">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-blue-600">📋</span>
-                  <span className="text-sm font-medium text-blue-800">Available Workflows</span>
+                  <span className="text-gray-600">🤖</span>
+                  <span className="text-sm font-medium text-gray-700">AI Workflow Suggestions</span>
                 </div>
+                
                 <div className="flex flex-wrap gap-2">
                   {stateMachineWorkflows.map((workflow, index) => {
                     const workflowText = workflow.toLowerCase().includes('workflow') ? workflow : `${workflow} workflow`;
@@ -1066,18 +1067,18 @@ const CreateDeployScreen: React.FC = () => {
                         key={index}
                         onClick={() => handleWorkflowSelect(workflow)}
                         disabled={isDisabled}
-                        className={`px-3 py-2 text-sm font-medium rounded-md border transition-colors duration-200 ${
+                        className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-all duration-200 ${
                           isCurrentlyBuilding
-                            ? 'bg-yellow-100 border-yellow-300 text-yellow-800 animate-pulse'
+                            ? 'bg-yellow-100 border-yellow-300 text-yellow-700 animate-pulse'
                             : isDisabled
-                            ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed'
-                            : 'bg-blue-100 hover:bg-blue-200 text-blue-800 border-blue-300 hover:shadow-sm cursor-pointer'
+                            ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                            : 'bg-white hover:bg-blue-50 text-gray-700 border-gray-300 hover:border-blue-300 hover:text-blue-700 cursor-pointer'
                         }`}
                       >
                         {isCurrentlyBuilding ? (
-                          <span className="flex items-center gap-2">
-                            <div className="w-3 h-3 border-2 border-yellow-600 border-t-transparent rounded-full animate-spin"></div>
-                            Building {workflowText}...
+                          <span className="flex items-center gap-1.5">
+                            <div className="w-2.5 h-2.5 border border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+                            Building...
                           </span>
                         ) : (
                           `Build ${workflowText}`
@@ -1086,8 +1087,9 @@ const CreateDeployScreen: React.FC = () => {
                     );
                   })}
                 </div>
-                <p className="text-xs text-blue-600 mt-2">
-                  Click on any workflow to build it in your application
+                
+                <p className="text-xs text-gray-500 mt-2">
+                  Click any suggestion to integrate the workflow into your application.
                 </p>
               </div>
             )}
