@@ -1174,7 +1174,8 @@ const ProjectPlanScreen: React.FC = () => {
         mindName,
         args,
         responseStructure,
-        mindId
+        mindId,
+        sessionId
       );
 
       const { job_id, session_id } = execution;

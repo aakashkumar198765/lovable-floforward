@@ -1328,7 +1328,7 @@ const CreateDeployScreen: React.FC = () => {
                     <span className="text-gray-600">📊</span>
                     <span className="text-sm font-medium text-gray-700">Session Information</span>
                   </div>
-                  <div className="flex gap-2">
+                  {/* <div className="flex gap-2">
                     <button
                       onClick={viewFullLogs}
                       className="px-3 py-1.5 text-xs font-medium rounded-full border border-gray-300 hover:border-green-300 hover:text-green-700 bg-white hover:bg-green-50 transition-all duration-200 cursor-pointer"
@@ -1347,7 +1347,7 @@ const CreateDeployScreen: React.FC = () => {
                     >
                       🔄 Refresh
                     </button>
-                  </div>
+                  </div> */}
                 </div>
                 
                 <div className="text-xs text-gray-500 mb-2">
