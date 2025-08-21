@@ -1441,7 +1441,7 @@ const ProjectPlanScreen: React.FC = () => {
                   )
                 }
               >
-                Create App
+                Build App
               </Button>
             </FlexLayout>
           </FlexLayout>

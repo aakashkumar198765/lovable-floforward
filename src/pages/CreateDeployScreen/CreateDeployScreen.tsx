@@ -5,7 +5,7 @@ import { Button, LoadingState, Alert } from "../../components/atoms";
 import paramSDKService from "../../services/ParamSDKService";
 import appCreationService from "../../services/AppCreationService";
 import DemoApp from "../../components/DemoApp";
-import { executeMind, streamSSE } from "../../services/paramai_browsersdk";
+import { executeMind, streamSSE, getSession } from "../../services/paramai_browsersdk";
 import Logs from "./Logs";
 
 interface ConversationMessage {
@@ -30,13 +30,9 @@ const CreateDeployScreen: React.FC = () => {
     projectName: string;
   }>();
   const [deploymentStatus, setDeploymentStatus] = useState<
-    "idle" | "creating" | "created" | "deploying" | "deployed" | "failed"
+    "idle" | "creating" | "completed" | "failed"
   >("idle");
-  const [previewUrl, setPreviewUrl] = useState<string | null>(
-    "https://www.paramai.studio/"
-  );
-  const [deploymentProgress, setDeploymentProgress] = useState(0);
-  const [showLocalDemo, setShowLocalDemo] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [userInput, setUserInput] = useState("");
   const [isAgentTyping, setIsAgentTyping] = useState(false);
@@ -44,8 +40,8 @@ const CreateDeployScreen: React.FC = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [streamCompleted, setStreamCompleted] = useState(false);
   const [project, setProject] = useState("");
+  const [sessionUrl, setSessionUrl] = useState<string | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const addMessage = (
     type: ConversationMessage["type"],
@@ -63,80 +59,10 @@ const CreateDeployScreen: React.FC = () => {
     setMessages((prev) => [...prev, newMessage]);
   };
 
-  const simulateAgentResponse = (userMessage: string) => {
-    setIsAgentTyping(true);
-
-    setTimeout(() => {
-      setIsAgentTyping(false);
-
-      const lowerMessage = userMessage.toLowerCase();
-      let response = "";
-      let suggestions: string[] = [];
-
-      if (
-        lowerMessage.includes("color") ||
-        lowerMessage.includes("design") ||
-        lowerMessage.includes("style")
-      ) {
-        response =
-          "I can help you customize the design! What specific colors or styling would you like to change? I can modify the theme, colors, layout, or any visual elements.";
-        suggestions = [
-          "Change to dark theme",
-          "Use blue color scheme",
-          "Make it more modern",
-          "Add animations",
-        ];
-      } else if (
-        lowerMessage.includes("feature") ||
-        lowerMessage.includes("functionality") ||
-        lowerMessage.includes("add")
-      ) {
-        response =
-          "Great! I can add new features to your application. What functionality would you like to implement? I can add components, APIs, or any interactive elements.";
-        suggestions = [
-          "Add user authentication",
-          "Include data visualization",
-          "Add search functionality",
-          "Implement notifications",
-        ];
-      } else if (
-        lowerMessage.includes("deploy") ||
-        lowerMessage.includes("live")
-      ) {
-        response =
-          "Your application is ready for deployment! I can deploy it to various platforms or help you configure the deployment settings. Would you like to proceed?";
-        suggestions = [
-          "Deploy to Vercel",
-          "Configure custom domain",
-          "Set up environment variables",
-          "Enable analytics",
-        ];
-      } else if (
-        lowerMessage.includes("bug") ||
-        lowerMessage.includes("fix") ||
-        lowerMessage.includes("error")
-      ) {
-        response =
-          "I'll help you identify and fix any issues. Can you describe what's not working as expected? I can analyze the code and provide solutions.";
-        suggestions = [
-          "Check console errors",
-          "Review component logic",
-          "Validate API calls",
-          "Test responsive design",
-        ];
-      } else {
-        response =
-          "I'm here to help you build and customize your application! I can assist with design changes, adding features, fixing issues, or deploying your app. What would you like to work on?";
-        suggestions = [
-          "Customize the design",
-          "Add new features",
-          "Fix any issues",
-          "Deploy the application",
-        ];
-      }
-
-      addMessage("agent", response, suggestions);
-    }, 1000 + Math.random() * 2000);
+  const addLogMessage = (logEntry: LogEntry) => {
+    // Convert log entry to chat message
+    const messageType = logEntry.status === "error" ? "system" : "agent";
+    addMessage(messageType, logEntry.message);
   };
 
   const handleUserMessage = (e: React.FormEvent) => {
@@ -147,12 +73,13 @@ const CreateDeployScreen: React.FC = () => {
     setUserInput("");
 
     addMessage("user", message);
-    simulateAgentResponse(message);
-  };
-
-  const handleSuggestionClick = (suggestion: string) => {
-    addMessage("user", suggestion);
-    simulateAgentResponse(suggestion);
+    
+    // Simple response for user messages
+    setIsAgentTyping(true);
+    setTimeout(() => {
+      setIsAgentTyping(false);
+      addMessage("agent", "I'm currently building your application. Once it's ready, you'll be able to interact with it in the preview panel.");
+    }, 1000);
   };
 
   const handleBackToPrompt = () => {
@@ -163,16 +90,12 @@ const CreateDeployScreen: React.FC = () => {
     );
   };
 
-  const handleViewOutput = () => {
-    setDeploymentStatus("created");
-  };
-
   const createApplication = async () => {
     setDeploymentStatus("creating");
     setMessages([]);
     setLogs([]);
-    setDeploymentProgress(0);
     setIsProcessing(true);
+    setSessionUrl(null);
 
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, "0");
@@ -199,32 +122,26 @@ const CreateDeployScreen: React.FC = () => {
 
     try {
       // Add initial log entry
-      setLogs((prev) => [
-        ...prev,
-        {
-          message: `\`[API]\` **Connected to build service...**  
-- Job ID: \`${mindName}\`  
-- Project: \`${projectName}\``,
-          status: "started",
-          format: "markdown",
-        },
-      ]);
+      const initialLog = {
+        message: `🚀 **Starting application build...**\n- Job ID: \`${mindName}\`\n- Project: \`${projectName}\``,
+        status: "started",
+        format: "markdown",
+      };
+      setLogs((prev) => [...prev, initialLog]);
+      addLogMessage(initialLog);
 
       // Execute the mind
       const response = await executeMind(mindName, args, responseStructure);
       const { job_id, session_id } = response;
 
       // Add execution log
-      setLogs((prev) => [
-        ...prev,
-        {
-          message: `\`[EXECUTE]\` **Mind execution started**  
-- Job ID: \`${job_id}\`  
-- Session: \`${session_id}\``,
-          status: "pending",
-          format: "markdown",
-        },
-      ]);
+      const executionLog = {
+        message: `⚡ **Build process initiated**\n- Job ID: \`${job_id}\`\n- Session: \`${session_id}\``,
+        status: "pending",
+        format: "markdown",
+      };
+      setLogs((prev) => [...prev, executionLog]);
+      addLogMessage(executionLog);
 
       // Start streaming logs
       try {
@@ -249,16 +166,16 @@ const CreateDeployScreen: React.FC = () => {
               }
             }
 
-            setLogs((prev) => [
-              ...prev,
-              {
-                message: `\`[STREAM]\` ${message}`,
-                status,
-                format,
-              },
-            ]);
+            const logEntry = {
+              message: `📝 ${message}`,
+              status,
+              format,
+            };
+
+            setLogs((prev) => [...prev, logEntry]);
+            addLogMessage(logEntry);
           },
-          onComplete: (data: any) => {
+          onComplete: async (data: any) => {
             console.log("Stream completed:", data);
             setStreamCompleted(true);
 
@@ -281,29 +198,33 @@ const CreateDeployScreen: React.FC = () => {
               }
             }
 
-            setLogs((prev) => [
-              ...prev,
-              {
-                message: `\`[STREAM]\` ${message}`,
-                status,
-                format,
-              },
-            ]);
+            const completionLog = {
+              message: `✅ **Build completed successfully!**\n${message}`,
+              status,
+              format,
+            };
 
-            setDeploymentStatus("created");
+            setLogs((prev) => [...prev, completionLog]);
+            addLogMessage(completionLog);
+
+            setDeploymentStatus("completed");
             setIsProcessing(false);
+
+            // Wait a bit for session to be fully created, then fetch session to get URL
+            addMessage("agent", "🔍 Searching for your application URL...");
+            setTimeout(async () => {
+              await fetchSessionUrl(session_id);
+            }, 2000); // Wait 2 seconds for session to be fully created
           },
           onError: (error: any) => {
             console.error("Stream error:", error);
-            setLogs((prev) => [
-              ...prev,
-              {
-                message: `\`[ERROR]\` **Stream connection failed**  
-- Error: ${error instanceof Error ? error.message : "Unknown error"}`,
-                status: "error",
-                format: "markdown",
-              },
-            ]);
+            const errorLog = {
+              message: `❌ **Build failed**\n- Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+              status: "error",
+              format: "markdown",
+            };
+            setLogs((prev) => [...prev, errorLog]);
+            addLogMessage(errorLog);
             setDeploymentStatus("failed");
             setIsProcessing(false);
           },
@@ -312,92 +233,116 @@ const CreateDeployScreen: React.FC = () => {
         });
       } catch (streamError) {
         console.error("Stream error:", streamError);
-        setLogs((prev) => [
-          ...prev,
-          {
-            message: `\`[ERROR]\` **Stream connection failed**  
-- Error: ${
-              streamError instanceof Error
-                ? streamError.message
-                : "Unknown error"
-            }`,
-            status: "error",
-            format: "markdown",
-          },
-        ]);
+        const streamErrorLog = {
+          message: `❌ **Stream connection failed**\n- Error: ${
+            streamError instanceof Error
+              ? streamError.message
+              : "Unknown error"
+          }`,
+          status: "error",
+          format: "markdown",
+        };
+        setLogs((prev) => [...prev, streamErrorLog]);
+        addLogMessage(streamErrorLog);
         setDeploymentStatus("failed");
         setIsProcessing(false);
       }
     } catch (error) {
       console.error("App creation failed:", error);
-      setLogs((prev) => [
-        ...prev,
-        {
-          message: `\`[ERROR]\` **Build failed**  
-- Error: ${error instanceof Error ? error.message : "Unknown error"}`,
-          status: "error",
-          format: "markdown",
-        },
-      ]);
+      const buildErrorLog = {
+        message: `❌ **Build initialization failed**\n- Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+        status: "error",
+        format: "markdown",
+      };
+      setLogs((prev) => [...prev, buildErrorLog]);
+      addLogMessage(buildErrorLog);
       setDeploymentStatus("failed");
       setIsProcessing(false);
     }
   };
 
-  const deployApplication = async () => {
-    setDeploymentStatus("deploying");
-    setDeploymentProgress(0);
-    setIsProcessing(true);
-
-    addMessage(
-      "agent",
-      "🚀 Great! Let's deploy your application to make it live. I'll handle the build and deployment process for you.",
-      [
-        "Configure custom domain",
-        "Set up analytics",
-        "Enable performance monitoring",
-      ]
-    );
-
+  const fetchSessionUrl = async (sessionId: string) => {
     try {
-      const deploySteps = [
-        "📦 Building your application for production...",
-        "🔧 Optimizing assets and bundle size...",
-        "☁️ Uploading to cloud infrastructure...",
-        "🌐 Configuring domain and SSL...",
-        "✅ Deployment successful! Your app is now live.",
-      ];
+      console.log("🔍 Fetching session URL for sessionId:", sessionId);
+      console.log("🔍 Project ID:", projectId);
+      console.log("🔍 Project Name:", projectName);
+      
+      // First try to get the specific session by sessionId
+      const specificSession = await getSession("", "", sessionId);
+      console.log("Specific session response:", specificSession);
 
-      for (let i = 0; i < deploySteps.length; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        addMessage("system", deploySteps[i]);
-        setDeploymentProgress(((i + 1) / deploySteps.length) * 100);
+      if (specificSession?.response?.url) {
+        console.log("✅ Found URL in specific session:", specificSession.response.url);
+        setSessionUrl(specificSession.response.url);
+        addMessage("agent", `🎉 Your application is ready! You can now view it in the preview panel.`);
+        return;
       }
 
-      setPreviewUrl("https://your-app.vercel.app");
-      setDeploymentStatus("deployed");
-      setShowLocalDemo(true);
-      setIsProcessing(false);
+      // If no URL in specific session, try to get all sessions and find by project name
+      const allSessions = await getSession();
+      console.log("All sessions response:", allSessions);
+      console.log("All sessions count:", allSessions?.response?.length || 0);
+      
+      if (allSessions?.response) {
+        console.log("Available session names:", allSessions.response.map((s: any) => ({ name: s.name, id: s._id, url: s.url })));
+      }
 
-      addMessage(
-        "agent",
-        "🎊 Congratulations! Your application is now live and accessible to users worldwide. You can continue to make updates, and I'll help you deploy new versions.",
-        [
-          "View live application",
-          "Make design changes",
-          "Add new features",
-          "Monitor performance",
-        ]
+      // Try multiple ways to find the project session
+      let projectSession = null;
+      
+      // Method 1: Look for exact project name match
+      projectSession = allSessions?.response?.find(
+        (session: any) => session?.name === projectName
       );
+
+      // Method 2: Look for project name in session name (partial match)
+      if (!projectSession) {
+        projectSession = allSessions?.response?.find(
+          (session: any) => session?.name?.includes(projectName) || projectName?.includes(session?.name)
+        );
+      }
+
+      // Method 3: Look for project ID in session name
+      if (!projectSession) {
+        projectSession = allSessions?.response?.find(
+          (session: any) => session?.name === projectId
+        );
+      }
+
+      // Method 4: Look for the most recent session that might be our build
+      if (!projectSession && allSessions?.response?.length > 0) {
+        // Sort by creation time if available, otherwise take the last one
+        const sortedSessions = allSessions.response.sort((a: any, b: any) => {
+          if (a.createdAt && b.createdAt) {
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          }
+          return 0;
+        });
+        projectSession = sortedSessions[0];
+      }
+
+      console.log("Found project session:", projectSession);
+
+      if (projectSession && projectSession.url) {
+        setSessionUrl(projectSession.url);
+        addMessage("agent", `🎉 Your application is ready! You can now view it in the preview panel.`);
+      } else {
+        // Log the session structure to debug
+        console.log("Session structure:", projectSession);
+        
+        // If no URL found, try again after a delay (session might still be processing)
+        if (!sessionUrl) {
+          addMessage("agent", `⏳ Application URL not ready yet. Retrying in 5 seconds...`);
+          setTimeout(async () => {
+            await fetchSessionUrl(sessionId);
+          }, 5000);
+        } else {
+          addMessage("agent", `✅ Build completed! The application is ready in the preview panel.`);
+        }
+      }
     } catch (error) {
-      console.error("Deployment failed:", error);
-      addMessage(
-        "agent",
-        `❌ Deployment encountered an issue: ${error}. Don't worry, we can fix this together!`,
-        ["Retry deployment", "Check build logs", "Use different platform"]
-      );
-      setDeploymentStatus("failed");
-      setIsProcessing(false);
+      console.error("Failed to fetch session URL:", error);
+      addMessage("agent", `✅ Build completed! However, there was an issue retrieving the application URL.`);
     }
   };
 
@@ -412,12 +357,6 @@ const CreateDeployScreen: React.FC = () => {
   // Start app creation automatically when component mounts
   useEffect(() => {
     createApplication();
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
   }, []);
 
   const renderMessage = (message: ConversationMessage) => {
@@ -465,154 +404,66 @@ const CreateDeployScreen: React.FC = () => {
               </div>
             )}
           </div>
-
-          {message.suggestions && message.suggestions.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {message.suggestions.map((suggestion, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  className="px-3 py-1.5 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full border border-gray-300"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     );
   };
 
   const renderPreview = () => {
-    if (deploymentStatus === "creating") {
-      return (
-        <Logs
-          logs={logs}
-          onBackToPrompt={handleBackToPrompt}
-          onViewOutput={handleViewOutput}
-          streamCompleted={streamCompleted}
-          setStreamingCompleted={setStreamCompleted}
-        />
-      );
-    }
-
-    if (deploymentStatus === "deploying") {
+    if (deploymentStatus === "creating" || deploymentStatus === "idle") {
       return (
         <div className="h-full flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-600 mx-auto mb-4"></div>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Deploying Your Application
+              Building Your Application
             </h3>
             <p className="text-gray-600 mb-4">
-              Building and deploying your application to the cloud...
+              AI is creating your application from the project plan...
             </p>
-            <div className="w-64 bg-gray-200 rounded-full h-2 mx-auto">
-              <div
-                className="bg-gray-600 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${deploymentProgress}%` }}
-              ></div>
+            <div className="text-sm text-gray-500">
+              This may take a few minutes
             </div>
-            <p className="text-sm text-gray-500 mt-2">
-              {deploymentProgress}% Complete
-            </p>
           </div>
         </div>
       );
     }
 
-    if (deploymentStatus === "created") {
+    if (deploymentStatus === "completed") {
+      // Once build is completed, always show the iframe
+      // If we have a session URL, use it; otherwise use a fallback
+      const iframeSrc = sessionUrl || "https://www.paramai.studio/";
+      
       return (
         <div className="h-full">
           <div className="p-4 border-b">
             <div className="flex items-center gap-2">
-              <span className="text-gray-600">👀</span>
+              <span className="text-gray-600">✅</span>
               <span className="font-semibold text-gray-800">
-                Application Preview
+                Application Ready
               </span>
             </div>
             <p className="text-sm text-gray-700 mt-1">
-              Review your generated application before deployment
+              {sessionUrl 
+                ? "Your application has been built successfully and is ready to use"
+                : "Your application has been built successfully. Loading preview..."
+              }
             </p>
           </div>
 
           <div className="h-full overflow-auto">
-            {/* <DemoApp /> */}
             <iframe
-              src={previewUrl || "https://www.paramai.studio"}
+              src={iframeSrc}
               className="w-full h-full border-0"
               title="Application Preview"
-              onLoad={() => console.log("Preview loaded successfully")}
-              onError={() => console.error("Failed to load preview")}
+              onLoad={() => {
+                console.log("Application loaded successfully");
+                if (!sessionUrl) {
+                  addMessage("agent", "📱 Application preview loaded successfully! The iframe is now displaying your application.");
+                }
+              }}
+              onError={() => console.error("Failed to load application")}
             />
-          </div>
-        </div>
-      );
-    }
-
-    if (deploymentStatus === "deployed") {
-      return (
-        <div className="h-full">
-          <div className="p-4 border-b">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600">✅</span>
-                <span className="font-semibold text-gray-800">
-                  Application Deployed Successfully!
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant={showLocalDemo ? "outline" : "primary"}
-                  onClick={() => setShowLocalDemo(!showLocalDemo)}
-                >
-                  {showLocalDemo ? "Show External" : "Show Demo"}
-                </Button>
-                {previewUrl && (
-                  <a
-                    href={previewUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-gray-600 hover:text-gray-800 underline"
-                  >
-                    Open Live App ↗
-                  </a>
-                )}
-              </div>
-            </div>
-            <p className="text-sm text-gray-700 mt-1">
-              {previewUrl
-                ? `Your application is live at: ${previewUrl}`
-                : "Your application has been deployed successfully!"}
-            </p>
-          </div>
-
-          <div className="h-full overflow-auto">
-            {false ? (
-              <DemoApp />
-            ) : true ? (
-              <iframe
-                src={previewUrl || "https://www.paramai.studio"}
-                className="w-full h-full border-0"
-                title="Application Preview"
-                onLoad={() => console.log("Preview loaded successfully")}
-                onError={() => console.error("Failed to load preview")}
-              />
-            ) : (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-4xl mb-2">🎉</div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                    Deployment Complete!
-                  </h3>
-                  <p className="text-gray-600">
-                    Your application has been successfully deployed.
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       );
@@ -624,20 +475,19 @@ const CreateDeployScreen: React.FC = () => {
           <div className="text-center">
             <div className="text-gray-600 text-6xl mb-4">❌</div>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Process Failed
+              Build Failed
             </h3>
             <p className="text-gray-600 mb-4">
-              There was an error during the process.
+              There was an error during the build process.
             </p>
             <Button
               variant="primary"
               onClick={() => {
                 setDeploymentStatus("idle");
-                setShowLocalDemo(false);
                 createApplication();
               }}
             >
-              Retry
+              Retry Build
             </Button>
           </div>
         </div>
@@ -649,7 +499,7 @@ const CreateDeployScreen: React.FC = () => {
         <div className="text-center">
           <div className="text-gray-400 text-6xl mb-4">🚀</div>
           <h3 className="text-lg font-semibold text-gray-800 mb-2">
-            Ready to Create
+            Ready to Build
           </h3>
           <p className="text-gray-600">
             Your application will be created from the project plan.
@@ -662,15 +512,11 @@ const CreateDeployScreen: React.FC = () => {
   const getStatusDisplay = () => {
     switch (deploymentStatus) {
       case "creating":
-        return { text: "Creating...", color: "bg-gray-100 text-gray-800" };
-      case "created":
-        return { text: "Created", color: "bg-gray-100 text-gray-800" };
-      case "deploying":
-        return { text: "Deploying...", color: "bg-gray-100 text-gray-800" };
-      case "deployed":
-        return { text: "Deployed", color: "bg-gray-100 text-gray-800" };
+        return { text: "Building...", color: "bg-blue-100 text-blue-800" };
+      case "completed":
+        return { text: "Ready", color: "bg-green-100 text-green-800" };
       case "failed":
-        return { text: "Failed", color: "bg-gray-100 text-gray-800" };
+        return { text: "Failed", color: "bg-red-100 text-red-800" };
       default:
         return { text: "Ready", color: "bg-gray-100 text-gray-800" };
     }
@@ -698,21 +544,17 @@ const CreateDeployScreen: React.FC = () => {
           </Button>
           <div>
             <h1 className="text-xl font-bold text-gray-900">
-              Create & Deploy Application
+              Build Application
             </h1>
             <p className="text-sm text-gray-600">
               {deploymentStatus === "creating" &&
-                "AI Assistant is creating your application"}
-              {deploymentStatus === "created" &&
-                "Application ready - chat with AI to customize or deploy"}
-              {deploymentStatus === "deploying" &&
-                "AI Assistant is deploying your application"}
-              {deploymentStatus === "deployed" &&
-                "Your application is live - continue chatting for updates"}
+                "AI is building your application from the project plan"}
+              {deploymentStatus === "completed" &&
+                "Your application is ready to use"}
               {deploymentStatus === "failed" &&
-                "Let's troubleshoot this together"}
+                "Build failed - let's try again"}
               {deploymentStatus === "idle" &&
-                "AI Assistant will guide you through the process"}
+                "Preparing to build your application"}
             </p>
           </div>
         </div>
@@ -723,23 +565,13 @@ const CreateDeployScreen: React.FC = () => {
           >
             {statusDisplay.text}
           </div>
-          {deploymentStatus === "created" && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={deployApplication}
-              className=""
-            >
-              Deploy Application
-            </Button>
-          )}
         </div>
       </div>
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Conversational Chat Panel */}
-        <div className="w-2/5  flex flex-col h-full">
+        <div className="w-2/5 flex flex-col h-full">
           {/* Chat Header */}
           <div className="p-5 border-b">
             <div className="flex items-center gap-3">
@@ -747,11 +579,11 @@ const CreateDeployScreen: React.FC = () => {
                 <span className="text-sm text-white font-bold">🤖</span>
               </div>
               <div>
-                <h2 className=" font-semibold">AI Development Assistant</h2>
+                <h2 className="font-semibold">Build Assistant</h2>
                 <p className="text-gray-400 text-xs">
                   {isProcessing
                     ? "Building your application..."
-                    : "Ready to help customize your app"}
+                    : "Ready to help with your app"}
                 </p>
               </div>
               {isProcessing && (
@@ -782,7 +614,7 @@ const CreateDeployScreen: React.FC = () => {
                 <div className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-3">
                   <span className="text-lg">🤖</span>
                 </div>
-                <p className="text-sm">AI Assistant is initializing...</p>
+                <p className="text-sm">Build Assistant is initializing...</p>
               </div>
             ) : (
               messages.map(renderMessage)
@@ -795,7 +627,7 @@ const CreateDeployScreen: React.FC = () => {
                     <div className="w-6 h-6 rounded-full bg-gray-600 flex items-center justify-center">
                       <span className="text-xs text-white font-bold">🤖</span>
                     </div>
-                    <span className="text-xs text-gray-400">AI Assistant</span>
+                    <span className="text-xs text-gray-400">Build Assistant</span>
                   </div>
                   <div className="bg-gray-100 text-gray-800 border border-gray-200 rounded-lg px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -819,13 +651,13 @@ const CreateDeployScreen: React.FC = () => {
           </div>
 
           {/* Chat Input */}
-          <form onSubmit={handleUserMessage} className="p-4 border-t ">
+          <form onSubmit={handleUserMessage} className="p-4 border-t">
             <div className="flex gap-3">
               <input
                 type="text"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
-                placeholder="Ask me to customize design, add features, or deploy..."
+                placeholder="Ask about your application build..."
                 className="flex-1 text-sm px-4 py-3 rounded-2xl border focus:border-blue-500 focus:outline-none placeholder-gray-400"
                 disabled={isAgentTyping}
               />
@@ -844,18 +676,6 @@ const CreateDeployScreen: React.FC = () => {
 
         {/* Preview Panel */}
         <div className="w-3/5 bg-white flex flex-col h-full border-l border-gray-200">
-          {/* <div className="p-4 border-b border-gray-200 bg-gray-50">
-            <h2 className="font-semibold text-gray-900">Application Preview</h2>
-            <p className="text-gray-600 text-sm mt-1">
-              {deploymentStatus === "creating" && "Creating your application..."}
-              {deploymentStatus === "created" && "Preview your generated application"}
-              {deploymentStatus === "deploying" && "Deploying your application..."}
-              {deploymentStatus === "deployed" && "Your live application"}
-              {deploymentStatus === "failed" && "Process failed"}
-              {deploymentStatus === "idle" && "Preview will appear after creation"}
-            </p>
-          </div> */}
-
           <div className="flex-1 overflow-hidden">{renderPreview()}</div>
         </div>
       </div>
