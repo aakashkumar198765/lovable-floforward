@@ -2945,9 +2945,11 @@ export type PromptContentProps = {
   userStory?: string;
   showUserStory?: boolean;
   userStoryLoading?: boolean;
+  userStoryLoadingExisting?: boolean;
   onUserStoryEdit?: () => void;
   onProceedToBRD?: () => void;
   onGenerateStory?: () => void;
+  onBackToPrompt?: () => void;
   // New regeneration props
   showRegenerationOptions?: boolean;
   regenerationType?: "same" | "edit" | null;

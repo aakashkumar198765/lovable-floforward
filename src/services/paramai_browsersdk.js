@@ -10,13 +10,14 @@ const defaultShareKey = "94a5bcfa7fbcf707f434e63d7ce6c44d1e7b1bc0d45e3923ab8746f
 /**
  * Execute mind using browser fetch API
  */
-async function executeMind(mindName, args, responseStructure , mindID) {
+async function executeMind(mindName, args, responseStructure , mindID, session_id) {
   // Create FormData for multipart request
   const formData = new FormData();
   formData.append('mind_name', mindName);
   formData.append('is_default_ui_disabled', false);
   formData.append('args', JSON.stringify(args));
   formData.append('mind_id', mindID ? mindID : defaultMindId);
+  formData.append('session_id', session_id);
   formData.append('response_structure', JSON.stringify(responseStructure));
 
   const response = await fetch('https://dev.paramai.studio:5012/mindflow/execute_mind', {

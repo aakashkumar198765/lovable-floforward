@@ -33,9 +33,11 @@ const PromptContent: React.FC<PromptContentProps> = ({
   userStory = "",
   showUserStory = false,
   userStoryLoading = false,
+  userStoryLoadingExisting = false,
   onUserStoryEdit = () => {},
   onProceedToBRD = () => {},
   onGenerateStory = () => {},
+  onBackToPrompt = () => {},
   // New regeneration props
   showRegenerationOptions = false,
   regenerationType = null,
@@ -434,12 +436,12 @@ const PromptContent: React.FC<PromptContentProps> = ({
                           <h3 className="text-lg font-semibold text-gray-800 mb-2">
                             Generated User Story
                           </h3>
-                          {userStoryLoading ? (
+                          {userStoryLoading || userStoryLoadingExisting ? (
                             <div className="bg-gray-50 rounded-lg p-4">
                               <div className="flex items-center space-x-2">
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
                                 <span className="text-gray-600">
-                                  Generating user story...
+                                  {userStoryLoadingExisting ? "Loading user story..." : "Generating user story..."}
                                 </span>
                               </div>
                             </div>
@@ -480,7 +482,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
 
                         {/* Action Buttons */}
                         <div className="flex justify-center space-x-4">
-                          {userStory && !userStoryLoading && (
+                          {userStory && !userStoryLoading && !userStoryLoadingExisting && (
                             <Button
                               onClick={onProceedToBRD}
                               variant="primary"
@@ -497,18 +499,16 @@ const PromptContent: React.FC<PromptContentProps> = ({
                               }
                               variant="secondary"
                               className="px-8 py-3 rounded-lg font-semibold text-base"
-                              disabled={!prompt.trim() || userStoryLoading}
-                              loading={userStoryLoading}
+                              disabled={!prompt.trim() || userStoryLoading || userStoryLoadingExisting}
+                              loading={userStoryLoading || userStoryLoadingExisting}
                               iconLeft={
-                                !userStoryLoading ? (
-                                  <Icon
-                                    name={userStory ? "refresh" : "arrow-right"}
-                                  />
+                                !userStoryLoading && !userStoryLoadingExisting ? (
+                                  <Icon name="arrow-right" />
                                 ) : undefined
                               }
                             >
-                              {userStoryLoading
-                                ? "Generating..."
+                              {userStoryLoading || userStoryLoadingExisting
+                                ? "Loading..."
                                 : userStory
                                 ? "Regenerate User Story"
                                 : "Generate User Story"}
@@ -525,16 +525,16 @@ const PromptContent: React.FC<PromptContentProps> = ({
                           onClick={onGenerateStory}
                           variant="primary"
                           className="px-12 py-4 rounded-lg font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled={!prompt.trim() || userStoryLoading}
-                          loading={userStoryLoading}
+                          disabled={!prompt.trim() || userStoryLoading || userStoryLoadingExisting}
+                          loading={userStoryLoading || userStoryLoadingExisting}
                           iconLeft={
-                            !userStoryLoading ? (
+                            !userStoryLoading && !userStoryLoadingExisting ? (
                               <Icon name="arrow-right" />
                             ) : undefined
                           }
                         >
-                          {userStoryLoading
-                            ? "Generating..."
+                          {userStoryLoading || userStoryLoadingExisting
+                            ? "Loading..."
                             : "Generate User Story"}
                         </Button>
                       </div>

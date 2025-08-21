@@ -72,7 +72,7 @@ const Workspace: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<any[]>([]);
   const [userStories, setUserStories] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<"projects" | "userStories">("projects");
+  const [activeTab, setActiveTab] = useState<"projects" | "userStories">("userStories");
 
   const navigate = useNavigate();
 
@@ -101,9 +101,15 @@ const Workspace: React.FC = () => {
   };
 
   const handleUserStoryClick = (userStory: any) => {
-    // Navigate to a user story detail view or back to prompt with the story loaded
-    // For now, we'll navigate back to prompt with the story ID
-    navigate(`/prompt?story=${userStory?._id}`);
+    // Navigate to prompt with session ID and mind name for loading existing user story
+    const sessionId = userStory?.session_id || userStory?._id;
+    const mindName = userStory?.name || "";
+    
+    if (sessionId) {
+      navigate(`/prompt?story=${sessionId}&mind=${encodeURIComponent(mindName)}`);
+    } else {
+      console.error("No session ID found for user story:", userStory);
+    }
   };
 
   const getFilteredData = useMemo(() => {
@@ -117,8 +123,8 @@ const Workspace: React.FC = () => {
         // Filter BRD projects by "P_" prefix
         return name.startsWith("P_") && searchMatch;
       } else {
-        // Filter User Stories by "US_" prefix or other user story naming
-        return (name.startsWith("US_") || name.startsWith("Test_Session")) && searchMatch;
+        // Filter User Stories - show ONLY stories starting with "US_"
+        return name.startsWith("US_") && searchMatch;
       }
     });
 
@@ -147,6 +153,38 @@ const Workspace: React.FC = () => {
           {/* Tab Navigation */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-1">
+              <button
+                onClick={() => setActiveTab("userStories")}
+                className={`relative px-6 py-3 font-medium text-sm transition-all duration-300 ease-in-out ${
+                  activeTab === "userStories"
+                    ? "text-purple-700 border-b-2 border-purple-600"
+                    : "text-gray-600 hover:text-gray-900 hover:border-b-2 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    activeTab === "userStories" 
+                      ? "bg-purple-100 text-purple-600" 
+                      : "bg-gray-100 text-gray-500 group-hover:bg-gray-200"
+                  }`}>
+                    <Icon name="file" size="sm" />
+                  </div>
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">User Stories</span>
+                    <span className="text-xs text-gray-500 font-normal">
+                      Requirements & Features
+                    </span>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                    activeTab === "userStories"
+                      ? "bg-purple-200 text-purple-700"
+                      : "bg-gray-200 text-purple-600"
+                  }`}>
+                    {userStories.filter((us: any) => us?.name?.startsWith("US_")).length}
+                  </span>
+                </div>
+              </button>
+              
               <button
                 onClick={() => setActiveTab("projects")}
                 className={`relative px-6 py-3 font-medium text-sm transition-all duration-300 ease-in-out ${
@@ -178,49 +216,17 @@ const Workspace: React.FC = () => {
                   </span>
                 </div>
               </button>
-              
-              <button
-                onClick={() => setActiveTab("userStories")}
-                className={`relative px-6 py-3 font-medium text-sm transition-all duration-300 ease-in-out ${
-                  activeTab === "userStories"
-                    ? "text-purple-700 border-b-2 border-purple-600"
-                    : "text-gray-600 hover:text-gray-900 hover:border-b-2 hover:border-gray-300"
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
-                    activeTab === "userStories" 
-                      ? "bg-purple-100 text-purple-600" 
-                      : "bg-gray-100 text-gray-500 group-hover:bg-gray-200"
-                  }`}>
-                    <Icon name="file" size="sm" />
-                  </div>
-                  <div className="flex flex-col items-start">
-                    <span className="font-semibold">User Stories</span>
-                    <span className="text-xs text-gray-500 font-normal">
-                      Requirements & Features
-                    </span>
-                  </div>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                    activeTab === "userStories"
-                      ? "bg-purple-200 text-purple-700"
-                      : "bg-gray-200 text-purple-600"
-                  }`}>
-                    {userStories.filter(us => us?.name?.startsWith("US_") || us?.name?.startsWith("Test_Session")).length}
-                  </span>
-                </div>
-              </button>
             </div>
             
             {/* Quick Stats */}
             <div className="flex items-center space-x-3 text-sm text-gray-600">
               <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>BRD Projects</span>
-              </div>
-              <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                 <span>User Stories</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>BRD Projects</span>
               </div>
             </div>
           </div>
@@ -234,8 +240,8 @@ const Workspace: React.FC = () => {
               <span className="text-sm text-gray-500">
                 {getFilteredData.length} of {
                   activeTab === "projects" 
-                    ? projects.filter(p => p?.name?.startsWith("P_")).length
-                    : userStories.filter(us => us?.name?.startsWith("US_") || us?.name?.startsWith("Test_Session")).length
+                    ? projects.filter((p: any) => p?.name?.startsWith("P_")).length
+                    : userStories.filter((us: any) => us?.name?.startsWith("US_")).length
                 } items
               </span>
             </div>
