@@ -511,7 +511,7 @@ const CreateDeployScreen: React.FC = () => {
         setIsProcessing(false);
         
         // Fetch state machine workflows after finding the session
-        await fetchStateMachineWorkflows();
+        // await fetchStateMachineWorkflows();
         
         return true;
       } else {
@@ -920,19 +920,21 @@ const CreateDeployScreen: React.FC = () => {
     }
   }, [messages]);
 
+  const initialized = useRef(false); // New ref
+
   // Start app creation automatically when component mounts
   useEffect(() => {
-    const initializeApp = async () => {
-      const sessionExists = await checkExistingSessions();
-      if (!sessionExists) {
-        await createApplication(false); // Not a rebuild
-      }
-      
-      // Always try to fetch state machine workflows
-      await fetchStateMachineWorkflows();
-    };
-    
-    initializeApp();
+    if (!initialized.current) { // Check if already initialized
+      initialized.current = true; // Mark as initialized
+      const initializeApp = async () => {
+        const sessionExists = await checkExistingSessions();
+        if (!sessionExists) {
+          await createApplication(false); // Not a rebuild
+        }
+        await fetchStateMachineWorkflows();
+      };
+      initializeApp();
+    }
   }, []);
 
   const renderMessage = (message: ConversationMessage) => {
