@@ -167,10 +167,7 @@ const PromptContent: React.FC<PromptContentProps> = ({
   };
 
   const handleViewOutput = () => {
-    const projectNameForUrl = buildingAppName
-      ? encodeURIComponent(buildingAppName.replace(/\s+/g, "-"))
-      : "default-project";
-    navigate(`/project-plan/${ProjectId}/${projectNameForUrl}`);
+    navigate(`/project-plan/${ProjectId}/${ProjectId}`);
   };
 
   const handleLogout = () => {
