@@ -373,7 +373,9 @@ const CreateDeployScreen: React.FC = () => {
     
     setIsRebuilding(isRebuild);
     setDeploymentStatus("creating");
-    setMessages([]);
+    if (!isRebuild) {
+      setMessages([]); // Only clear messages for new builds, not rebuilds
+    }
     setLogs([]);
     setIsProcessing(true);
     setSessionUrl(null);
@@ -403,6 +405,7 @@ const CreateDeployScreen: React.FC = () => {
     const args = {
       project_id: projectId,
       project_name: projectName,
+      user_prompt: isRebuild ? "Rebuild Application" : undefined,
       files: [],
     };
 
@@ -424,6 +427,7 @@ const CreateDeployScreen: React.FC = () => {
         responseStructure,
         mindId: config.paramAiSdk.appBuilderMindId,
         session_id: isRebuild ? existingSessionId : undefined,
+        user_prompt: isRebuild ? "Rebuild Application" : undefined,
         isRebuild
       });
       
@@ -947,8 +951,13 @@ const CreateDeployScreen: React.FC = () => {
                   console.log("⚠️ Rebuild: No sessionUrl or project available");
                 }
                 
+                // Add user message to chat first (same as workflow suggestions)
+                addMessage("user", "Rebuild Application");
+                
+                // Add agent confirmation message
+                addMessage("agent", "🔄 **Rebuild Selected:** Rebuild Application\n\nExecuting application rebuild...");
+                
                 setDeploymentStatus("idle");
-                setMessages([]);
                 setLogs([]);
                 setSessionUrl(null);
                 
