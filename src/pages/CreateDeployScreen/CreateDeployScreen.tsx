@@ -42,6 +42,7 @@ const CreateDeployScreen: React.FC = () => {
   const [streamCompleted, setStreamCompleted] = useState(false);
   const [project, setProject] = useState("");
   const [sessionUrl, setSessionUrl] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null); // Store the actual session ID
   const [isRebuilding, setIsRebuilding] = useState(false);
   const [stateMachineWorkflows, setStateMachineWorkflows] = useState<string[]>([]);
   const [stateMachineSessionId, setStateMachineSessionId] = useState<string | null>(null);
@@ -158,19 +159,23 @@ const CreateDeployScreen: React.FC = () => {
         files: [],
       };
 
+      // Use the stored session ID if available
+      const existingSessionId = sessionId;
       console.log(`🔧 Executing workflow with parameters:`, {
         mindName,
         args,
         responseStructure,
         mindId: config.paramAiSdk.appBuilderMindId,
-        user_prompt: workflowName
+        user_prompt: workflowName,
+        session_id: existingSessionId
       });
 
       const response = await executeMind(
         mindName, 
         args, 
         responseStructure, 
-        config.paramAiSdk.appBuilderMindId
+        config.paramAiSdk.appBuilderMindId,
+        existingSessionId // Pass the stored session ID
       );
 
       const { job_id, session_id } = response;
@@ -280,12 +285,18 @@ const CreateDeployScreen: React.FC = () => {
         console.log("✅ Found matching session:", matchingSession);
         setProject(expectedMindName);
         
-        // If session has a URL, set it
+        // Store both the session URL and session ID
         if (matchingSession.url) {
           setSessionUrl(matchingSession.url);
           addMessage("agent", `🎉 Found existing application! Your application is ready to use.`);
         } else {
           addMessage("agent", `✅ Found existing application session: ${expectedMindName}. Loading preview...`);
+        }
+        
+        // Store the session ID for future use
+        if (matchingSession._id) {
+          setSessionId(matchingSession._id);
+          console.log("✅ Stored session ID:", matchingSession._id);
         }
         
         setDeploymentStatus("completed");
@@ -375,10 +386,10 @@ const CreateDeployScreen: React.FC = () => {
     setDeploymentStatus("creating");
     if (!isRebuild) {
       setMessages([]); // Only clear messages for new builds, not rebuilds
+      setSessionUrl(null); // Only clear session URL for new builds, not rebuilds
     }
     setLogs([]);
     setIsProcessing(true);
-    setSessionUrl(null);
 
     // Add initial message for rebuild vs new build
     if (isRebuild) {
@@ -421,14 +432,16 @@ const CreateDeployScreen: React.FC = () => {
 
       // Execute the mind using appBuilderMindId from config
       // If rebuilding, pass the existing session ID to update the same session
+      const sessionIdToUse = isRebuild ? (existingSessionId || sessionId) : undefined;
       console.log(`🔧 Calling executeMind with parameters:`, {
         mindName,
         args,
         responseStructure,
         mindId: config.paramAiSdk.appBuilderMindId,
-        session_id: isRebuild ? existingSessionId : undefined,
+        session_id: sessionIdToUse,
         user_prompt: isRebuild ? "Rebuild Application" : undefined,
-        isRebuild
+        isRebuild,
+        stored_session_id: sessionId
       });
       
       const response = await executeMind(
@@ -436,13 +449,13 @@ const CreateDeployScreen: React.FC = () => {
         args, 
         responseStructure, 
         config.paramAiSdk.appBuilderMindId,
-        isRebuild ? existingSessionId : undefined
+        sessionIdToUse
       );
       const { job_id, session_id } = response;
 
       // Add execution log
       const executionLog = {
-        message: `⚡ **Build process initiated**\n- Job ID: \`${job_id}\`\n- Session: \`${session_id}\`${isRebuild && existingSessionId ? `\n- Updating existing session: \`${existingSessionId}\`` : ''}`,
+        message: `⚡ **Build process initiated**\n- Job ID: \`${job_id}\`\n- Session: \`${session_id}\`${isRebuild && existingSessionId ? `\n- Updating existing session: \`${existingSessionId}\`` : ''}\n- Rebuild mode: ${isRebuild ? 'Yes' : 'No'}\n- Stored session ID: ${sessionId || 'None'}`,
         status: "pending",
         format: "markdown",
       };
@@ -592,6 +605,13 @@ const CreateDeployScreen: React.FC = () => {
       if (specificSession?.response?.url) {
         console.log("✅ Found URL in specific session:", specificSession.response.url);
         setSessionUrl(specificSession.response.url);
+        
+        // Also store the session ID if available
+        if (specificSession.response._id) {
+          setSessionId(specificSession.response._id);
+          console.log("✅ Stored session ID from specific session:", specificSession.response._id);
+        }
+        
         addMessage("agent", `🎉 Your application is ready! You can now view it in the preview panel.`);
         return;
       }
@@ -916,9 +936,9 @@ const CreateDeployScreen: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={async () => {
-                // Get the existing session ID before clearing the state
-                let existingSessionId;
-                if (sessionUrl && project) {
+                // Use the stored session ID if available, otherwise try to get it
+                let existingSessionId = sessionId; // Use stored session ID first
+                if (!existingSessionId && sessionUrl && project) {
                   // Try to get the actual session ID from the existing session
                   try {
                     console.log("🔍 Rebuild: Looking for existing session with project:", project);
@@ -947,8 +967,10 @@ const CreateDeployScreen: React.FC = () => {
                   } catch (error) {
                     console.error("Error getting existing session ID:", error);
                   }
+                } else if (existingSessionId) {
+                  console.log("🔍 Rebuild: Using stored session ID:", existingSessionId);
                 } else {
-                  console.log("⚠️ Rebuild: No sessionUrl or project available");
+                  console.log("⚠️ Rebuild: No session ID available");
                 }
                 
                 // Add user message to chat first (same as workflow suggestions)
@@ -959,10 +981,10 @@ const CreateDeployScreen: React.FC = () => {
                 
                 setDeploymentStatus("idle");
                 setLogs([]);
-                setSessionUrl(null);
+                // Don't clear sessionUrl during rebuild - keep it for reference
                 
                 // Pass the existing session ID for rebuilding
-                createApplication(true, existingSessionId);
+                createApplication(true, existingSessionId ?? undefined);
               }}
             >
               Rebuild App
