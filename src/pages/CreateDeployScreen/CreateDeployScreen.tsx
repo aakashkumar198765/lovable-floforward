@@ -71,6 +71,191 @@ const CreateDeployScreen: React.FC = () => {
     addMessage(messageType, logEntry.message);
   };
 
+  // Function to manually refresh session information
+  const refreshSessionInfo = async () => {
+    if (!sessionId) {
+      addMessage("agent", "⚠️ No session ID available to refresh.");
+      return;
+    }
+    
+    try {
+      addMessage("agent", "🔄 **Refreshing session information...**");
+      
+      const fullSession = await getSession(
+        config.paramAiSdk.appBuilderMindId,
+        "",
+        sessionId
+      );
+      
+      if (fullSession?.response) {
+        console.log("Refreshed session data:", fullSession.response);
+        displaySessionInfo(fullSession.response, "Refreshed Application Session");
+      } else {
+        addMessage("agent", "❌ Failed to refresh session information.");
+      }
+    } catch (error) {
+      console.error("Error refreshing session info:", error);
+      addMessage("agent", `❌ **Error refreshing session:** ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  };
+
+  // Function to display full session logs
+  const viewFullLogs = async () => {
+    if (!sessionId) {
+      addMessage("agent", "⚠️ No session ID available to view logs.");
+      return;
+    }
+    
+    try {
+      addMessage("agent", "📝 **Fetching full session logs...**");
+      
+      const fullSession = await getSession(
+        config.paramAiSdk.appBuilderMindId,
+        "",
+        sessionId
+      );
+      
+      if (fullSession?.response?.logs && Array.isArray(fullSession.response.logs)) {
+        const logs = fullSession.response.logs;
+        addMessage("agent", `📋 **Full Session Logs (${logs.length} entries):**`);
+        
+        logs.forEach((log: any, index: number) => {
+          if (log.message) {
+            const timestamp = log.timestamp || `Entry ${index + 1}`;
+            const status = log.status ? ` [${log.status}]` : '';
+            addMessage("agent", `📝 **${timestamp}${status}:**\n${log.message}`);
+          }
+        });
+      } else {
+        addMessage("agent", "ℹ️ No logs found for this session.");
+      }
+    } catch (error) {
+      console.error("Error fetching full logs:", error);
+      addMessage("agent", `❌ **Error fetching logs:** ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  };
+
+  // Function to display detailed session output
+  const viewOutputDetails = async () => {
+    if (!sessionId) {
+      addMessage("agent", "⚠️ No session ID available to view output details.");
+      return;
+    }
+    
+    try {
+      addMessage("agent", "📤 **Fetching session output details...**");
+      
+      const fullSession = await getSession(
+        config.paramAiSdk.appBuilderMindId,
+        "",
+        sessionId
+      );
+      
+      if (fullSession?.response?.output) {
+        const output = fullSession.response.output;
+        addMessage("agent", `📊 **Session Output Details:**`);
+        
+        if (output.type === "tabs" && output.tabs) {
+          addMessage("agent", `📑 **Output Type:** ${output.type}\n📋 **Available Tabs:** ${output.tabs.join(", ")}`);
+          
+          if (output.content) {
+            Object.keys(output.content).forEach((tabName) => {
+              const tabContent = output.content[tabName];
+              if (Array.isArray(tabContent) && tabContent.length > 0) {
+                addMessage("agent", `\n**${tabName} Tab Content:**`);
+                tabContent.forEach((item: any, index: number) => {
+                  if (item.type === "markdown" && item.content) {
+                    addMessage("agent", `📝 **${tabName} - Item ${index + 1}:**\n\`\`\`markdown\n${item.content}\n\`\`\``);
+                  } else {
+                    addMessage("agent", `📄 **${tabName} - Item ${index + 1}:**\n\`\`\`json\n${JSON.stringify(item, null, 2)}\n\`\`\``);
+                  }
+                });
+              }
+            });
+          }
+        } else {
+          addMessage("agent", `📄 **Raw Output:**\n\`\`\`json\n${JSON.stringify(output, null, 2)}\n\`\`\``);
+        }
+      } else {
+        addMessage("agent", "ℹ️ No output found for this session.");
+      }
+    } catch (error) {
+      console.error("Error fetching output details:", error);
+      addMessage("agent", `❌ **Error fetching output details:** ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  };
+
+  // Helper function to display session information in a formatted way
+  const displaySessionInfo = (sessionData: any, sessionType: string = "Session") => {
+    let infoMessage = `📊 **${sessionType} Information:**\n`;
+    
+    // Display session args if available
+    if (sessionData.args) {
+      infoMessage += `\n📋 **Args:**\n\`\`\`json\n${JSON.stringify(sessionData.args, null, 2)}\n\`\`\``;
+    }
+    
+    // Display session output if available
+    if (sessionData.output) {
+      if (sessionData.output.type === "tabs" && sessionData.output.tabs) {
+        infoMessage += `\n📤 **Output Tabs:** ${sessionData.output.tabs.join(", ")}`;
+        
+        // Display content for each tab
+        if (sessionData.output.content) {
+          Object.keys(sessionData.output.content).forEach((tabName) => {
+            const tabContent = sessionData.output.content[tabName];
+            if (Array.isArray(tabContent) && tabContent.length > 0) {
+              infoMessage += `\n\n**${tabName}:**`;
+              tabContent.forEach((item: any, index: number) => {
+                if (item.type === "markdown" && item.content) {
+                  // Truncate long content to avoid overwhelming the chat
+                  const truncatedContent = item.content.length > 200 
+                    ? item.content.substring(0, 200) + "..."
+                    : item.content;
+                  infoMessage += `\n${index + 1}. ${truncatedContent}`;
+                }
+              });
+            }
+          });
+        }
+      } else {
+        infoMessage += `\n📤 **Output:**\n\`\`\`json\n${JSON.stringify(sessionData.output, null, 2)}\n\`\`\``;
+      }
+    }
+    
+    // Display session logs count if available
+    if (sessionData.logs && Array.isArray(sessionData.logs)) {
+      infoMessage += `\n\n📝 **Logs:** Found ${sessionData.logs.length} log entries`;
+      
+      // Add recent logs (limit to last 3 to avoid spam)
+      const recentLogs = sessionData.logs.slice(-3);
+      if (recentLogs.length > 0) {
+        infoMessage += `\n\n**Recent Logs:**`;
+        recentLogs.forEach((log: any, index: number) => {
+          if (log.message) {
+            // Truncate long log messages
+            const truncatedMessage = log.message.length > 150 
+              ? log.message.substring(0, 150) + "..."
+              : log.message;
+            infoMessage += `\n${index + 1}. ${truncatedMessage}`;
+          }
+        });
+      }
+    }
+    
+    // Add session metadata if available
+    if (sessionData.created_at) {
+      infoMessage += `\n\n⏰ **Created:** ${new Date(sessionData.created_at).toLocaleString()}`;
+    }
+    if (sessionData.e_at) {
+      infoMessage += `\n🔄 **Executed:** ${new Date(sessionData.e_at).toLocaleString()}`;
+    }
+    if (sessionData.execution_status) {
+      infoMessage += `\n✅ **Status:** ${sessionData.execution_status}`;
+    }
+    
+    addMessage("agent", infoMessage);
+  };
+
   // Handle workflow selection
   const handleWorkflowSelect = (workflowName: string) => {
     // Prevent selection if already building a workflow
@@ -285,18 +470,41 @@ const CreateDeployScreen: React.FC = () => {
         console.log("✅ Found matching session:", matchingSession);
         setProject(expectedMindName);
         
+        // Store the session ID for future use
+        if (matchingSession._id) {
+          setSessionId(matchingSession._id);
+          console.log("✅ Stored session ID:", matchingSession._id);
+          
+          // Fetch the full session content with logs, args, and output
+          try {
+            console.log("🔍 Fetching full session content for session ID:", matchingSession._id);
+            const fullSession = await getSession(
+              config.paramAiSdk.appBuilderMindId,
+              "",
+              matchingSession._id
+            );
+            console.log("Full session content:", fullSession);
+            
+            if (fullSession?.response) {
+              // Extract and display session information
+              const sessionData = fullSession.response;
+              console.log("Full session data:", sessionData);
+              
+              // Use the helper function to display session information
+              displaySessionInfo(sessionData, "Existing Application Session");
+            }
+          } catch (sessionError) {
+            console.error("Error fetching full session content:", sessionError);
+            addMessage("agent", `⚠️ **Note:** Found existing session but couldn't retrieve full content.`);
+          }
+        }
+        
         // Store both the session URL and session ID
         if (matchingSession.url) {
           setSessionUrl(matchingSession.url);
           addMessage("agent", `🎉 Found existing application! Your application is ready to use.`);
         } else {
           addMessage("agent", `✅ Found existing application session: ${expectedMindName}. Loading preview...`);
-        }
-        
-        // Store the session ID for future use
-        if (matchingSession._id) {
-          setSessionId(matchingSession._id);
-          console.log("✅ Stored session ID:", matchingSession._id);
         }
         
         setDeploymentStatus("completed");
@@ -658,6 +866,36 @@ const CreateDeployScreen: React.FC = () => {
 
       if (projectSession && projectSession.url) {
         setSessionUrl(projectSession.url);
+        
+        // Also store the session ID if available
+        if (projectSession._id) {
+          setSessionId(projectSession._id);
+          console.log("✅ Stored session ID from project session:", projectSession._id);
+          
+          // Fetch the full session content with logs, args, and output
+          try {
+            console.log("🔍 Fetching full session content for project session ID:", projectSession._id);
+            const fullSession = await getSession(
+              config.paramAiSdk.appBuilderMindId,
+              "",
+              projectSession._id
+            );
+            console.log("Full project session content:", fullSession);
+            
+            if (fullSession?.response) {
+              // Extract and display session information
+              const sessionData = fullSession.response;
+              console.log("Full project session data:", sessionData);
+              
+              // Use the helper function to display session information
+              displaySessionInfo(sessionData, "Project Session");
+            }
+          } catch (sessionError) {
+            console.error("Error fetching full project session content:", sessionError);
+            addMessage("agent", `⚠️ **Note:** Found project session but couldn't retrieve full content.`);
+          }
+        }
+        
         addMessage("agent", `🎉 Your application is ready! You can now view it in the preview panel.`);
       } else {
         // Log the session structure to debug
@@ -1075,6 +1313,42 @@ const CreateDeployScreen: React.FC = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Session Information and Actions */}
+            {sessionId && (
+              <div className="mt-4 py-4 px-0">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-600">📊</span>
+                    <span className="text-sm font-medium text-gray-700">Session Information</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={viewFullLogs}
+                      className="px-3 py-1.5 text-xs font-medium rounded-full border border-gray-300 hover:border-green-300 hover:text-green-700 bg-white hover:bg-green-50 transition-all duration-200 cursor-pointer"
+                    >
+                      📝 View Logs
+                    </button>
+                    <button
+                      onClick={viewOutputDetails}
+                      className="px-3 py-1.5 text-xs font-medium rounded-full border border-gray-300 hover:border-purple-300 hover:text-purple-700 bg-white hover:bg-purple-50 transition-all duration-200 cursor-pointer"
+                    >
+                      📤 Output Details
+                    </button>
+                    <button
+                      onClick={refreshSessionInfo}
+                      className="px-3 py-1.5 text-xs font-medium rounded-full border border-gray-300 hover:border-blue-300 hover:text-blue-700 bg-white hover:bg-blue-50 transition-all duration-200 cursor-pointer"
+                    >
+                      🔄 Refresh
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="text-xs text-gray-500 mb-2">
+                  Session ID: <code className="bg-gray-100 px-1 py-0.5 rounded">{sessionId}</code>
                 </div>
               </div>
             )}
