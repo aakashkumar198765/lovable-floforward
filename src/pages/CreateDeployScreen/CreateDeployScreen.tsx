@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FlexLayout } from "../components/atoms/layouts";
-import { Button, LoadingState, Alert } from "../components/atoms";
-import paramSDKService from "../services/ParamSDKService";
-import appCreationService from "../services/AppCreationService";
-import DemoApp from "../components/DemoApp";
-import { executeMind, streamSSE } from "../services/paramai_browsersdk";
-import Logs from "./CreateDeployScreen/Logs";
+import { FlexLayout } from "../../components/atoms/layouts";
+import { Button, LoadingState, Alert } from "../../components/atoms";
+import paramSDKService from "../../services/ParamSDKService";
+import appCreationService from "../../services/AppCreationService";
+import DemoApp from "../../components/DemoApp";
+import { executeMind, streamSSE } from "../../services/paramai_browsersdk";
+import Logs from "./Logs";
 
 interface ConversationMessage {
   id: string;

@@ -15,7 +15,7 @@ import paramSDKService from "./services/ParamSDKService";
 import Prompt from "./pages/Prompt";
 import Login from "./pages/Login";
 import AIConfiguration from "./pages/AIConfiguration";
-import CreateDeployScreen from "./pages/CreateDeployScreen";
+import CreateDeployScreen from "./pages/CreateDeployScreen/CreateDeployScreen";
 
 function App() {
   useEffect(() => {
