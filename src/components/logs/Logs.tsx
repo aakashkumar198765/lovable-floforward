@@ -13,6 +13,10 @@ type LogsProps = {
   onViewOutput: () => void;
   streamCompleted?: boolean;
   setStreamingCompleted?: (completed: boolean) => void;
+  title?: string;
+  backButtonText?: string;
+  viewOutputButtonText?: string;
+  bgStyling?: boolean;
 };
 
 const Logs: React.FC<LogsProps> = ({
@@ -21,18 +25,18 @@ const Logs: React.FC<LogsProps> = ({
   onViewOutput,
   streamCompleted,
   setStreamingCompleted = () => {},
+  bgStyling = false,
+  title = "Creating Application - AI is building your app",
+  backButtonText = "Back to Project",
+  viewOutputButtonText = "View Demo App",
 }) => {
-  const logsEndRef = useRef<null | HTMLDivElement>(null);
+  const logsContainerRef = useRef<HTMLDivElement>(null);
   const [displayedLogs, setDisplayedLogs] = useState<LogEntry[]>([]);
   const [currentLogIndex, setCurrentLogIndex] = useState(0);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [displayedMessage, setDisplayedMessage] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const messageLinesRef = useRef<string[]>([]);
-
-  const scrollToBottom = () => {
-    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
 
   useEffect(() => {
     if (currentLogIndex < logs.length && !isStreaming) {
@@ -69,7 +73,10 @@ const Logs: React.FC<LogsProps> = ({
   }, [isStreaming, currentLineIndex, currentLogIndex, logs, displayedMessage]);
 
   useEffect(() => {
-    scrollToBottom();
+    if (logsContainerRef.current) {
+      logsContainerRef.current.scrollTop =
+        logsContainerRef.current.scrollHeight;
+    }
   }, [displayedLogs, displayedMessage]);
 
   const formatMessage = (message: string) => {
@@ -85,7 +92,7 @@ const Logs: React.FC<LogsProps> = ({
         /#{1,6}\s+(.*)/g,
         '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>'
       )
-      .replace(/- (.*)/g, '<li class="ml-4">$1</li>')
+      .replace(/\- (.*)/g, '<li class="ml-4">$1</li>')
       .replace(/\n/g, "<br />");
   };
 
@@ -128,14 +135,16 @@ const Logs: React.FC<LogsProps> = ({
   };
 
   return (
-    <div className="h-full bg-gray-50 rounded-lg p-6 flex flex-col">
+    <div
+      className={`${bgStyling ? "h-[calc(100vh-10rem)]" : "h-[calc(100vh-6rem)]"} ${ 
+        bgStyling && "bg-gray-50 shadow-2xl p-6"
+      } rounded-lg flex flex-col`}
+    >
       <div className="flex-shrink-0 mb-6">
-        <h3 className="text-2xl font-bold text-gray-800">
-          Creating Application - AI is building your app
-        </h3>
+        <h3 className="text-2xl font-bold text-gray-800">{title}</h3>
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-4">
+      <div className="flex-1 overflow-y-auto pr-4" ref={logsContainerRef}>
         {displayedLogs.map((log, index) => (
           <div
             key={index}
@@ -148,10 +157,11 @@ const Logs: React.FC<LogsProps> = ({
                   log.status
                 )} font-medium mb-1`}
               >
-                {log.status.charAt(0).toUpperCase() + log.status.slice(1)}
+                {log.status.charAt(0).toUpperCase() +
+                  log.status.slice(1)}
               </div>
               <div
-                className="text-sm text-gray-700 leading-relaxed"
+                className="text-sm text-gray-700 leading-relaxed break-all"
                 dangerouslySetInnerHTML={{
                   __html: formatMessage(log.message),
                 }}
@@ -197,29 +207,32 @@ const Logs: React.FC<LogsProps> = ({
             </div>
           </div>
         )}
-        <div ref={logsEndRef} />
       </div>
 
       {logs.length > 0 && (
         <div className="flex-shrink-0 pt-6 border-t border-gray-200">
           <div className="flex justify-center space-x-4">
-            <Button
-              onClick={handleBackToPrompt}
-              variant="secondary"
-              className="px-8 py-3 bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 rounded-lg"
-              iconLeft={<Icon name="arrow-left" size="sm" />}
-            >
-              Back to Project
-            </Button>
-            <Button
-              onClick={onViewOutput}
-              disabled={!streamCompleted}
-              variant="primary"
-              className="px-8 py-3 rounded-lg font-semibold"
-              iconRight={<Icon name="arrow-right" size="sm" />}
-            >
-              View Demo App
-            </Button>
+            {backButtonText && (
+              <Button
+                onClick={handleBackToPrompt}
+                variant="secondary"
+                className="px-8 py-3 bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 rounded-lg"
+                iconLeft={<Icon name="arrow-left" size="sm" />}
+              >
+                {backButtonText}
+              </Button>
+            )}
+            {viewOutputButtonText && (
+              <Button
+                onClick={onViewOutput}
+                disabled={!streamCompleted}
+                variant="primary"
+                className="px-8 py-3 rounded-lg font-semibold"
+                iconRight={<Icon name="arrow-right" size="sm" />}
+              >
+                {viewOutputButtonText}
+              </Button>
+            )}
           </div>
         </div>
       )}

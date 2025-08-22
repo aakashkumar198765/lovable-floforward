@@ -6,7 +6,6 @@ import paramSDKService from "../../services/ParamSDKService";
 import appCreationService from "../../services/AppCreationService";
 import DemoApp from "../../components/DemoApp";
 import { executeMind, streamSSE, getSession } from "../../services/paramai_browsersdk";
-import Logs from "./Logs";
 import config from "../../config.json";
 
 interface ConversationMessage {
