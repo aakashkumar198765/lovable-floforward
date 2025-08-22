@@ -276,6 +276,8 @@ const Prompt: React.FC = () => {
 
       setUserStoryLoading(true);
       setShowUserStory(true);
+      setLogs([]);
+      setStreamCompleted(false);
 
       // Debug: Log the current state for regeneration
       console.log("🔍 executeUserStoryMind called with:");
@@ -406,9 +408,96 @@ const Prompt: React.FC = () => {
           console.log("💾 New session mode: stored new session ID:", session_id);
         }
 
+        setLogs((prev) => [
+          ...prev,
+          {
+            message: `\`[API]\` **Connected to user story generation service...**  \n- Job ID: \`${job_id}\`  \n- Session: \`${session_id || 'New Session'}\``,
+            status: "started",
+            format: "markdown",
+          },
+        ]);
+
         // Start streaming logs from the event source
         try {
-          await streamSSE(job_id, {});
+          await streamSSE(job_id, {
+            onEvent: (data: any) => {
+              // Handle incoming stream data
+              let message = "";
+              let status = "pending";
+              let format = "text";
+  
+              if (typeof data === "object" && data !== null) {
+                message = data.message || data.text || JSON.stringify(data);
+                status = data.status || "pending";
+                format = data.format || "text";
+              } else if (typeof data === "string") {
+                try {
+                  const parsed = JSON.parse(data);
+                  message = parsed.message || parsed.text || data;
+                  status = parsed.status || "pending";
+                  format = parsed.format || "text";
+                } catch (e) {
+                  message = data;
+                }
+              }
+  
+              // Add the streamed log to state
+              setLogs((prev) => [
+                ...prev,
+                {
+                  message: `\`[STREAM]\` ${message}`,
+                  status,
+                  format,
+                },
+              ]);
+            },
+            onComplete: (data: any) => {
+              // Handle completion - stream is already closed
+              console.log("Stream completed:", data);
+              setStreamCompleted(true);
+              // Handle incoming stream data
+              let message = "";
+              let status = "completed";
+              let format = "text";
+              if (typeof data === "object" && data !== null) {
+                message = data.message || data.text || JSON.stringify(data);
+                status = data.status || "completed";
+                format = data.format || "text";
+              } else if (typeof data === "string") {
+                try {
+                  const parsed = JSON.parse(data);
+                  message = parsed.message || parsed.text || data;
+                  status = parsed.status || "completed";
+                  format = parsed.format || "text";
+                } catch (e) {
+                  message = data;
+                }
+              }
+              // Add the streamed log to state
+              setLogs((prev) => [
+                ...prev,
+                {
+                  message: `\`[STREAM]\` ${message}`,
+                  status,
+                  format,
+                },
+              ]);
+            },
+            onError: (error: any) => {
+              console.error("Stream error:", error);
+              // Add error log entry
+              setLogs((prev) => [
+                ...prev,
+                {
+                  message: `\`[ERROR]\` **Stream connection failed**  \n- Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+                  status: "error",
+                  format: "markdown",
+                },
+              ]);
+            },
+            maxRetries: 3,
+            retryDelay: 2000,
+          });
           
           // Use the appropriate session ID for getSession
           let sessionIdForGetSession;
@@ -768,6 +857,7 @@ const Prompt: React.FC = () => {
     
     // Proceed to BRD building
     setShowUserStory(false);
+    setStreamCompleted(false);
     console.log("🔍 Set showUserStory to false");
     
     // Add a small delay to ensure state updates are processed

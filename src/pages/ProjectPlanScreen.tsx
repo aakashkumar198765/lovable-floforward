@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ReactFlow,
@@ -31,6 +31,7 @@ import {
 import ValidUtils from "../utils/ValidUtils";
 import { LoadingState, Spinner, Icon } from "../components";
 import config from "../config.json";
+import Logs from "../components/logs/Logs";
 
 const nodeColor = (node: any) => {
   // First check if node has style with backgroundColor
@@ -68,6 +69,12 @@ const mindsConfig = {
   syntheticData: config.paramAiSdk.syntheticDataMindId,
 };
 
+type LogEntry = {
+  message: string;
+  status: string;
+  format: string;
+};
+
 const ProjectPlanScreen: React.FC = () => {
   const navigate = useNavigate();
   const { projectId, projectName } = useParams<{
@@ -77,6 +84,8 @@ const ProjectPlanScreen: React.FC = () => {
   const [activeProjectTab, setActiveProjectTab] = useState("brd");
   const [selectedVersion, setSelectedVersion] = useState("1.0");
   const [loading, setLoading] = useState(false);
+  const [streamedLogs, setStreamedLogs] = useState<LogEntry[]>([]);
+  const [isStreamingLogs, setIsStreamingLogs] = useState(false);
   const [Brd, setBrd]: any = useState({});
   const [schemaWorkflow, setSchemaWorkflow]: any = useState({});
   const [plan, setPlan]: any = useState({});
@@ -166,7 +175,17 @@ const ProjectPlanScreen: React.FC = () => {
         );
         const { job_id, session_id } = schemaWorkflowExecute;
         // show logs using job_id
-        await streamSSE(job_id);
+        setLoading(false); // Hide main loader
+        setIsStreamingLogs(true);
+        setStreamedLogs([]); // Clear previous logs
+        await streamSSE(job_id, {
+          onEvent: handleStreamEvent,
+          onComplete: () => setIsStreamingLogs(false),
+          onError: (err: any) => {
+            console.error("SSE error during schema workflow:", err);
+            setIsStreamingLogs(false);
+          }
+        });
         // once logs are completed then fetch and save schemaWorkflow details using session_id
         const schemaWorkflowResponse = await getSession(
           mindsConfig?.schemaAnalysis,
@@ -196,7 +215,17 @@ const ProjectPlanScreen: React.FC = () => {
         const planSessionId = planExecution?.session_id;
 
         // show logs for plans using session id and then fetch plan details
-        await streamSSE(planJobId);
+        setLoading(false); // Hide main loader
+        setIsStreamingLogs(true);
+        setStreamedLogs([]); // Clear previous logs
+        await streamSSE(planJobId, {
+          onEvent: handleStreamEvent,
+          onComplete: () => setIsStreamingLogs(false),
+          onError: (err: any) => {
+            console.error("SSE error during plan generation:", err);
+            setIsStreamingLogs(false);
+          }
+        });
         const planDetails = await getSession(
           mindsConfig?.jsonOutput,
           "",
@@ -254,7 +283,17 @@ const ProjectPlanScreen: React.FC = () => {
         );
         console.log(previewExecute);
         const { job_id, session_id } = previewExecute;
-        await streamSSE(job_id);
+        setLoading(false); // Hide main loader
+        setIsStreamingLogs(true);
+        setStreamedLogs([]); // Clear previous logs
+        await streamSSE(job_id, {
+          onEvent: handleStreamEvent,
+          onComplete: () => setIsStreamingLogs(false),
+          onError: (err: any) => {
+            console.error("SSE error during preview generation:", err);
+            setIsStreamingLogs(false);
+          }
+        });
         const previewResponse = await getSession(
           mindsConfig?.syntheticData,
           "",
@@ -992,6 +1031,15 @@ const ProjectPlanScreen: React.FC = () => {
   // Ref to access ReactFlow instance
   const reactFlowInstance = React.useRef<any>(null);
   const [isFlowReady, setIsFlowReady] = React.useState(false);
+  const logsEndRef = useRef<null | HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [streamedLogs]);
 
   // Helper function to get current state machines data for components
   const getCurrentStateMachines = () => {
@@ -1018,6 +1066,28 @@ const ProjectPlanScreen: React.FC = () => {
       return "";
     }
     return testMarkdown;
+  };
+
+  // Helper function to handle streamed events and update logs
+  const handleStreamEvent = (data: any) => {
+    let logMessage = '';
+    if (typeof data === 'object' && data !== null && data.message) {
+      logMessage = data.message;
+    } else if (typeof data === 'string') {
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed && parsed.message) {
+          logMessage = parsed.message;
+        } else {
+          logMessage = data;
+        }
+      } catch(e) {
+        logMessage = data;
+      }
+    } else {
+      logMessage = String(data);
+    }
+    setStreamedLogs((prev) => [...prev, { message: logMessage, status: "info", format: "text" }]);
   };
 
   // Helper function to get schema from node ID
@@ -1108,6 +1178,54 @@ const ProjectPlanScreen: React.FC = () => {
     }
   };
 
+  const formatMessage = (message: string) => {
+    // Simple markdown-like formatting
+    return message
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Bold
+      .replace(/\*(.*?)\*/g, "<em>$1</em>") // Italic
+      .replace(/`([^`]+)`/g, '<code class="bg-gray-200 px-1 rounded">$1</code>') // Inline code
+      .replace(
+        /```([\s\S]*?)```/g,
+        '<pre class="bg-gray-100 p-2 rounded text-sm overflow-x-auto"><code>$1</code></pre>'
+      )
+      .replace(
+        /#{1,6}\s+(.*)/g,
+        '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>'
+      )
+      .replace(/-\s+(.*)/g, '<li class="ml-4">$1</li>')
+      .replace(/\n/g, "<br />"); // Line breaks
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "started":
+        return "text-blue-600";
+      case "pending":
+        return "text-yellow-700";
+      case "completed":
+        return "text-green-600";
+      case "error":
+        return "text-red-600";
+      default:
+        return "text-gray-600";
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "started":
+        return "▶️";
+      case "pending":
+        return "⏳";
+      case "completed":
+        return "✅";
+      case "error":
+        return "❌";
+      default:
+        return "ℹ️";
+    }
+  };
+
   const handleReRun = async () => {
     try {
       setLoading(true);
@@ -1181,7 +1299,17 @@ const ProjectPlanScreen: React.FC = () => {
       const { job_id, session_id } = execution;
 
       // Wait for the SSE stream to complete
-      await streamSSE(job_id);
+      setLoading(false); // Hide main loader
+      setIsStreamingLogs(true);
+      setStreamedLogs([]); // Clear previous logs
+      await streamSSE(job_id, {
+        onEvent: handleStreamEvent,
+        onComplete: () => setIsStreamingLogs(false),
+        onError: (err: any) => {
+          console.error("SSE error during re-run:", err);
+          setIsStreamingLogs(false);
+        }
+      });
 
       // Fetch the updated response
       const response = await getSession(mindId, "", session_id);
@@ -1215,6 +1343,23 @@ const ProjectPlanScreen: React.FC = () => {
           <MarkdownRenderer content={getBrdContent()} className="w-full p-4" />
         );
       case "plan":
+        if (isStreamingLogs || streamedLogs.length > 0) {
+          return (
+            <Logs
+              logs={streamedLogs}
+              onBackToPrompt={() => {
+                setIsStreamingLogs(false);
+                setStreamedLogs([]);
+              }}
+              onViewOutput={() => setStreamedLogs([])}
+              streamCompleted={!isStreamingLogs && streamedLogs.length > 0}
+              title="Logs"
+              backButtonText=""
+              viewOutputButtonText="View workflow"
+              bgStyling={false}
+            />
+          );
+        }
         return (
           <ReactFlowProvider>
             <div className="h-full w-full flex relative">
@@ -1463,7 +1608,7 @@ const ProjectPlanScreen: React.FC = () => {
 
           {/* Rendering the tab content */}
           <div className="w-full overflow-auto p-4 h-full">
-            {loading ? <Spinner className="h-100" /> : renderContent()}
+            {loading && !isStreamingLogs ? <Spinner className="h-100" /> : renderContent()}
           </div>
         </FlexLayout>
       </FlexLayout>
