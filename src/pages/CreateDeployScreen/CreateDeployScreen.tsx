@@ -48,6 +48,13 @@ const CreateDeployScreen: React.FC = () => {
   const [stateMachineSessionId, setStateMachineSessionId] = useState<string | null>(null);
   const [currentlyBuildingWorkflow, setCurrentlyBuildingWorkflow] = useState<string | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [showLogs, setShowLogs] = useState(false);
+  const [logsMessageId, setLogsMessageId] = useState<string | null>(null);
+  const [logsData, setLogsData] = useState<any[] | null>(null); // New state for logs data
+  const [logsLoading, setLogsLoading] = useState(false); // New state for loading logs
+  const [fullSessionData, setFullSessionData] = useState<any>(null);
+  const [showWorkflowAnalysis, setShowWorkflowAnalysis] = useState(false); // New state for workflow analysis
+  const [workflowAnalysisData, setWorkflowAnalysisData] = useState<any>(null); // New state for workflow analysis data
 
   const addMessage = (
     type: ConversationMessage["type"],
@@ -185,8 +192,37 @@ const CreateDeployScreen: React.FC = () => {
     }
   };
 
+  // Helper function to extract URL from session data
+  const extractUrlFromSession = (sessionData: any): string | null => {
+    if (!sessionData?.output) return null;
+    
+    const output = sessionData.output;
+    
+    // Check if output has the expected structure with tabs and content
+    if (output.type === "tabs" && output.content) {
+      // Look for the Aipagegenerator__001 tab content
+      const aiPageContent = output.content["Aipagegenerator__001"];
+      if (aiPageContent && Array.isArray(aiPageContent) && aiPageContent.length > 0) {
+        // Get the first item which should contain the URL
+        const firstItem = aiPageContent[0];
+        if (firstItem.type === "markdown" && firstItem.content) {
+          // Check if content is a URL
+          if (firstItem.content.startsWith('http')) {
+            return firstItem.content;
+          }
+        }
+      }
+    }
+    
+    // Fallback: check if there's a direct URL property
+    return sessionData.url || null;
+  };
+
   // Helper function to display session information in a formatted way
   const displaySessionInfo = (sessionData: any, sessionType: string = "Session") => {
+    // Store the full session data for future use (logs, etc.)
+    setFullSessionData(sessionData);
+    
     let infoMessage = `📊 **${sessionType} Information:**\n`;
     
     // Display session args if available
@@ -194,12 +230,12 @@ const CreateDeployScreen: React.FC = () => {
       infoMessage += `\n📋 **Args:**\n\`\`\`json\n${JSON.stringify(sessionData.args, null, 2)}\n\`\`\``;
     }
     
-    // Display session output if available
+    // Display session output if available - Updated to handle the specific output structure
     if (sessionData.output) {
       if (sessionData.output.type === "tabs" && sessionData.output.tabs) {
         infoMessage += `\n📤 **Output Tabs:** ${sessionData.output.tabs.join(", ")}`;
         
-        // Display content for each tab
+        // Display content for each tab - Updated to handle the specific content structure
         if (sessionData.output.content) {
           Object.keys(sessionData.output.content).forEach((tabName) => {
             const tabContent = sessionData.output.content[tabName];
@@ -207,11 +243,22 @@ const CreateDeployScreen: React.FC = () => {
               infoMessage += `\n\n**${tabName}:**`;
               tabContent.forEach((item: any, index: number) => {
                 if (item.type === "markdown" && item.content) {
-                  // Truncate long content to avoid overwhelming the chat
-                  const truncatedContent = item.content.length > 200 
-                    ? item.content.substring(0, 200) + "..."
-                    : item.content;
-                  infoMessage += `\n${index + 1}. ${truncatedContent}`;
+                  // Check if content is a URL
+                  if (item.content.startsWith('http')) {
+                    infoMessage += `\n${index + 1}. 🔗 **Application URL:** ${item.content}`;
+                    
+                    // If this is the first URL found and we don't have a session URL yet, set it
+                    if (!sessionUrl && index === 0) {
+                      console.log("🔗 Setting session URL from displaySessionInfo:", item.content);
+                      setSessionUrl(item.content);
+                    }
+                  } else {
+                    // Truncate long content to avoid overwhelming the chat
+                    const truncatedContent = item.content.length > 200 
+                      ? item.content.substring(0, 200) + "..."
+                      : item.content;
+                    infoMessage += `\n${index + 1}. ${truncatedContent}`;
+                  }
                 }
               });
             }
@@ -256,11 +303,129 @@ const CreateDeployScreen: React.FC = () => {
     addMessage("agent", infoMessage);
   };
 
+  // Function to display all logs in one card
+  const displayAllLogsCard = (logs: any[]) => {
+    // Store logs data for display in the card (not in chat)
+    setLogsData(logs);
+    setLogsLoading(false); // Ensure loading is off when using stored data
+  };
+
+  // Function to display workflow analysis in a card format
+  const displayWorkflowAnalysisCard = (analysis: any) => {
+    // Store workflow analysis data for display in the card (not in chat)
+    setWorkflowAnalysisData(analysis);
+    setShowWorkflowAnalysis(true);
+  };
+
+  // Function to fetch and display all logs
+  const fetchAndDisplayAllLogs = async () => {
+    if (!sessionId) {
+      addMessage("agent", "⚠️ No session ID available to view logs.");
+      return;
+    }
+    
+    // Use stored session data if available, otherwise fetch
+    if (fullSessionData && fullSessionData.logs && Array.isArray(fullSessionData.logs)) {
+      // Use stored logs data - no need to fetch again
+      displayAllLogsCard(fullSessionData.logs);
+      return;
+    }
+    
+    try {
+      setLogsLoading(true);
+      
+      const fullSession = await getSession(
+        config.paramAiSdk.appBuilderMindId,
+        "",
+        sessionId
+      );
+      
+      if (fullSession?.response?.logs && Array.isArray(fullSession.response.logs)) {
+        displayAllLogsCard(fullSession.response.logs);
+      } else {
+        addMessage("agent", "ℹ️ No logs found for this session.");
+      }
+    } catch (error) {
+      console.error("Error fetching all logs:", error);
+      addMessage("agent", `❌ **Error fetching logs:** ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setLogsLoading(false);
+    }
+  };
+
+  // Function to hide logs by clearing the logs data
+  const hideLogs = () => {
+    setLogsData(null);
+    setLogsMessageId(null);
+  };
+
+  // Function to hide workflow analysis by clearing the analysis data
+  const hideWorkflowAnalysis = () => {
+    setWorkflowAnalysisData(null);
+    setShowWorkflowAnalysis(false);
+  };
+
+  // Function to format log messages for better readability
+  const formatLogMessage = (message: string) => {
+    if (!message) return "";
+    
+    // Handle different types of log messages
+    if (message.includes('[TOOL_USE]') || message.includes('[TOOL_RESULT]')) {
+      return (
+        <div className="space-y-2">
+          {message.split('\n').map((line, lineIndex) => {
+            if (line.includes('[TOOL_USE]') || line.includes('[TOOL_RESULT]')) {
+              return (
+                <div key={lineIndex} className="bg-blue-50 border border-blue-200 rounded p-2">
+                  <span className="font-mono text-xs text-blue-800 break-all">{line}</span>
+                </div>
+              );
+            } else if (line.includes('**') && line.includes('**')) {
+              return (
+                <div key={lineIndex} className="font-semibold text-gray-900">
+                  {line}
+                </div>
+              );
+            } else if (line.includes('```')) {
+              return (
+                <div key={lineIndex} className="bg-gray-50 border border-gray-200 rounded p-2">
+                  <pre className="text-xs text-gray-700 whitespace-pre-wrap break-all overflow-x-auto">
+                    {line.replace(/```/g, '')}
+                  </pre>
+                </div>
+              );
+            } else if (line.trim()) {
+              return (
+                <div key={lineIndex} className="break-words">
+                  {line}
+                </div>
+              );
+            }
+            return null;
+          })}
+        </div>
+      );
+    }
+    
+    // For regular messages, just wrap long text
+    return (
+      <div className="break-words whitespace-pre-wrap">
+        {message}
+      </div>
+    );
+  };
+
   // Handle workflow selection
   const handleWorkflowSelect = (workflowName: string) => {
-    // Prevent selection if already building a workflow
+    // Prevent selection if already building a workflow or if application is building
     if (currentlyBuildingWorkflow) {
       addMessage("agent", `⚠️ **Workflow in progress**: Currently building ${currentlyBuildingWorkflow}. Please wait for it to complete before selecting another workflow.`);
+      return;
+    }
+    
+    // Prevent selection if application is currently building
+    if (isProcessing || deploymentStatus === "creating") {
+      addMessage("agent", `⚠️ **Application building in progress**: Please wait for the current application build to complete before executing additional workflows.`);
       return;
     }
 
@@ -286,10 +451,103 @@ const CreateDeployScreen: React.FC = () => {
     executeWorkflow(workflowText);
   };
 
+  // Execute user query using executeMind
+  const executeUserQuery = async (userQuery: string) => {
+    try {
+      setIsAgentTyping(true);
+      addMessage("agent", `🚀 **Executing Query:** ${userQuery}\n\nI'm now processing your request...`);
+      
+      const mindName = projectName ? 
+        (projectName.startsWith("P_") ? projectName.replace(/^P_/, 'A_') : `A_${projectName}`) 
+        : `A_${Date.now()}`;
+      
+      const responseStructure = {
+        api: {},
+        ui: {
+          type: "tabs",
+          tabs: [],
+          content: {},
+        },
+      };
+
+      const args: any = {
+        codegen_id: mindName.replace(/^(US|P|A)/, 'P'),
+        user_query: userQuery,
+        files: [],
+      };
+
+      // Use the stored session ID if available
+      const existingSessionId = sessionId;
+      console.log(`🔧 Executing user query with parameters:`, {
+        mindName,
+        args,
+        responseStructure,
+        mindId: config.paramAiSdk.appBuilderMindId,
+        user_query: userQuery,
+        session_id: existingSessionId
+      });
+      
+      const response = await executeMind(
+        mindName, 
+        args, 
+        responseStructure, 
+        config.paramAiSdk.appBuilderMindId,
+        existingSessionId // Pass the stored session ID
+      );
+
+      const { job_id, session_id } = response;
+      
+      addMessage("agent", `⚡ **Query execution initiated**\n- Job ID: \`${job_id}\`\n- Session: \`${session_id}\``);
+
+      // Start streaming logs for the query execution
+      try {
+        await streamSSE(job_id, {
+          onEvent: (data: any) => {
+            let message = "";
+            if (typeof data === "object" && data !== null) {
+              message = data.message || data.text || JSON.stringify(data);
+            } else if (typeof data === "string") {
+              try {
+                const parsed = JSON.parse(data);
+                message = parsed.message || parsed.text || data;
+              } catch (e) {
+                message = data;
+              }
+            }
+
+            if (message) {
+              addMessage("agent", `📝 ${message}`);
+            }
+          },
+          onComplete: async (data: any) => {
+            console.log("User query execution completed:", data);
+            addMessage("agent", `✅ **Query execution completed successfully!**\n\nI've processed your request: "${userQuery}"`);
+            setIsAgentTyping(false);
+          },
+          onError: (error: any) => {
+            console.error("User query execution error:", error);
+            addMessage("agent", `❌ **Query execution failed**\n- Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+            setIsAgentTyping(false);
+          },
+          maxRetries: 3,
+          retryDelay: 2000,
+        });
+      } catch (streamError) {
+        console.error("User query stream error:", streamError);
+        addMessage("agent", `❌ **Query stream connection failed**\n- Error: ${streamError instanceof Error ? streamError.message : "Unknown error"}`);
+        setIsAgentTyping(false);
+      }
+    } catch (error) {
+      console.error("User query execution failed:", error);
+      addMessage("agent", `❌ **Query execution failed**\n- Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+      setIsAgentTyping(false);
+    }
+  };
+
   // Handle user message with workflow support
   const handleUserMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userInput.trim() || isAgentTyping) return;
+    if (!userInput.trim() || isAgentTyping || isProcessing || deploymentStatus === "creating") return;
 
     const message = userInput.trim();
     setUserInput("");
@@ -310,12 +568,12 @@ const CreateDeployScreen: React.FC = () => {
       }
     }
     
-    // Simple response for other user messages
+    // For other user messages, execute the mind with the user's query
     setIsAgentTyping(true);
-    setTimeout(() => {
-      setIsAgentTyping(false);
-      addMessage("agent", "I'm currently building your application. Once it's ready, you'll be able to interact with it in the preview panel.");
-    }, 1000);
+    addMessage("agent", `🤔 **Processing your query:** "${message}"\n\nLet me analyze this and provide you with a response...`);
+    
+    // Execute the mind with the user's query
+    executeUserQuery(message);
   };
 
   // Execute workflow using executeMind
@@ -491,26 +749,26 @@ const CreateDeployScreen: React.FC = () => {
               
               // Use the helper function to display session information
               displaySessionInfo(sessionData, "Existing Application Session");
+
+                // The URL extraction and status setting is now handled by displaySessionInfo
+              // We just need to wait a moment for the state to update, then check if URL was found
+              const sessionUrl = extractUrlFromSession(sessionData);
+              setTimeout(() => {
+                if (sessionUrl) {
+                  console.log("✅ URL found, setting deployment status to completed");
+                  setDeploymentStatus("completed");
+                } else {
+                  console.log("❌ No URL found, setting deployment status to failed");
+                  setDeploymentStatus("failed");
+                }
+                setIsProcessing(false);
+              }, 100);
             }
           } catch (sessionError) {
             console.error("Error fetching full session content:", sessionError);
             addMessage("agent", `⚠️ **Note:** Found existing session but couldn't retrieve full content.`);
           }
         }
-        
-        // Store both the session URL and session ID
-        if (matchingSession.url) {
-          setSessionUrl(matchingSession.url);
-          addMessage("agent", `🎉 Found existing application! Your application is ready to use.`);
-        } else {
-          addMessage("agent", `✅ Found existing application session: ${expectedMindName}. Loading preview...`);
-        }
-        
-        setDeploymentStatus("completed");
-        setIsProcessing(false);
-        
-        // Fetch state machine workflows after finding the session
-        // await fetchStateMachineWorkflows();
         
         return true;
       } else {
@@ -741,19 +999,29 @@ const CreateDeployScreen: React.FC = () => {
             setDeploymentStatus("completed");
             setIsProcessing(false);
 
-            // Try to fetch session URL once, then show iframe regardless
+            // Try to fetch session URL once, then check if build was successful
             addMessage("agent", "🔍 Searching for your application URL...");
             // If rebuilding, use the existing session ID; otherwise use the new one
             const sessionIdToUse = rebuildParams.isRebuild && rebuildParams.existingSessionId ? rebuildParams.existingSessionId : session_id;
-            await fetchSessionUrl(sessionIdToUse);
+            const urlFound = await fetchSessionUrl(sessionIdToUse);
             
-            // Add completion message
-            if (rebuildParams.isRebuild) {
-              addMessage("agent", `🎉 **Rebuild completed successfully!** Your application has been updated with the latest changes.`);
-            }
-            
-            // Fetch state machine workflows after build completion
-            await fetchStateMachineWorkflows();
+                    // Check if URL was found to determine build success
+        if (urlFound) {
+          // Add completion message
+          if (rebuildParams.isRebuild) {
+            addMessage("agent", `🎉 **Rebuild completed successfully!** Your application has been updated with the latest changes.`);
+          } else {
+            addMessage("agent", `🎉 **Build completed successfully!** Your application is ready to use.`);
+          }
+          
+          // Fetch state machine workflows after successful build completion
+          await fetchStateMachineWorkflows();
+        } else {
+          // Build failed - no URL found
+          addMessage("agent", `❌ **Build Failed**\n\nThe mind execution completed, but the application URL could not be found. This indicates the build process failed to generate a deployable application.`);
+          setDeploymentStatus("failed");
+          setIsProcessing(false);
+        }
           },
           onError: (error: any) => {
             console.error("Stream error:", error);
@@ -800,7 +1068,7 @@ const CreateDeployScreen: React.FC = () => {
     }
   };
 
-    const fetchSessionUrl = async (sessionId: string) => {
+    const fetchSessionUrl = async (sessionId: string): Promise<boolean> => {
     try {
       console.log("🔍 Fetching session URL for sessionId:", sessionId);
       console.log("🔍 Project ID:", projectId);
@@ -811,9 +1079,15 @@ const CreateDeployScreen: React.FC = () => {
       const specificSession = await getSession(config.paramAiSdk.appBuilderMindId, "", sessionId);
       console.log("Specific session response:", specificSession);
 
-      if (specificSession?.response?.url) {
-        console.log("✅ Found URL in specific session:", specificSession.response.url);
-        setSessionUrl(specificSession.response.url);
+      // Extract URL from the session output structure using the helper function
+      const extractedUrl = extractUrlFromSession(specificSession.response);
+      if (extractedUrl) {
+        console.log("✅ Found URL using helper function:", extractedUrl);
+      }
+
+      if (extractedUrl) {
+        console.log("✅ Successfully extracted URL:", extractedUrl);
+        setSessionUrl(extractedUrl);
         
         // Also store the session ID if available
         if (specificSession.response._id) {
@@ -822,10 +1096,10 @@ const CreateDeployScreen: React.FC = () => {
         }
         
         addMessage("agent", `🎉 Your application is ready! You can now view it in the preview panel.`);
-        return;
+        return true;
       }
 
-      // If no URL in specific session, try to get all sessions and find by mind name
+      // If no URL found in specific session, try to get all sessions and find by mind name
       const allSessions = await getSession(config.paramAiSdk.appBuilderMindId);
       console.log("All sessions response:", allSessions);
       console.log("All sessions count:", allSessions?.response?.length || 0);
@@ -865,52 +1139,300 @@ const CreateDeployScreen: React.FC = () => {
 
       console.log("Found project session:", projectSession);
 
-      if (projectSession && projectSession.url) {
-        setSessionUrl(projectSession.url);
+              if (projectSession) {
+          // Try to extract URL from the project session output structure using the helper function
+          const projectUrl = extractUrlFromSession(projectSession);
+          if (projectUrl) {
+            console.log("✅ Found URL in project session using helper function:", projectUrl);
+          }
         
-        // Also store the session ID if available
-        if (projectSession._id) {
-          setSessionId(projectSession._id);
-          console.log("✅ Stored session ID from project session:", projectSession._id);
+        if (projectUrl) {
+          setSessionUrl(projectUrl);
           
-          // Fetch the full session content with logs, args, and output
-          try {
-            console.log("🔍 Fetching full session content for project session ID:", projectSession._id);
-            const fullSession = await getSession(
-              config.paramAiSdk.appBuilderMindId,
-              "",
-              projectSession._id
-            );
-            console.log("Full project session content:", fullSession);
+          // Also store the session ID if available
+          if (projectSession._id) {
+            setSessionId(projectSession._id);
+            console.log("✅ Stored session ID from project session:", projectSession._id);
             
-            if (fullSession?.response) {
-              // Extract and display session information
-              const sessionData = fullSession.response;
-              console.log("Full project session data:", sessionData);
+            // Fetch the full session content with logs, args, and output
+            try {
+              console.log("🔍 Fetching full session content for project session ID:", projectSession._id);
+              const fullSession = await getSession(
+                config.paramAiSdk.appBuilderMindId,
+                "",
+                projectSession._id
+              );
+              console.log("Full project session content:", fullSession);
               
-              // Use the helper function to display session information
-              displaySessionInfo(sessionData, "Project Session");
+              if (fullSession?.response) {
+                // Extract and display session information
+                const sessionData = fullSession.response;
+                console.log("Full project session data:", sessionData);
+                
+                // Use the helper function to display session information
+                displaySessionInfo(sessionData, "Project Session");
+              }
+            } catch (sessionError) {
+              console.error("Error fetching full project session content:", sessionError);
+              addMessage("agent", `⚠️ **Note:** Found project session but couldn't retrieve full content.`);
             }
-          } catch (sessionError) {
-            console.error("Error fetching full project session content:", sessionError);
-            addMessage("agent", `⚠️ **Note:** Found project session but couldn't retrieve full content.`);
+          }
+          
+          addMessage("agent", `🎉 Your application is ready! You can now view it in the preview panel.`);
+          return true;
+        } else {
+          // Log the session structure to debug
+          console.log("Project session structure:", projectSession);
+          console.log("Project session output:", projectSession.output);
+          
+          // Only show message once, no retries
+          if (!sessionUrl) {
+            addMessage("agent", `✅ Build completed! However, the application URL could not be extracted from the session.`);
           }
         }
-        
-        addMessage("agent", `🎉 Your application is ready! You can now view it in the preview panel.`);
       } else {
-        // Log the session structure to debug
-        console.log("Session structure:", projectSession);
+        console.log("No project session found");
         
         // Only show message once, no retries
         if (!sessionUrl) {
-          addMessage("agent", `✅ Build completed! The application is ready in the preview panel with fallback content.`);
+          addMessage("agent", `✅ Build completed! However, no matching session was found.`);
         }
       }
+      
+      // If we reach here, no URL was found
+      return false;
     } catch (error) {
       console.error("Failed to fetch session URL:", error);
       addMessage("agent", `✅ Build completed! However, there was an issue retrieving the application URL.`);
+      return false;
     }
+  };
+
+  // Function to analyze app builder mind session logs and extract workflow information
+  const analyzeSessionLogs = (logs: any[]) => {
+    if (!logs || !Array.isArray(logs)) {
+      return {
+        error: "No logs available for analysis"
+      };
+    }
+
+    // Initialize analysis structure
+    const analysis = {
+      totalLogs: logs.length,
+      workflowSummary: {
+        totalWorkflows: 0,
+        completedWorkflows: 0,
+        pendingWorkflows: 0,
+        failedWorkflows: 0,
+        progressPercentage: 0
+      },
+      workflowDetails: [] as any[],
+      toolUsage: {
+        totalTools: 0,
+        successfulTools: 0,
+        failedTools: 0,
+        toolTypes: {} as Record<string, number>
+      },
+      executionPhases: {
+        analysis: { status: 'pending', steps: 0, completed: 0 },
+        setup: { status: 'pending', steps: 0, completed: 0 },
+        implementation: { status: 'pending', steps: 0, completed: 0 },
+        completion: { status: 'pending', steps: 0, completed: 0 }
+      },
+      errors: [] as string[],
+      recommendations: [] as string[]
+    };
+
+    // Analyze each log entry
+    logs.forEach((log, index) => {
+      const message = log.message || '';
+      const status = log.status || 'unknown';
+      const timestamp = log.timestamp || '';
+
+      // Detect workflow phases
+      if (message.includes('[INFO]') && message.includes('Analyzing')) {
+        analysis.executionPhases.analysis.status = 'in_progress';
+        analysis.executionPhases.analysis.steps++;
+        if (status === 'completed') {
+          analysis.executionPhases.analysis.completed++;
+        }
+      }
+
+      if (message.includes('[SEQUENCE]') || message.includes('[START]')) {
+        analysis.executionPhases.setup.status = 'in_progress';
+        analysis.executionPhases.setup.steps++;
+        if (status === 'completed') {
+          analysis.executionPhases.setup.completed++;
+        }
+      }
+
+      if (message.includes('[TOOL_USE]')) {
+        analysis.executionPhases.implementation.status = 'in_progress';
+        analysis.executionPhases.implementation.steps++;
+        if (status === 'completed') {
+          analysis.executionPhases.implementation.completed++;
+        }
+
+        // Extract tool information
+        analysis.toolUsage.totalTools++;
+        const toolMatch = message.match(/Using Tool:`\s*`([^`]+)`/);
+        if (toolMatch) {
+          const toolName = toolMatch[1];
+          analysis.toolUsage.toolTypes[toolName] = (analysis.toolUsage.toolTypes[toolName] || 0) + 1;
+        }
+      }
+
+      if (message.includes('[TOOL_RESULT]')) {
+        if (message.includes('✅') || message.includes('SUCCESS')) {
+          analysis.toolUsage.successfulTools++;
+        } else if (message.includes('❌') || message.includes('ERROR') || message.includes('File does not exist')) {
+          analysis.toolUsage.failedTools++;
+          analysis.errors.push(`Tool execution failed at step ${index + 1}: ${message.substring(0, 100)}...`);
+        }
+      }
+
+      // Detect workflow completion
+      if (message.includes('MODE 1') && message.includes('completed')) {
+        analysis.workflowSummary.totalWorkflows++;
+        analysis.workflowSummary.completedWorkflows++;
+        analysis.workflowDetails.push({
+          name: 'MODE 1: Initial Project Setup',
+          status: 'completed',
+          completionTime: timestamp,
+          description: 'Project foundation and configuration setup'
+        });
+      }
+
+      // Detect specific workflow implementations
+      if (message.includes('Orders Workflow') || message.includes('Invoice Workflow') || message.includes('Payment Workflow')) {
+        analysis.workflowSummary.totalWorkflows++;
+        const workflowName = message.match(/(Orders|Invoice|Payment)\s+Workflow/)?.[1] || 'Unknown';
+        
+        if (status === 'completed') {
+          analysis.workflowSummary.completedWorkflows++;
+          analysis.workflowDetails.push({
+            name: `${workflowName} Workflow`,
+            status: 'completed',
+            completionTime: timestamp,
+            description: `${workflowName} workflow implementation completed`
+          });
+        } else if (status === 'pending' || status === 'in_progress') {
+          analysis.workflowSummary.pendingWorkflows++;
+          analysis.workflowDetails.push({
+            name: `${workflowName} Workflow`,
+            status: 'in_progress',
+            startTime: timestamp,
+            description: `${workflowName} workflow implementation in progress`
+          });
+        }
+      }
+
+      // Detect errors and issues
+      if (message.includes('File does not exist') || message.includes('tool_use_error')) {
+        analysis.errors.push(`File access error at step ${index + 1}: ${message.substring(0, 100)}...`);
+      }
+
+      if (message.includes('ERROR') || message.includes('FAILED')) {
+        analysis.errors.push(`Execution error at step ${index + 1}: ${message.substring(0, 100)}...`);
+      }
+    });
+
+    // Calculate progress percentages
+    analysis.workflowSummary.progressPercentage = analysis.workflowSummary.totalWorkflows > 0 
+      ? Math.round((analysis.workflowSummary.completedWorkflows / analysis.workflowSummary.totalWorkflows) * 100)
+      : 0;
+
+    // Update phase statuses based on completion
+    Object.keys(analysis.executionPhases).forEach(phase => {
+      const phaseData = analysis.executionPhases[phase as keyof typeof analysis.executionPhases];
+      if (phaseData.steps > 0) {
+        if (phaseData.completed === phaseData.steps) {
+          phaseData.status = 'completed';
+        } else if (phaseData.completed > 0) {
+          phaseData.status = 'in_progress';
+        }
+      }
+    });
+
+    // Generate recommendations
+    if (analysis.workflowSummary.pendingWorkflows > 0) {
+      analysis.recommendations.push(`Continue with ${analysis.workflowSummary.pendingWorkflows} pending workflow(s)`);
+    }
+
+    if (analysis.toolUsage.failedTools > 0) {
+      analysis.recommendations.push(`Review and fix ${analysis.toolUsage.failedTools} failed tool executions`);
+    }
+
+    if (analysis.errors.length > 0) {
+      analysis.recommendations.push(`Address ${analysis.errors.length} identified errors for smooth execution`);
+    }
+
+    if (analysis.workflowSummary.progressPercentage >= 80) {
+      analysis.recommendations.push('Excellent progress! Consider final testing and validation');
+    }
+
+    return analysis;
+  };
+
+  // Function to display workflow analysis in a formatted way
+  const displayWorkflowAnalysis = (analysis: any) => {
+    let analysisMessage = `📊 **Workflow Analysis Report**\n\n`;
+    
+    // Workflow Summary
+    analysisMessage += `🎯 **Workflow Summary:**\n`;
+    analysisMessage += `• Total Workflows: ${analysis.workflowSummary.totalWorkflows}\n`;
+    analysisMessage += `• Completed: ${analysis.workflowSummary.completedWorkflows} ✅\n`;
+    analysisMessage += `• Pending: ${analysis.workflowSummary.pendingWorkflows} ⏳\n`;
+    analysisMessage += `• Failed: ${analysis.workflowSummary.failedWorkflows} ❌\n`;
+    analysisMessage += `• Progress: ${analysis.workflowSummary.progressPercentage}% 📈\n\n`;
+
+    // Execution Phases
+    analysisMessage += `🚀 **Execution Phases:**\n`;
+    Object.entries(analysis.executionPhases).forEach(([phase, data]: [string, any]) => {
+      const statusIcon = data.status === 'completed' ? '✅' : data.status === 'in_progress' ? '⏳' : '⏸️';
+      analysisMessage += `• ${phase.charAt(0).toUpperCase() + phase.slice(1)}: ${statusIcon} ${data.completed}/${data.steps} steps\n`;
+    });
+    analysisMessage += `\n`;
+
+    // Tool Usage
+    analysisMessage += `🛠️ **Tool Usage:**\n`;
+    analysisMessage += `• Total Tools: ${analysis.toolUsage.totalTools}\n`;
+    analysisMessage += `• Successful: ${analysis.toolUsage.successfulTools} ✅\n`;
+    analysisMessage += `• Failed: ${analysis.toolUsage.failedTools} ❌\n\n`;
+
+    // Workflow Details
+    if (analysis.workflowDetails.length > 0) {
+      analysisMessage += `📋 **Workflow Details:**\n`;
+      analysis.workflowDetails.forEach((workflow: any, index: number) => {
+        const statusIcon = workflow.status === 'completed' ? '✅' : '⏳';
+        analysisMessage += `${index + 1}. ${statusIcon} **${workflow.name}**\n`;
+        analysisMessage += `   Status: ${workflow.status}\n`;
+        analysisMessage += `   ${workflow.status === 'completed' ? 'Completed' : 'Started'}: ${workflow.completionTime || workflow.startTime}\n`;
+        analysisMessage += `   Description: ${workflow.description}\n\n`;
+      });
+    }
+
+    // Errors (if any)
+    if (analysis.errors.length > 0) {
+      analysisMessage += `⚠️ **Identified Issues:**\n`;
+      analysis.errors.slice(0, 5).forEach((error: string, index: number) => {
+        analysisMessage += `${index + 1}. ${error}\n`;
+      });
+      if (analysis.errors.length > 5) {
+        analysisMessage += `... and ${analysis.errors.length - 5} more issues\n`;
+      }
+      analysisMessage += `\n`;
+    }
+
+    // Recommendations
+    if (analysis.recommendations.length > 0) {
+      analysisMessage += `💡 **Recommendations:**\n`;
+      analysis.recommendations.forEach((rec: string, index: number) => {
+        analysisMessage += `${index + 1}. ${rec}\n`;
+      });
+    }
+
+    return analysisMessage;
   };
 
   // Auto-scroll chat to bottom
@@ -931,7 +1453,7 @@ const CreateDeployScreen: React.FC = () => {
         const sessionExists = await checkExistingSessions();
         if (!sessionExists) {
           await createApplication(false); // Not a rebuild
-        }
+        } 
         await fetchStateMachineWorkflows();
       };
       initializeApp();
@@ -1032,33 +1554,42 @@ const CreateDeployScreen: React.FC = () => {
     if (deploymentStatus === "completed") {
       // Once build is completed, always show the iframe
       // If we have a session URL, use it; otherwise use a fallback
-      const iframeSrc = sessionUrl || "https://www.paramai.studio/";
+      const app_url = sessionUrl || "";
       
       return (
         <div className="h-full">
           <div className="p-4 border-b">
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600">✅</span>
-              <span className="font-semibold text-gray-800">
-                Application Ready
-              </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">✅</span>
+                <span className="font-semibold text-gray-800">
+                  Application Ready
+                </span>
+              </div>
+              {app_url && (
+                <button
+                  onClick={() => window.open(app_url, '_blank')}
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-full hover:bg-blue-100 hover:border-blue-300 transition-colors duration-200"
+                >
+                  <span>Preview</span>
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </button>
+              )}
             </div>
             <p className="text-sm text-gray-700 mt-1">
-              {sessionUrl 
+              {app_url 
                 ? "Your application has been built successfully and is ready to use"
                 : "Your application has been built successfully. Loading preview..."
               }
             </p>
-            {sessionUrl && (
-              <div className="mt-2 text-xs text-gray-500">
-                Found existing session: {project}
-              </div>
-            )}
+
           </div>
 
           <div className="h-full overflow-auto">
             <iframe
-              src={iframeSrc}
+              src={app_url}
               className="w-full h-full border-0"
               title="Application Preview"
               onLoad={() => {
@@ -1176,6 +1707,7 @@ const CreateDeployScreen: React.FC = () => {
             <Button
               variant="outline"
               size="sm"
+              disabled={isProcessing || isAgentTyping || currentlyBuildingWorkflow !== null}
               onClick={async () => {
                 // Use the stored session ID if available, otherwise try to get it
                 let existingSessionId = sessionId; // Use stored session ID first
@@ -1256,6 +1788,12 @@ const CreateDeployScreen: React.FC = () => {
                     ? (isRebuilding ? "Rebuilding your application..." : "Building your application...")
                     : "Ready to help with your app"}
                 </p>
+                {(isProcessing || deploymentStatus === "creating") && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-orange-600 font-medium">Chat disabled during build</span>
+                  </div>
+                )}
               </div>
               {isProcessing && (
                 <div className="ml-auto">
@@ -1288,7 +1826,10 @@ const CreateDeployScreen: React.FC = () => {
                 <p className="text-sm">Build Assistant is initializing...</p>
               </div>
             ) : (
-              messages.map(renderMessage)
+              <>
+                {messages.map(renderMessage)}
+
+              </>
             )}
 
             {isAgentTyping && (
@@ -1351,8 +1892,269 @@ const CreateDeployScreen: React.FC = () => {
                 </div>
                 
                 <div className="text-xs text-gray-500 mb-2">
-                  Session ID: <code className="bg-gray-100 px-1 py-0.5 rounded">{sessionId}</code>
+                  Session ID: <code className="bg-gray-100 px-1 py-0.5 rounded break-all">{sessionId}</code>
                 </div>
+                
+                <div className="text-xs text-gray-500 mb-2">
+                  App URL: {sessionUrl ? (
+                    <a 
+                      href={sessionUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline cursor-pointer break-all"
+                    >
+                      {sessionUrl}
+                    </a>
+                  ) : (
+                    <span className="text-gray-400 italic">Not available</span>
+                  )}
+                </div>
+                
+                <div className="text-xs text-gray-500 mb-2">
+                  Session logs: <button 
+                    onClick={() => {
+                      if (!showLogs) {
+                        // Fetch and display all logs
+                        fetchAndDisplayAllLogs();
+                      } else {
+                        // Hide logs
+                        hideLogs();
+                      }
+                      setShowLogs(!showLogs);
+                    }}
+                    className="text-blue-600 hover:text-blue-800 underline cursor-pointer"
+                  >
+                    {showLogs ? 'Hide Logs' : 'View Logs'}
+                  </button>
+                </div>
+                
+                <div className="text-xs text-gray-500 mb-2">
+                  Workflow Analysis: <button 
+                    onClick={() => {
+                      if (!showWorkflowAnalysis) {
+                        // Fetch and display workflow analysis
+                        if (fullSessionData && fullSessionData.logs) {
+                          const analysis = analyzeSessionLogs(fullSessionData.logs);
+                          displayWorkflowAnalysisCard(analysis);
+                        } else {
+                          addMessage("agent", "⚠️ No session data available for workflow analysis. Please ensure logs are loaded first.");
+                        }
+                      } else {
+                        // Hide workflow analysis
+                        hideWorkflowAnalysis();
+                      }
+                    }}
+                    className="text-green-600 hover:text-green-800 underline cursor-pointer"
+                  >
+                    {showWorkflowAnalysis ? 'Hide Analysis' : 'Analyze Workflows'}
+                  </button>
+                </div>
+                
+                {/* Workflow Analysis Card - appears below Analyze Workflows button when toggled on */}
+                {showWorkflowAnalysis && workflowAnalysisData && (
+                  <div className="mt-3 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    {/* Card Header */}
+                    <div className="bg-green-50 px-4 py-3 border-b border-green-200">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-green-600">📊</span>
+                          <span className="text-sm font-semibold text-green-800">Workflow Analysis Report</span>
+                          <span className="text-xs text-green-600 bg-green-200 px-2 py-1 rounded-full">
+                            {workflowAnalysisData.workflowSummary.totalWorkflows} workflows
+                          </span>
+                        </div>
+                        <span className="text-xs text-green-600">Click "Hide Analysis" above to close</span>
+                      </div>
+                    </div>
+                    
+                    {/* Analysis Content */}
+                    <div className="max-h-96 overflow-y-auto p-4">
+                      {/* Workflow Summary */}
+                      <div className="mb-4">
+                        <h4 className="text-sm font-semibold text-gray-800 mb-2">🎯 Workflow Summary</h4>
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div className="bg-gray-50 p-2 rounded">
+                            <span className="text-gray-600">Total:</span>
+                            <span className="ml-1 font-medium">{workflowAnalysisData.workflowSummary.totalWorkflows}</span>
+                          </div>
+                          <div className="bg-green-50 p-2 rounded">
+                            <span className="text-green-600">Completed:</span>
+                            <span className="ml-1 font-medium text-green-700">{workflowAnalysisData.workflowSummary.completedWorkflows} ✅</span>
+                          </div>
+                          <div className="bg-yellow-50 p-2 rounded">
+                            <span className="text-yellow-600">Pending:</span>
+                            <span className="ml-1 font-medium text-yellow-700">{workflowAnalysisData.workflowSummary.pendingWorkflows} ⏳</span>
+                          </div>
+                          <div className="bg-red-50 p-2 rounded">
+                            <span className="text-red-600">Failed:</span>
+                            <span className="ml-1 font-medium text-red-700">{workflowAnalysisData.workflowSummary.failedWorkflows} ❌</span>
+                          </div>
+                        </div>
+                        <div className="mt-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-600">Progress:</span>
+                            <div className="flex-1 bg-gray-200 rounded-full h-2">
+                              <div 
+                                className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                                style={{ width: `${workflowAnalysisData.workflowSummary.progressPercentage}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-xs font-medium text-gray-700">{workflowAnalysisData.workflowSummary.progressPercentage}%</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Execution Phases */}
+                      <div className="mb-4">
+                        <h4 className="text-sm font-semibold text-gray-800 mb-2">🚀 Execution Phases</h4>
+                        <div className="space-y-2">
+                          {Object.entries(workflowAnalysisData.executionPhases).map(([phase, data]: [string, any]) => {
+                            const statusIcon = data.status === 'completed' ? '✅' : data.status === 'in_progress' ? '⏳' : '⏸️';
+                            const statusColor = data.status === 'completed' ? 'text-green-600' : data.status === 'in_progress' ? 'text-yellow-600' : 'text-gray-500';
+                            return (
+                              <div key={phase} className="flex items-center justify-between text-xs">
+                                <span className="capitalize">{phase}:</span>
+                                <div className="flex items-center gap-2">
+                                  <span className={statusColor}>{statusIcon}</span>
+                                  <span className="text-gray-600">{data.completed}/{data.steps} steps</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Tool Usage */}
+                      <div className="mb-4">
+                        <h4 className="text-sm font-semibold text-gray-800 mb-2">🛠️ Tool Usage</h4>
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                          <div className="bg-gray-50 p-2 rounded text-center">
+                            <div className="font-medium text-gray-800">{workflowAnalysisData.toolUsage.totalTools}</div>
+                            <div className="text-gray-600">Total</div>
+                          </div>
+                          <div className="bg-green-50 p-2 rounded text-center">
+                            <div className="font-medium text-green-700">{workflowAnalysisData.toolUsage.successfulTools} ✅</div>
+                            <div className="text-green-600">Successful</div>
+                          </div>
+                          <div className="bg-red-50 p-2 rounded text-center">
+                            <div className="font-medium text-red-700">{workflowAnalysisData.toolUsage.failedTools} ❌</div>
+                            <div className="text-red-600">Failed</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Workflow Details */}
+                      {workflowAnalysisData.workflowDetails.length > 0 && (
+                        <div className="mb-4">
+                          <h4 className="text-sm font-semibold text-gray-800 mb-2">📋 Workflow Details</h4>
+                          <div className="space-y-2">
+                            {workflowAnalysisData.workflowDetails.map((workflow: any, index: number) => {
+                              const statusIcon = workflow.status === 'completed' ? '✅' : '⏳';
+                              const statusColor = workflow.status === 'completed' ? 'text-green-600' : 'text-yellow-600';
+                              return (
+                                <div key={index} className="bg-gray-50 p-2 rounded text-xs">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className={statusColor}>{statusIcon}</span>
+                                    <span className="font-medium">{workflow.name}</span>
+                                  </div>
+                                  <div className="text-gray-600 mb-1">Status: {workflow.status}</div>
+                                  <div className="text-gray-600 mb-1">
+                                    {workflow.status === 'completed' ? 'Completed' : 'Started'}: {workflow.completionTime || workflow.startTime}
+                                  </div>
+                                  <div className="text-gray-600">{workflow.description}</div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Errors (if any) */}
+                      {workflowAnalysisData.errors.length > 0 && (
+                        <div className="mb-4">
+                          <h4 className="text-sm font-semibold text-red-800 mb-2">⚠️ Identified Issues</h4>
+                          <div className="space-y-1">
+                            {workflowAnalysisData.errors.slice(0, 5).map((error: string, index: number) => (
+                              <div key={index} className="bg-red-50 border border-red-200 rounded p-2 text-xs text-red-700">
+                                {index + 1}. {error}
+                              </div>
+                            ))}
+                            {workflowAnalysisData.errors.length > 5 && (
+                              <div className="text-xs text-red-600 text-center">
+                                ... and {workflowAnalysisData.errors.length - 5} more issues
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Recommendations */}
+                      {workflowAnalysisData.recommendations.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-semibold text-blue-800 mb-2">💡 Recommendations</h4>
+                          <div className="space-y-1">
+                            {workflowAnalysisData.recommendations.map((rec: string, index: number) => (
+                              <div key={index} className="bg-blue-50 border border-blue-200 rounded p-2 text-xs text-blue-700">
+                                {index + 1}. {rec}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                {/* All Logs Card - appears below View Logs button when toggled on */}
+                {showLogs && logsData && (
+                  <div className="mt-3 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    {/* Card Header */}
+                    <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-600">📋</span>
+                          <span className="text-sm font-semibold text-gray-800">All Session Logs</span>
+                          <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-full">
+                            {logsData.length} entries
+                          </span>
+                        </div>
+                        <span className="text-xs text-gray-500">Click "Hide Logs" above to close</span>
+                      </div>
+                    </div>
+                    
+                    {/* Logs Content */}
+                    {logsLoading ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
+                        <p className="text-sm text-gray-600">Loading logs...</p>
+                      </div>
+                    ) : logsData.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-sm text-gray-600">No logs available for this session.</p>
+                      </div>
+                    ) : (
+                      <div className="max-h-96 overflow-y-auto">
+                        {logsData.map((log, index) => (
+                          <div key={index} className={`px-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors ${
+                            index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                          }`}>
+                            {/* Log Header */}
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs font-mono text-gray-500 bg-gray-200 px-2 py-1 rounded">
+                                Entry {index + 1}
+                              </span>
+                            </div>
+                            
+                            {/* Log Message */}
+                            <div className="text-sm text-gray-800 leading-relaxed">
+                              {formatLogMessage(log.message)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
@@ -1368,7 +2170,7 @@ const CreateDeployScreen: React.FC = () => {
                   {stateMachineWorkflows.map((workflow, index) => {
                     const workflowText = workflow.toLowerCase().includes('workflow') ? workflow : `${workflow} workflow`;
                     const isCurrentlyBuilding = currentlyBuildingWorkflow === workflowText;
-                    const isDisabled = currentlyBuildingWorkflow !== null;
+                    const isDisabled = currentlyBuildingWorkflow !== null || isProcessing || deploymentStatus === "creating" || isAgentTyping;
                     
                     return (
                       <button
@@ -1397,32 +2199,65 @@ const CreateDeployScreen: React.FC = () => {
                 </div>
                 
                 <p className="text-xs text-gray-500 mt-2">
-                  Click any suggestion to integrate the workflow into your application.
+                  {isProcessing || deploymentStatus === "creating" || isAgentTyping || currentlyBuildingWorkflow !== null
+                    ? "Workflow suggestions are disabled while a mind is executing. Please wait for the current operation to complete."
+                    : "Click any suggestion to integrate the workflow into your application."
+                  }
                 </p>
               </div>
             )}
           </div>
 
           {/* Chat Input */}
+          {(isProcessing || deploymentStatus === "creating") && (
+            <div className="px-4 py-2 bg-blue-50 border-t border-blue-200">
+              <div className="flex items-center gap-2 text-sm text-blue-700">
+                <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <span className="font-medium">Application is building...</span>
+                <span className="text-blue-600">Chat is temporarily disabled until build completes</span>
+              </div>
+            </div>
+          )}
           <form onSubmit={handleUserMessage} className="p-4 border-t">
-            <div className="flex gap-3">
-              <input
-                type="text"
+            <div className="flex flex-col gap-3">
+              <textarea
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
-                placeholder="Ask about your application build..."
-                className="flex-1 text-sm px-4 py-3 rounded-2xl border focus:border-blue-500 focus:outline-none placeholder-gray-400"
-                disabled={isAgentTyping}
+                placeholder={
+                  isProcessing || isAgentTyping || deploymentStatus === "creating"
+                    ? "Application is building... Please wait..."
+                    : "Ask about your application build..."
+                }
+                className="flex-1 text-sm px-4 py-3 rounded-2xl border focus:border-blue-500 focus:outline-none placeholder-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500 resize-none min-h-[80px] max-h-[200px] overflow-y-auto"
+                disabled={isProcessing || isAgentTyping || deploymentStatus === "creating"}
+                rows={3}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.shiftKey) {
+                    // Allow Shift+Enter for new lines
+                    return;
+                  }
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (userInput.trim() && !isProcessing && !isAgentTyping && deploymentStatus !== "creating") {
+                      handleUserMessage(e as any);
+                    }
+                  }
+                }}
               />
-              <Button
-                type="submit"
-                disabled={!userInput.trim() || isAgentTyping}
-                variant="primary"
-                className="px-4 py-3 text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span className="hidden sm:inline">Send</span>
-                <span className="sm:hidden">↗</span>
-              </Button>
+              <div className="flex justify-between items-center">
+                <div className="text-xs text-gray-500">
+                  Press Enter to send, Shift+Enter for new line
+                </div>
+                <Button
+                  type="submit"
+                  disabled={!userInput.trim() || isProcessing || isAgentTyping || deploymentStatus === "creating"}
+                  variant="primary"
+                  className="px-4 py-2 text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="hidden sm:inline">Send</span>
+                  <span className="sm:hidden">↗</span>
+                </Button>
+              </div>
             </div>
           </form>
         </div>
