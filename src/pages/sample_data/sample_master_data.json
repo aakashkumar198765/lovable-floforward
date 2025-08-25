@@ -1,0 +1,830 @@
+{
+  "Countries": [
+    {
+      "CountryCode": "USA",
+      "CountryName": "United States of America",
+      "Region": "North America",
+      "Currency": "USD",
+      "Language": "English",
+      "Active": true,
+      "Notes": "Primary market for shipments"
+    },
+    {
+      "CountryCode": "GBR",
+      "CountryName": "United Kingdom",
+      "Region": "Europe",
+      "Currency": "GBP",
+      "Language": "English",
+      "Active": true,
+      "Notes": "Major European market"
+    },
+    {
+      "CountryCode": "DEU",
+      "CountryName": "Germany",
+      "Region": "Europe",
+      "Currency": "EUR",
+      "Language": "German",
+      "Active": true,
+      "Notes": "Central European logistics hub"
+    },
+    {
+      "CountryCode": "FRA",
+      "CountryName": "France",
+      "Region": "Europe",
+      "Currency": "EUR",
+      "Language": "French",
+      "Active": true,
+      "Notes": "Major European market"
+    },
+    {
+      "CountryCode": "JPN",
+      "CountryName": "Japan",
+      "Region": "Asia",
+      "Currency": "JPY",
+      "Language": "Japanese",
+      "Active": true,
+      "Notes": "Major Asian market"
+    },
+    {
+      "CountryCode": "UAE",
+      "CountryName": "United Arab Emirates",
+      "Region": "Middle East",
+      "Currency": "AED",
+      "Language": "Arabic",
+      "Active": true,
+      "Notes": "Middle East logistics hub"
+    },
+    {
+      "CountryCode": "IND",
+      "CountryName": "India",
+      "Region": "Asia",
+      "Currency": "INR",
+      "Language": "Hindi/English",
+      "Active": true,
+      "Notes": "Major Asian manufacturing hub"
+    }
+  ],
+  "Cities": [
+    {
+      "CityCode": "NYC",
+      "CityName": "New York City",
+      "CountryCode": "USA",
+      "StateProvince": "NY",
+      "Timezone": "America/New_York",
+      "Active": true,
+      "Notes": "Major US logistics hub"
+    },
+    {
+      "CityCode": "LAX",
+      "CityName": "Los Angeles",
+      "CountryCode": "USA",
+      "StateProvince": "CA",
+      "Timezone": "America/Los_Angeles",
+      "Active": true,
+      "Notes": "Major US West Coast hub"
+    },
+    {
+      "CityCode": "SFO",
+      "CityName": "San Francisco",
+      "CountryCode": "USA",
+      "StateProvince": "CA",
+      "Timezone": "America/Los_Angeles",
+      "Active": true,
+      "Notes": "Tech hub and logistics center"
+    },
+    {
+      "CityCode": "LON",
+      "CityName": "London",
+      "CountryCode": "GBR",
+      "StateProvince": "",
+      "Timezone": "Europe/London",
+      "Active": true,
+      "Notes": "Major European logistics hub"
+    },
+    {
+      "CityCode": "BER",
+      "CityName": "Berlin",
+      "CountryCode": "DEU",
+      "StateProvince": "",
+      "Timezone": "Europe/Berlin",
+      "Active": true,
+      "Notes": "German logistics center"
+    },
+    {
+      "CityCode": "PAR",
+      "CityName": "Paris",
+      "CountryCode": "FRA",
+      "StateProvince": "",
+      "Timezone": "Europe/Paris",
+      "Active": true,
+      "Notes": "French logistics hub"
+    },
+    {
+      "CityCode": "TOK",
+      "CityName": "Tokyo",
+      "CountryCode": "JPN",
+      "StateProvince": "",
+      "Timezone": "Asia/Tokyo",
+      "Active": true,
+      "Notes": "Major Asian logistics hub"
+    },
+    {
+      "CityCode": "DXB",
+      "CityName": "Dubai",
+      "CountryCode": "UAE",
+      "StateProvince": "",
+      "Timezone": "Asia/Dubai",
+      "Active": true,
+      "Notes": "Middle East logistics hub"
+    },
+    {
+      "CityCode": "BOM",
+      "CityName": "Mumbai",
+      "CountryCode": "IND",
+      "StateProvince": "Maharashtra",
+      "Timezone": "Asia/Kolkata",
+      "Active": true,
+      "Notes": "Indian logistics center"
+    }
+  ],
+  "Ports": [
+    {
+      "PortCode": "JFK",
+      "PortName": "John F. Kennedy International Airport",
+      "PortType": "Airport",
+      "Country": "USA",
+      "City": "NYC",
+      "Region": "North America",
+      "Active": true,
+      "Notes": "Major US air cargo hub"
+    },
+    {
+      "PortCode": "LAX",
+      "PortName": "Los Angeles International Airport",
+      "PortType": "Airport",
+      "Country": "USA",
+      "City": "LAX",
+      "Region": "North America",
+      "Active": true,
+      "Notes": "Major US West Coast air hub"
+    },
+    {
+      "PortCode": "SFO",
+      "PortName": "San Francisco International Airport",
+      "PortType": "Airport",
+      "Country": "USA",
+      "City": "SFO",
+      "Region": "North America",
+      "Active": true,
+      "Notes": "US West Coast air cargo hub"
+    },
+    {
+      "PortCode": "LHR",
+      "PortName": "London Heathrow Airport",
+      "PortType": "Airport",
+      "Country": "GBR",
+      "City": "LON",
+      "Region": "Europe",
+      "Active": true,
+      "Notes": "Major European air hub"
+    },
+    {
+      "PortCode": "CDG",
+      "PortName": "Charles de Gaulle Airport",
+      "PortType": "Airport",
+      "Country": "FRA",
+      "City": "PAR",
+      "Region": "Europe",
+      "Active": true,
+      "Notes": "French air cargo hub"
+    },
+    {
+      "PortCode": "NRT",
+      "PortName": "Narita International Airport",
+      "PortType": "Airport",
+      "Country": "JPN",
+      "City": "TOK",
+      "Region": "Asia",
+      "Active": true,
+      "Notes": "Major Japanese air hub"
+    },
+    {
+      "PortCode": "DXB",
+      "PortName": "Dubai International Airport",
+      "PortType": "Airport",
+      "Country": "UAE",
+      "City": "DXB",
+      "Region": "Middle East",
+      "Active": true,
+      "Notes": "Middle East air hub"
+    },
+    {
+      "PortCode": "BOM",
+      "PortName": "Chhatrapati Shivaji Maharaj International Airport",
+      "PortType": "Airport",
+      "Country": "IND",
+      "City": "BOM",
+      "Region": "Asia",
+      "Active": true,
+      "Notes": "Indian air cargo hub"
+    }
+  ],
+  "PortConnections": [
+    {
+      "OriginPort": "JFK",
+      "DestinationPort": "LHR",
+      "TransportMode": "Air",
+      "TransitTime": 1,
+      "Active": true,
+      "Notes": "Direct daily flights"
+    },
+    {
+      "OriginPort": "LAX",
+      "DestinationPort": "NRT",
+      "TransportMode": "Air",
+      "TransitTime": 1,
+      "Active": true,
+      "Notes": "Direct daily flights"
+    },
+    {
+      "OriginPort": "SFO",
+      "DestinationPort": "LHR",
+      "TransportMode": "Air",
+      "TransitTime": 1,
+      "Active": true,
+      "Notes": "Direct daily flights"
+    },
+    {
+      "OriginPort": "CDG",
+      "DestinationPort": "DXB",
+      "TransportMode": "Air",
+      "TransitTime": 1,
+      "Active": true,
+      "Notes": "Direct daily flights"
+    },
+    {
+      "OriginPort": "BOM",
+      "DestinationPort": "LHR",
+      "TransportMode": "Air",
+      "TransitTime": 1,
+      "Active": true,
+      "Notes": "Direct daily flights"
+    },
+    {
+      "OriginPort": "JFK",
+      "DestinationPort": "DXB",
+      "TransportMode": "Air",
+      "TransitTime": 1,
+      "Active": true,
+      "Notes": "Direct daily flights"
+    }
+  ],
+  "Organizations": [
+    {
+      "OrgCode": "TECH_SOL",
+      "OrgName": "Tech Solutions Inc.",
+      "OrgType": "Buyer",
+      "Country": "USA",
+      "City": "SFO",
+      "ContactPerson": "John Smith",
+      "Phone": "+1-555-0123",
+      "Email": "john.smith@techsolutions.com",
+      "Website": "https://techsolutions.com",
+      "Active": true,
+      "Rating": 5,
+      "Notes": "Major technology company"
+    },
+    {
+      "OrgCode": "GLOBAL_FREIGHT",
+      "OrgName": "Global Freight Solutions Ltd.",
+      "OrgType": "Seller",
+      "Country": "USA",
+      "City": "LAX",
+      "ContactPerson": "Maria Rodriguez",
+      "Phone": "+1-555-0456",
+      "Email": "maria.rodriguez@gfs.com",
+      "Website": "https://gfs.com",
+      "Active": true,
+      "Rating": 4,
+      "Notes": "International freight forwarder"
+    },
+    {
+      "OrgCode": "EURO_MFG",
+      "OrgName": "European Manufacturing Co.",
+      "OrgType": "Buyer",
+      "Country": "DEU",
+      "City": "BER",
+      "ContactPerson": "Hans Mueller",
+      "Phone": "+49-30-123456",
+      "Email": "hans.mueller@euromfg.com",
+      "Website": "https://euromfg.com",
+      "Active": true,
+      "Rating": 4,
+      "Notes": "European manufacturing company"
+    },
+    {
+      "OrgCode": "EURO_LOG",
+      "OrgName": "European Logistics GmbH",
+      "OrgType": "Seller",
+      "Country": "FRA",
+      "City": "PAR",
+      "ContactPerson": "Pierre Dubois",
+      "Phone": "+33-1-987654",
+      "Email": "pierre.dubois@eurolog.com",
+      "Website": "https://eurolog.com",
+      "Active": true,
+      "Rating": 4,
+      "Notes": "European logistics provider"
+    },
+    {
+      "OrgCode": "ASIAN_TRADING",
+      "OrgName": "Asian Trading Corp.",
+      "OrgType": "Buyer",
+      "Country": "JPN",
+      "City": "TOK",
+      "ContactPerson": "Yuki Tanaka",
+      "Phone": "+81-3-12345678",
+      "Email": "yuki.tanaka@asiantrading.co.jp",
+      "Website": "https://asiantrading.co.jp",
+      "Active": true,
+      "Rating": 4,
+      "Notes": "Japanese trading company"
+    },
+    {
+      "OrgCode": "ME_EXPRESS",
+      "OrgName": "Middle East Express Ltd.",
+      "OrgType": "Seller",
+      "Country": "UAE",
+      "City": "DXB",
+      "ContactPerson": "Ahmed Al-Rashid",
+      "Phone": "+971-4-1234567",
+      "Email": "ahmed.alrashid@meexpress.ae",
+      "Website": "https://meexpress.ae",
+      "Active": true,
+      "Rating": 4,
+      "Notes": "Middle East logistics provider"
+    },
+    {
+      "OrgCode": "BRITISH_RETAIL",
+      "OrgName": "British Retail Group",
+      "OrgType": "Buyer",
+      "Country": "GBR",
+      "City": "LON",
+      "ContactPerson": "Emma Wilson",
+      "Phone": "+44-20-12345678",
+      "Email": "emma.wilson@britishretail.co.uk",
+      "Website": "https://britishretail.co.uk",
+      "Active": true,
+      "Rating": 4,
+      "Notes": "UK retail company"
+    },
+    {
+      "OrgCode": "INDO_EURO",
+      "OrgName": "Indo-European Cargo Ltd.",
+      "OrgType": "Seller",
+      "Country": "IND",
+      "City": "BOM",
+      "ContactPerson": "Raj Patel",
+      "Phone": "+91-22-12345678",
+      "Email": "raj.patel@iecargo.in",
+      "Website": "https://iecargo.in",
+      "Active": true,
+      "Rating": 4,
+      "Notes": "Indian logistics provider"
+    }
+  ],
+  "Carriers": [
+    {
+      "CarrierCode": "FEDEX",
+      "CarrierName": "Federal Express",
+      "CarrierType": "Express",
+      "Country": "USA",
+      "ContactPerson": "John Carrier",
+      "Phone": "+1-800-463-3339",
+      "Email": "support@fedex.com",
+      "Website": "https://fedex.com",
+      "Active": true,
+      "Rating": 5,
+      "Notes": "Global express delivery"
+    },
+    {
+      "CarrierCode": "UPS",
+      "CarrierName": "United Parcel Service",
+      "CarrierType": "Express",
+      "Country": "USA",
+      "ContactPerson": "Sarah Logistics",
+      "Phone": "+1-800-742-5877",
+      "Email": "support@ups.com",
+      "Website": "https://ups.com",
+      "Active": true,
+      "Rating": 5,
+      "Notes": "Global logistics provider"
+    },
+    {
+      "CarrierCode": "DHL",
+      "CarrierName": "DHL Express",
+      "CarrierType": "Express",
+      "Country": "DEU",
+      "ContactPerson": "Hans Transport",
+      "Phone": "+49-228-182-0",
+      "Email": "info@dhl.com",
+      "Website": "https://dhl.com",
+      "Active": true,
+      "Rating": 5,
+      "Notes": "Global express delivery"
+    },
+    {
+      "CarrierCode": "MAERSK",
+      "CarrierName": "Maersk Line",
+      "CarrierType": "Ocean Freight",
+      "Country": "DNK",
+      "ContactPerson": "Peter Shipping",
+      "Phone": "+45-3363-3363",
+      "Email": "info@maersk.com",
+      "Website": "https://maersk.com",
+      "Active": true,
+      "Rating": 5,
+      "Notes": "Global ocean freight"
+    }
+  ],
+  "ItemTypes": [
+    {
+      "TypeCode": "ELECTRONICS",
+      "TypeName": "Electronics",
+      "Category": "Technology",
+      "Description": "Electronic devices and components",
+      "DangerousGoods": false,
+      "TemperatureSensitive": false,
+      "SpecialHandling": "Handle with care, avoid static",
+      "Active": true,
+      "Notes": "Common shipment type"
+    },
+    {
+      "TypeCode": "TEXTILES",
+      "TypeName": "Textiles",
+      "Category": "Fashion",
+      "Description": "Fabrics, clothing, and textile products",
+      "DangerousGoods": false,
+      "TemperatureSensitive": true,
+      "SpecialHandling": "Temperature controlled, humidity sensitive",
+      "Active": true,
+      "Notes": "Requires special handling"
+    },
+    {
+      "TypeCode": "MACHINERY",
+      "TypeName": "Machinery",
+      "Category": "Industrial",
+      "Description": "Industrial machinery and equipment",
+      "DangerousGoods": false,
+      "TemperatureSensitive": false,
+      "SpecialHandling": "Heavy equipment, secure properly",
+      "Active": true,
+      "Notes": "Heavy and valuable items"
+    },
+    {
+      "TypeCode": "FURNITURE",
+      "TypeName": "Furniture",
+      "Category": "Home",
+      "Description": "Furniture and home furnishings",
+      "DangerousGoods": false,
+      "TemperatureSensitive": false,
+      "SpecialHandling": "Fragile items, stack carefully",
+      "Active": true,
+      "Notes": "Requires careful handling"
+    },
+    {
+      "TypeCode": "CHEMICALS",
+      "TypeName": "Chemicals",
+      "Category": "Industrial",
+      "Description": "Chemical products and materials",
+      "DangerousGoods": true,
+      "TemperatureSensitive": true,
+      "SpecialHandling": "Dangerous goods handling required",
+      "Active": true,
+      "Notes": "Requires special permits"
+    }
+  ],
+  "ShipmentTypes": [
+    {
+      "TypeCode": "STANDARD",
+      "TypeName": "Standard",
+      "Description": "Standard ground/sea shipment",
+      "TransitTime": 7,
+      "CostMultiplier": 1.0,
+      "SpecialRequirements": "Standard handling",
+      "Active": true,
+      "Notes": "Most common shipment type"
+    },
+    {
+      "TypeCode": "EXPRESS",
+      "TypeName": "Express",
+      "Description": "Fast air shipment",
+      "TransitTime": 2,
+      "CostMultiplier": 2.5,
+      "SpecialRequirements": "Priority handling",
+      "Active": true,
+      "Notes": "Fast delivery option"
+    },
+    {
+      "TypeCode": "PRIORITY",
+      "TypeName": "Priority",
+      "Description": "High priority shipment",
+      "TransitTime": 3,
+      "CostMultiplier": 1.8,
+      "SpecialRequirements": "Priority handling and tracking",
+      "Active": true,
+      "Notes": "Balanced speed and cost"
+    },
+    {
+      "TypeCode": "SPECIALIZED",
+      "TypeName": "Specialized",
+      "Description": "Special handling required",
+      "TransitTime": 5,
+      "CostMultiplier": 2.0,
+      "SpecialRequirements": "Special handling and monitoring",
+      "Active": true,
+      "Notes": "For sensitive items"
+    }
+  ],
+  "PriorityLevels": [
+    {
+      "LevelCode": "LOW",
+      "LevelName": "Low",
+      "Description": "Standard priority level",
+      "TransitTime": 7,
+      "CostMultiplier": 1.0,
+      "ColorCode": "#28A745",
+      "Active": true,
+      "Notes": "Standard delivery timeline"
+    },
+    {
+      "LevelCode": "MEDIUM",
+      "LevelName": "Medium",
+      "Description": "Medium priority level",
+      "TransitTime": 5,
+      "CostMultiplier": 1.3,
+      "ColorCode": "#FFC107",
+      "Active": true,
+      "Notes": "Faster than standard"
+    },
+    {
+      "LevelCode": "HIGH",
+      "LevelName": "High",
+      "Description": "High priority level",
+      "TransitTime": 3,
+      "CostMultiplier": 1.8,
+      "ColorCode": "#FD7E14",
+      "Active": true,
+      "Notes": "Urgent delivery required"
+    },
+    {
+      "LevelCode": "CRITICAL",
+      "LevelName": "Critical",
+      "Description": "Critical priority level",
+      "TransitTime": 1,
+      "CostMultiplier": 3.0,
+      "ColorCode": "#DC3545",
+      "Active": true,
+      "Notes": "Extremely urgent delivery"
+    }
+  ],
+  "TransportModes": [
+    {
+      "ModeCode": "ROAD",
+      "ModeName": "Road",
+      "Description": "Road transportation by truck",
+      "TransitTime": 5,
+      "CostMultiplier": 1.0,
+      "Restrictions": "Weather dependent, road conditions",
+      "Active": true,
+      "Notes": "Most common for domestic"
+    },
+    {
+      "ModeCode": "AIR",
+      "ModeName": "Air",
+      "Description": "Air transportation by plane",
+      "TransitTime": 1,
+      "CostMultiplier": 3.0,
+      "Restrictions": "Weather dependent, airport capacity",
+      "Active": true,
+      "Notes": "Fastest option"
+    },
+    {
+      "ModeCode": "SEA",
+      "ModeName": "Sea",
+      "Description": "Sea transportation by ship",
+      "TransitTime": 21,
+      "CostMultiplier": 0.5,
+      "Restrictions": "Weather dependent, port capacity",
+      "Active": true,
+      "Notes": "Most economical for large shipments"
+    },
+    {
+      "ModeCode": "RAIL",
+      "ModeName": "Rail",
+      "Description": "Rail transportation by train",
+      "TransitTime": 7,
+      "CostMultiplier": 0.7,
+      "Restrictions": "Track availability, scheduling",
+      "Active": true,
+      "Notes": "Good for bulk shipments"
+    },
+    {
+      "ModeCode": "MULTIMODAL",
+      "ModeName": "Multimodal",
+      "Description": "Combination of transport modes",
+      "TransitTime": 10,
+      "CostMultiplier": 1.2,
+      "Restrictions": "Coordination between modes",
+      "Active": true,
+      "Notes": "Flexible routing options"
+    }
+  ],
+  "DocumentTypes": [
+    {
+      "DocTypeCode": "COMMERCIAL_INVOICE",
+      "DocTypeName": "Commercial Invoice",
+      "Category": "Commercial",
+      "Required": true,
+      "ApplicableStates": ["Orders", "CustomsClearance"],
+      "Description": "Primary commercial document",
+      "Template": "commercial_invoice_template.pdf",
+      "Active": true,
+      "Notes": "Required for all shipments"
+    },
+    {
+      "DocTypeCode": "PACKING_LIST",
+      "DocTypeName": "Packing List",
+      "Category": "Commercial",
+      "Required": true,
+      "ApplicableStates": ["Orders", "CustomsClearance"],
+      "Description": "Detailed item list",
+      "Template": "packing_list_template.pdf",
+      "Active": true,
+      "Notes": "Required for customs"
+    },
+    {
+      "DocTypeCode": "CERTIFICATE_OF_ORIGIN",
+      "DocTypeName": "Certificate of Origin",
+      "Category": "Legal",
+      "Required": false,
+      "ApplicableStates": ["CustomsClearance"],
+      "Description": "Proof of item origin",
+      "Template": "coo_template.pdf",
+      "Active": true,
+      "Notes": "Required for some countries"
+    },
+    {
+      "DocTypeCode": "PROOF_OF_DELIVERY",
+      "DocTypeName": "Proof of Delivery",
+      "Category": "Delivery",
+      "Required": true,
+      "ApplicableStates": ["DeliveryConfirmation"],
+      "Description": "Delivery confirmation",
+      "Template": "pod_template.pdf",
+      "Active": true,
+      "Notes": "Required for delivery confirmation"
+    }
+  ],
+  "Users": [
+    {
+      "UserID": "USR001",
+      "Username": "john.smith",
+      "FullName": "John Smith",
+      "Email": "john.smith@techsolutions.com",
+      "Phone": "+1-555-0123",
+      "Organization": "TECH_SOL",
+      "Role": "Buyer",
+      "Department": "Procurement",
+      "Active": true,
+      "LastLogin": "2024-01-12T10:30:00Z",
+      "Notes": "Primary procurement contact"
+    },
+    {
+      "UserID": "USR002",
+      "Username": "maria.rodriguez",
+      "FullName": "Maria Rodriguez",
+      "Email": "maria.rodriguez@gfs.com",
+      "Phone": "+1-555-0456",
+      "Organization": "GLOBAL_FREIGHT",
+      "Role": "Seller",
+      "Department": "Operations",
+      "Active": true,
+      "LastLogin": "2024-01-12T09:15:00Z",
+      "Notes": "Operations manager"
+    },
+    {
+      "UserID": "USR003",
+      "Username": "hans.mueller",
+      "FullName": "Hans Mueller",
+      "Email": "hans.mueller@euromfg.com",
+      "Phone": "+49-30-123456",
+      "Organization": "EURO_MFG",
+      "Role": "Buyer",
+      "Department": "Logistics",
+      "Active": true,
+      "LastLogin": "2024-01-12T08:45:00Z",
+      "Notes": "European logistics contact"
+    },
+    {
+      "UserID": "USR004",
+      "Username": "emma.wilson",
+      "FullName": "Emma Wilson",
+      "Email": "emma.wilson@britishretail.co.uk",
+      "Phone": "+44-20-12345678",
+      "Organization": "BRITISH_RETAIL",
+      "Role": "Buyer",
+      "Department": "Receiving",
+      "Active": true,
+      "LastLogin": "2024-01-12T07:30:00Z",
+      "Notes": "Receiving manager"
+    }
+  ],
+  "Facilities": [
+    {
+      "FacilityCode": "LAX_CT_01",
+      "FacilityName": "LAX Cargo Terminal",
+      "FacilityType": "Cargo Terminal",
+      "Country": "USA",
+      "City": "LAX",
+      "Address": "456 Logistics Way, Industrial District, Los Angeles, CA 90210",
+      "ContactPerson": "David Chen",
+      "Phone": "+1-555-0456",
+      "Email": "david.chen@gfs.com",
+      "Active": true,
+      "Notes": "Primary LAX cargo facility"
+    },
+    {
+      "FacilityCode": "LHR_CARGO_01",
+      "FacilityName": "London Heathrow Cargo",
+      "FacilityType": "Cargo Terminal",
+      "Country": "GBR",
+      "City": "LON",
+      "Address": "Heathrow Airport, London, UK",
+      "ContactPerson": "James Logistics",
+      "Phone": "+44-20-12345678",
+      "Email": "james.logistics@lhr.com",
+      "Active": true,
+      "Notes": "Primary LHR cargo facility"
+    },
+    {
+      "FacilityCode": "CDG_CT_01",
+      "FacilityName": "CDG Cargo Terminal",
+      "FacilityType": "Cargo Terminal",
+      "Country": "FRA",
+      "City": "PAR",
+      "Address": "Charles de Gaulle Airport, Paris, France",
+      "ContactPerson": "Jean-Luc Martin",
+      "Phone": "+33-1-987654",
+      "Email": "jean-luc.martin@cdg.com",
+      "Active": true,
+      "Notes": "Primary CDG cargo facility"
+    }
+  ],
+  "ValidationRules": [
+    {
+      "RuleCode": "REQ_TRACKING_NUMBER",
+      "RuleName": "Tracking Number Required",
+      "FieldPath": "TrackingInformation.TrackingNumber",
+      "RuleType": "Required",
+      "RuleValue": "",
+      "ErrorMessage": "Tracking number is required for shipment tracking",
+      "ApplicableStates": ["ShipmentTracking"],
+      "Active": true,
+      "Notes": "Required when state is ShipmentTracking"
+    },
+    {
+      "RuleCode": "REQ_CARRIER_NAME",
+      "RuleName": "Carrier Name Required",
+      "FieldPath": "TrackingInformation.CarrierName",
+      "RuleType": "Required",
+      "RuleValue": "",
+      "ErrorMessage": "Carrier name is required for shipment tracking",
+      "ApplicableStates": ["ShipmentTracking"],
+      "Active": true,
+      "Notes": "Required when state is ShipmentTracking"
+    },
+    {
+      "RuleCode": "REQ_DECLARATION_NUMBER",
+      "RuleName": "Declaration Number Required",
+      "FieldPath": "CustomsInformation.DeclarationNumber",
+      "RuleType": "Required",
+      "RuleValue": "",
+      "ErrorMessage": "Declaration number is required for customs clearance",
+      "ApplicableStates": ["CustomsClearance"],
+      "Active": true,
+      "Notes": "Required when state is CustomsClearance"
+    },
+    {
+      "RuleCode": "MIN_QUANTITY_1",
+      "RuleName": "Minimum Quantity 1",
+      "FieldPath": "OrderedItems.I_Quantity",
+      "RuleType": "Range",
+      "RuleValue": "1",
+      "ErrorMessage": "Quantity must be at least 1",
+      "ApplicableStates": ["Orders", "ShipmentTracking", "CustomsClearance", "DeliveryConfirmation"],
+      "Active": true,
+      "Notes": "Quantity validation for all states"
+    }
+  ]
+} 

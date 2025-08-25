@@ -3,7 +3,7 @@ import { Button, Icon } from '../components';
 
 interface JsonPreviewProps {
   schema?: any;
-  stateName: string;
+  stateName?: string;
   data?: any;
   title?: string;
   onClose?: () => void;
@@ -22,7 +22,7 @@ const JsonPreview: React.FC<JsonPreviewProps> = ({
   // Simple node type detection
   const getNodeType = () => {
     if (stateName === "project-plan-node") return "root";
-    if (stateName.endsWith("-node")) return "workflow";
+    if (stateName?.endsWith("-node")) return "workflow";
     return "state";
   };
 
@@ -635,7 +635,7 @@ const JsonPreview: React.FC<JsonPreviewProps> = ({
   return (
     <div className="bg-white rounded-lg border border-gray-200 h-full flex flex-col">
       {/* Simple header */}
-      <div className="p-4 border-b border-gray-200">
+      {stateName && <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={`w-8 h-8 ${styling.color} rounded-lg flex items-center justify-center`}>
@@ -643,7 +643,7 @@ const JsonPreview: React.FC<JsonPreviewProps> = ({
             </div>
             <div>
               <h3 className="font-semibold text-gray-900">
-                {stateName === "project-plan-node" ? "Project" : stateName.replace("-node", "").replace("-", " ")}
+                {stateName === "project-plan-node" ? "Project" : stateName?.replace("-node", "").replace("-", " ")}
               </h3>
               <p className="text-sm text-gray-600">{styling.label}</p>
             </div>
@@ -658,7 +658,7 @@ const JsonPreview: React.FC<JsonPreviewProps> = ({
             Close
           </Button>
         </div>
-      </div>
+      </div>}
 
       {/* View mode toggle and content */}
       <div className="flex-1 overflow-auto p-4">
@@ -712,7 +712,7 @@ const JsonPreview: React.FC<JsonPreviewProps> = ({
           
           {/* Content based on view mode */}
           {viewMode === 'preview' ? (
-            <div className="flex-1 overflow-auto bg-gray-50 rounded-lg p-4 min-h-0">
+            <div className="flex-1 overflow-auto rounded-lg min-h-0">
               <div className="space-y-4">
                 {renderRichUIPreview(content)}
               </div>

@@ -1,0 +1,749 @@
+
+{
+  "Countries": {
+    "title": "Countries",
+    "type": "object",
+    "properties": {
+      "CountryCode": {
+        "title": "Country Code",
+        "description": "ISO 3-letter country code",
+        "type": "string"
+      },
+      "CountryName": {
+        "title": "Country Name",
+        "description": "Full name of the country",
+        "type": "string"
+      },
+      "Region": {
+        "title": "Region",
+        "description": "Geographic region",
+        "type": "string"
+      },
+      "Currency": {
+        "title": "Currency",
+        "description": "Primary currency code",
+        "type": "string"
+      },
+      "Language": {
+        "title": "Language",
+        "description": "Primary language",
+        "type": "string"
+      },
+      "Active": {
+        "title": "Active",
+        "description": "Whether the country is active for shipments",
+        "type": "boolean"
+      },
+      "Notes": {
+        "title": "Notes",
+        "description": "Additional country information",
+        "type": "string"
+      }
+    },
+    "required": ["CountryCode", "CountryName", "Active"]
+  },
+  "Cities": {
+    "title": "Cities",
+    "type": "object",
+    "properties": {
+      "CityCode": {
+        "title": "City Code",
+        "description": "Unique identifier for the city",
+        "type": "string"
+      },
+      "CityName": {
+        "title": "City Name",
+        "description": "Full name of the city",
+        "type": "string"
+      },
+      "CountryCode": {
+        "title": "Country Code",
+        "description": "Country where city is located",
+        "type": "string"
+      },
+      "StateProvince": {
+        "title": "State/Province",
+        "description": "State or province of the city",
+        "type": "string"
+      },
+      "Timezone": {
+        "title": "Timezone",
+        "description": "Timezone of the city",
+        "type": "string"
+      },
+      "Active": {
+        "title": "Active",
+        "description": "Whether the city is active for shipments",
+        "type": "boolean"
+      },
+      "Notes": {
+        "title": "Notes",
+        "description": "Additional city information",
+        "type": "string"
+      }
+    },
+    "required": ["CityCode", "CityName", "CountryCode", "Active"]
+  },
+  "Ports": {
+    "title": "Ports",
+    "type": "object",
+    "properties": {
+      "PortCode": {
+        "title": "Port Code",
+        "description": "Unique identifier for the port",
+        "type": "string"
+      },
+      "PortName": {
+        "title": "Port Name",
+        "description": "Full name of the port",
+        "type": "string"
+      },
+      "PortType": {
+        "title": "Port Type",
+        "description": "Type of port facility",
+        "type": "string",
+        "enum": ["Airport", "Seaport", "Rail Terminal", "Road Terminal", "Multimodal"]
+      },
+      "Country": {
+        "title": "Country",
+        "description": "Country where port is located",
+        "type": "string"
+      },
+      "City": {
+        "title": "City",
+        "description": "City where port is located",
+        "type": "string"
+      },
+      "Region": {
+        "title": "Region",
+        "description": "Geographic region of the port",
+        "type": "string"
+      },
+      "Active": {
+        "title": "Active",
+        "description": "Whether the port is currently active",
+        "type": "boolean"
+      },
+      "Notes": {
+        "title": "Notes",
+        "description": "Additional information about the port",
+        "type": "string"
+      }
+    },
+    "required": ["PortCode", "PortName", "PortType", "Country", "City", "Active"]
+  },
+  "PortConnections": {
+    "title": "PortConnections",
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "OriginPort": {
+          "title": "Origin Port",
+          "description": "Port code of origin",
+          "type": "string"
+        },
+        "DestinationPort": {
+          "title": "Destination Port",
+          "description": "Port code of destination",
+          "type": "string"
+        },
+        "TransportMode": {
+          "title": "Transport Mode",
+          "description": "Available transport modes between ports",
+          "type": "string",
+          "enum": ["Air", "Sea", "Rail", "Road", "Multimodal"]
+        },
+        "TransitTime": {
+          "title": "Transit Time",
+          "description": "Average transit time in days",
+          "type": "number"
+        },
+        "Active": {
+          "title": "Active",
+          "description": "Whether this connection is currently active",
+          "type": "boolean"
+        },
+        "Notes": {
+          "title": "Notes",
+          "description": "Additional information about the connection",
+          "type": "string"
+        }
+      },
+      "required": ["OriginPort", "DestinationPort", "TransportMode", "TransitTime", "Active"]
+    }
+  },
+  "Organizations": {
+    "title": "Organizations",
+    "type": "object",
+    "properties": {
+      "OrgCode": {
+        "title": "Organization Code",
+        "description": "Unique identifier for the organization",
+        "type": "string"
+      },
+      "OrgName": {
+        "title": "Organization Name",
+        "description": "Full name of the organization",
+        "type": "string"
+      },
+      "OrgType": {
+        "title": "Organization Type",
+        "description": "Type of organization",
+        "type": "string",
+        "enum": ["Buyer", "Seller", "Carrier", "Customs Broker", "Insurance Provider", "Warehouse", "Other"]
+      },
+      "Country": {
+        "title": "Country",
+        "description": "Country of organization registration",
+        "type": "string"
+      },
+      "City": {
+        "title": "City",
+        "description": "City of organization location",
+        "type": "string"
+      },
+      "ContactPerson": {
+        "title": "Contact Person",
+        "description": "Primary contact person",
+        "type": "string"
+      },
+      "Phone": {
+        "title": "Phone Number",
+        "description": "Contact phone number",
+        "type": "string",
+        "format": "phone"
+      },
+      "Email": {
+        "title": "Email",
+        "description": "Contact email address",
+        "type": "string",
+        "format": "email"
+      },
+      "Website": {
+        "title": "Website",
+        "description": "Organization website URL",
+        "type": "string",
+        "format": "url"
+      },
+      "Active": {
+        "title": "Active",
+        "description": "Whether the organization is currently active",
+        "type": "boolean"
+      },
+      "Rating": {
+        "title": "Rating",
+        "description": "Service quality rating (1-5)",
+        "type": "number"
+      },
+      "Notes": {
+        "title": "Notes",
+        "description": "Additional organization information",
+        "type": "string"
+      }
+    },
+    "required": ["OrgCode", "OrgName", "OrgType", "Country", "Active"]
+  },
+  "Carriers": {
+    "title": "Carriers",
+    "type": "object",
+    "properties": {
+      "CarrierCode": {
+        "title": "Carrier Code",
+        "description": "Unique identifier for the carrier",
+        "type": "string"
+      },
+      "CarrierName": {
+        "title": "Carrier Name",
+        "description": "Full name of the carrier company",
+        "type": "string"
+      },
+      "CarrierType": {
+        "title": "Carrier Type",
+        "description": "Type of carrier service",
+        "type": "string",
+        "enum": ["Air Freight", "Ocean Freight", "Rail Freight", "Road Freight", "Express", "Multimodal"]
+      },
+      "Country": {
+        "title": "Country",
+        "description": "Country of carrier registration",
+        "type": "string"
+      },
+      "ContactPerson": {
+        "title": "Contact Person",
+        "description": "Primary contact person",
+        "type": "string"
+      },
+      "Phone": {
+        "title": "Phone Number",
+        "description": "Contact phone number",
+        "type": "string",
+        "format": "phone"
+      },
+      "Email": {
+        "title": "Email",
+        "description": "Contact email address",
+        "type": "string",
+        "format": "email"
+      },
+      "Website": {
+        "title": "Website",
+        "description": "Carrier website URL",
+        "type": "string",
+        "format": "url"
+      },
+      "Active": {
+        "title": "Active",
+        "description": "Whether the carrier is currently active",
+        "type": "boolean"
+      },
+      "Rating": {
+        "title": "Rating",
+        "description": "Service quality rating (1-5)",
+        "type": "number"
+      },
+      "Notes": {
+        "title": "Notes",
+        "description": "Additional carrier information",
+        "type": "string"
+      }
+    },
+    "required": ["CarrierCode", "CarrierName", "CarrierType", "Country", "Active"]
+  },
+  "ItemTypes": {
+    "title": "ItemTypes",
+    "type": "object",
+    "properties": {
+      "TypeCode": {
+        "title": "Type Code",
+        "description": "Unique identifier for item type",
+        "type": "string"
+      },
+      "TypeName": {
+        "title": "Type Name",
+        "description": "Name of the item type",
+        "type": "string"
+      },
+      "Category": {
+        "title": "Category",
+        "description": "Category of the item type",
+        "type": "string"
+      },
+      "Description": {
+        "title": "Description",
+        "description": "Description of the item type",
+        "type": "string"
+      },
+      "DangerousGoods": {
+        "title": "Dangerous Goods",
+        "description": "Whether this type can contain dangerous goods",
+        "type": "boolean"
+      },
+      "TemperatureSensitive": {
+        "title": "Temperature Sensitive",
+        "description": "Whether this type requires temperature control",
+        "type": "boolean"
+      },
+      "SpecialHandling": {
+        "title": "Special Handling",
+        "description": "Special handling requirements",
+        "type": "string"
+      },
+      "Active": {
+        "title": "Active",
+        "description": "Whether this item type is active",
+        "type": "boolean"
+      },
+      "Notes": {
+        "title": "Notes",
+        "description": "Additional item type information",
+        "type": "string"
+      }
+    },
+    "required": ["TypeCode", "TypeName", "Active"]
+  },
+  "ShipmentTypes": {
+    "title": "ShipmentTypes",
+    "type": "object",
+    "properties": {
+      "TypeCode": {
+        "title": "Type Code",
+        "description": "Unique identifier for shipment type",
+        "type": "string"
+      },
+      "TypeName": {
+        "title": "Type Name",
+        "description": "Name of the shipment type",
+        "type": "string"
+      },
+      "Description": {
+        "title": "Description",
+        "description": "Description of the shipment type",
+        "type": "string"
+      },
+      "TransitTime": {
+        "title": "Transit Time",
+        "description": "Average transit time in days",
+        "type": "number"
+      },
+      "CostMultiplier": {
+        "title": "Cost Multiplier",
+        "description": "Cost multiplier compared to standard",
+        "type": "number"
+      },
+      "SpecialRequirements": {
+        "title": "Special Requirements",
+        "description": "Special requirements for this type",
+        "type": "string"
+      },
+      "Active": {
+        "title": "Active",
+        "description": "Whether this shipment type is active",
+        "type": "boolean"
+      },
+      "Notes": {
+        "title": "Notes",
+        "description": "Additional shipment type information",
+        "type": "string"
+      }
+    },
+    "required": ["TypeCode", "TypeName", "Active"]
+  },
+  "PriorityLevels": {
+    "title": "PriorityLevels",
+    "type": "object",
+    "properties": {
+      "LevelCode": {
+        "title": "Level Code",
+        "description": "Unique identifier for priority level",
+        "type": "string"
+      },
+      "LevelName": {
+        "title": "Level Name",
+        "description": "Name of the priority level",
+        "type": "string"
+      },
+      "Description": {
+        "title": "Description",
+        "description": "Description of the priority level",
+        "type": "string"
+      },
+      "TransitTime": {
+        "title": "Transit Time",
+        "description": "Expected transit time in days",
+        "type": "number"
+      },
+      "CostMultiplier": {
+        "title": "Cost Multiplier",
+        "description": "Cost multiplier for this priority",
+        "type": "number"
+      },
+      "ColorCode": {
+        "title": "Color Code",
+        "description": "Color code for UI display",
+        "type": "string"
+      },
+      "Active": {
+        "title": "Active",
+        "description": "Whether this priority level is active",
+        "type": "boolean"
+      },
+      "Notes": {
+        "title": "Notes",
+        "description": "Additional priority level information",
+        "type": "string"
+      }
+    },
+    "required": ["LevelCode", "LevelName", "Active"]
+  },
+  "TransportModes": {
+    "title": "TransportModes",
+    "type": "object",
+    "properties": {
+      "ModeCode": {
+        "title": "Mode Code",
+        "description": "Unique identifier for transport mode",
+        "type": "string"
+      },
+      "ModeName": {
+        "title": "Mode Name",
+        "description": "Name of the transport mode",
+        "type": "string"
+      },
+      "Description": {
+        "title": "Description",
+        "description": "Description of the transport mode",
+        "type": "string"
+      },
+      "TransitTime": {
+        "title": "Transit Time",
+        "description": "Average transit time in days",
+        "type": "number"
+      },
+      "CostMultiplier": {
+        "title": "Cost Multiplier",
+        "description": "Cost multiplier for this mode",
+        "type": "number"
+      },
+      "Restrictions": {
+        "title": "Restrictions",
+        "description": "Any restrictions for this mode",
+        "type": "string"
+      },
+      "Active": {
+        "title": "Active",
+        "description": "Whether this transport mode is active",
+        "type": "boolean"
+      },
+      "Notes": {
+        "title": "Notes",
+        "description": "Additional transport mode information",
+        "type": "string"
+      }
+    },
+    "required": ["ModeCode", "ModeName", "Active"]
+  },
+  "DocumentTypes": {
+    "title": "DocumentTypes",
+    "type": "object",
+    "properties": {
+      "DocTypeCode": {
+        "title": "Document Type Code",
+        "description": "Unique identifier for document type",
+        "type": "string"
+      },
+      "DocTypeName": {
+        "title": "Document Type Name",
+        "description": "Name of the document type",
+        "type": "string"
+      },
+      "Category": {
+        "title": "Category",
+        "description": "Category of the document",
+        "type": "string"
+      },
+      "Required": {
+        "title": "Required",
+        "description": "Whether this document is required",
+        "type": "boolean"
+      },
+      "ApplicableStates": {
+        "title": "Applicable States",
+        "description": "States where this document is applicable",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "Description": {
+        "title": "Description",
+        "description": "Description of the document type",
+        "type": "string"
+      },
+      "Template": {
+        "title": "Template",
+        "description": "Document template if available",
+        "type": "string",
+        "format": "file"
+      },
+      "Active": {
+        "title": "Active",
+        "description": "Whether this document type is active",
+        "type": "boolean"
+      },
+      "Notes": {
+        "title": "Notes",
+        "description": "Additional document type information",
+        "type": "string"
+      }
+    },
+    "required": ["DocTypeCode", "DocTypeName", "Active"]
+  },
+  "Users": {
+    "title": "Users",
+    "type": "object",
+    "properties": {
+      "UserID": {
+        "title": "User ID",
+        "description": "Unique identifier for the user",
+        "type": "string"
+      },
+      "Username": {
+        "title": "Username",
+        "description": "User's login username",
+        "type": "string"
+      },
+      "FullName": {
+        "title": "Full Name",
+        "description": "User's full name",
+        "type": "string"
+      },
+      "Email": {
+        "title": "Email",
+        "description": "User's email address",
+        "type": "string",
+        "format": "email"
+      },
+      "Phone": {
+        "title": "Phone Number",
+        "description": "User's phone number",
+        "type": "string",
+        "format": "phone"
+      },
+      "Organization": {
+        "title": "Organization",
+        "description": "User's organization",
+        "type": "string"
+      },
+      "Role": {
+        "title": "Role",
+        "description": "User's role in the system",
+        "type": "string",
+        "enum": ["Buyer", "Seller", "ProjectManager", "Logistics", "DataAnalyst", "Regulatory", "Admin"]
+      },
+      "Department": {
+        "title": "Department",
+        "description": "User's department",
+        "type": "string"
+      },
+      "Active": {
+        "title": "Active",
+        "description": "Whether the user account is active",
+        "type": "boolean"
+      },
+      "LastLogin": {
+        "title": "Last Login",
+        "description": "Date of last login",
+        "type": "string",
+        "format": "date-time"
+      },
+      "Notes": {
+        "title": "Notes",
+        "description": "Additional user information",
+        "type": "string"
+      }
+    },
+    "required": ["UserID", "Username", "FullName", "Email", "Organization", "Role", "Active"]
+  },
+  "Facilities": {
+    "title": "Facilities",
+    "type": "object",
+    "properties": {
+      "FacilityCode": {
+        "title": "Facility Code",
+        "description": "Unique identifier for the facility",
+        "type": "string"
+      },
+      "FacilityName": {
+        "title": "Facility Name",
+        "description": "Name of the facility",
+        "type": "string"
+      },
+      "FacilityType": {
+        "title": "Facility Type",
+        "description": "Type of facility",
+        "type": "string",
+        "enum": ["Warehouse", "Distribution Center", "Cargo Terminal", "Customs Office", "Transit Hub", "Other"]
+      },
+      "Country": {
+        "title": "Country",
+        "description": "Country where facility is located",
+        "type": "string"
+      },
+      "City": {
+        "title": "City",
+        "description": "City where facility is located",
+        "type": "string"
+      },
+      "Address": {
+        "title": "Address",
+        "description": "Complete facility address",
+        "type": "string"
+      },
+      "ContactPerson": {
+        "title": "Contact Person",
+        "description": "Primary contact person",
+        "type": "string"
+      },
+      "Phone": {
+        "title": "Phone Number",
+        "description": "Contact phone number",
+        "type": "string",
+        "format": "phone"
+      },
+      "Email": {
+        "title": "Email",
+        "description": "Contact email address",
+        "type": "string",
+        "format": "email"
+      },
+      "Active": {
+        "title": "Active",
+        "description": "Whether the facility is currently active",
+        "type": "boolean"
+      },
+      "Notes": {
+        "title": "Notes",
+        "description": "Additional facility information",
+        "type": "string"
+      }
+    },
+    "required": ["FacilityCode", "FacilityName", "FacilityType", "Country", "City", "Active"]
+  },
+  "ValidationRules": {
+    "title": "ValidationRules",
+    "type": "object",
+    "properties": {
+      "RuleCode": {
+        "title": "Rule Code",
+        "description": "Unique identifier for the validation rule",
+        "type": "string"
+      },
+      "RuleName": {
+        "title": "Rule Name",
+        "description": "Name of the validation rule",
+        "type": "string"
+      },
+      "FieldPath": {
+        "title": "Field Path",
+        "description": "Path to the field being validated",
+        "type": "string"
+      },
+      "RuleType": {
+        "title": "Rule Type",
+        "description": "Type of validation rule",
+        "type": "string",
+        "enum": ["Required", "MinLength", "MaxLength", "Pattern", "Range", "Custom"]
+      },
+      "RuleValue": {
+        "title": "Rule Value",
+        "description": "Value for the validation rule",
+        "type": "string"
+      },
+      "ErrorMessage": {
+        "title": "Error Message",
+        "description": "Error message to display",
+        "type": "string"
+      },
+      "ApplicableStates": {
+        "title": "Applicable States",
+        "description": "States where this rule applies",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "Active": {
+        "title": "Active",
+        "description": "Whether this validation rule is active",
+        "type": "boolean"
+      },
+      "Notes": {
+        "title": "Notes",
+        "description": "Additional rule information",
+        "type": "string"
+      }
+    },
+    "required": ["RuleCode", "RuleName", "FieldPath", "RuleType", "ErrorMessage", "Active"]
+  }
+}
