@@ -1616,7 +1616,6 @@ const ProjectPlanScreen: React.FC = () => {
               />
             ) : (
               <MasterDataPreview 
-                data={masterData} 
                 projectId={projectId}
                 mindsConfig={mindsConfig}
               />

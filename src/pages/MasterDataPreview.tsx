@@ -1,21 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Tab, Badge, Button, Icon } from '../components';
+import { Tab, Badge, Button, Icon, EditableDataGrid } from '../components';
 import SchemaPreview from './SchemaPreview';
 import { getSession } from '../services/paramai_browsersdk';
 
 interface MasterDataPreviewProps {
-  data: Record<string, any[]>;
   projectId?: string;
   mindsConfig?: any;
 }
 
 const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({ 
-  data, 
   projectId = "", 
   mindsConfig = {} 
 }) => {
-  const dataKeys = Object.keys(data);
-  const [activeTab, setActiveTab] = useState(dataKeys[0]);
+  const [activeTab, setActiveTab] = useState<string>("");
   const [viewMode, setViewMode] = useState('documents'); // 'documents' or 'schema'
   
   // New state for master schema session management
@@ -23,17 +20,18 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
   const [hasExistingSession, setHasExistingSession] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [masterSchemas, setMasterSchemas] = useState<Record<string, any>>({});
+  const [masterData, setMasterData] = useState<Record<string, any[]>>({});
 
-  const activeData = data[activeTab] || [];
-  const headers = activeData.length > 0 ? Object.keys(activeData[0]) : [];
-
-  const tabItems = dataKeys.map(key => ({
+  // Dynamic tab items based on master schemas
+  const tabItems = Object.keys(masterSchemas).map(key => ({
     id: key,
-    label: key,
+    label: masterSchemas[key].title || key,
   }));
 
   // Get the schema for the active tab from the dynamic master schemas
   const activeSchema = masterSchemas[activeTab];
+  const activeData = masterData[activeTab] || [];
+  const headers = activeData.length > 0 ? Object.keys(activeData[0]) : [];
 
   // Check for existing master schema session (similar to MasterSchemaConfig)
   const checkMasterSchemaSession = async () => {
@@ -44,13 +42,19 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
 
     try {
       setIsCheckingSession(true);
+      console.log('🔍 Checking master schema session for project:', projectId);
+      console.log('🔍 Using mind ID:', mindsConfig.masterSchemaMindId);
+      
       // Get all sessions for master schema mind
       const masterSchemaSessions = await getSession(mindsConfig.masterSchemaMindId);
+      console.log('🔍 All master schema sessions:', masterSchemaSessions);
       
       // Find sessions matching the project ID and sort by execution time (e_at) to get most recent
       const matchingSessions = masterSchemaSessions?.response?.filter(
         (el: any) => el?.name === projectId
       ) || [];
+      
+      console.log('🔍 Matching sessions for project:', matchingSessions);
       
       if (matchingSessions.length > 0) {
         // Sort by e_at timestamp (most recent first) and take the first one
@@ -78,6 +82,8 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
         // Parse the master schema CSV content and create individual schema objects
         if (sessionDetails?.response?.output?.content) {
           const content = sessionDetails.response.output.content;
+          console.log('🔍 Session output content keys:', Object.keys(content));
+          
           // Find the first content item that contains CSV data
           const firstContentKey = Object.keys(content)[0];
           if (firstContentKey && content[firstContentKey] && content[firstContentKey][0]) {
@@ -87,6 +93,12 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
               const parsedSchemas = parseMasterSchemaCSV(csvContent);
               console.log('📊 Parsed master schemas:', Object.keys(parsedSchemas));
               setMasterSchemas(parsedSchemas);
+              
+              // Set active tab to first schema if available
+              if (Object.keys(parsedSchemas).length > 0 && !activeTab) {
+                const firstSchemaKey = Object.keys(parsedSchemas)[0];
+                setActiveTab(firstSchemaKey);
+              }
             }
           }
         }
@@ -94,11 +106,15 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
         console.log('🔍 No sessions found for project:', projectId);
         setHasExistingSession(false);
         setMasterSchemaSession(null);
+        setMasterSchemas({});
+        setMasterData({});
       }
     } catch (error) {
       console.error("Error checking master schema session:", error);
       setHasExistingSession(false);
       setMasterSchemaSession(null);
+      setMasterSchemas({});
+      setMasterData({});
     } finally {
       setIsCheckingSession(false);
     }
@@ -240,10 +256,103 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
     checkMasterSchemaSession();
   }, [projectId, mindsConfig?.masterSchemaMindId]);
 
+  // Helper function to generate random sample values based on property type
+  const generateSampleValue = (property: any) => {
+    const { type, format, enum: enumValues } = property;
+    
+    if (enumValues && Array.isArray(enumValues) && enumValues.length > 0) {
+      return enumValues[Math.floor(Math.random() * enumValues.length)];
+    }
+    
+    switch (type) {
+      case 'string':
+        if (format === 'email') return `user${Math.floor(Math.random() * 1000)}@example.com`;
+        if (format === 'date') return new Date().toISOString().split('T')[0];
+        if (property.title?.toLowerCase().includes('number') || property.title?.toLowerCase().includes('id')) {
+          return `DOC-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+        }
+        return property.title || `Sample Text ${Math.floor(Math.random() * 100)}`;
+      case 'number':
+      case 'integer':
+        return Math.floor(Math.random() * 1000) + 1;
+      case 'boolean':
+        return Math.random() > 0.5;
+      case 'array':
+        return [`Item ${Math.floor(Math.random() * 10)}`];
+      case 'object':
+        return { value: `Object ${Math.floor(Math.random() * 10)}` };
+      default:
+        return 'N/A';
+    }
+  };
+
+  // Generate a full schema document with random data - maintaining nested structure
+  const generateSchemaDocument = (schema: any, docNumber: number) => {
+    const document: any = {
+      _id: `doc_${docNumber}`,
+    };
+    
+    // Process each group in the schema order
+    if (schema.order) {
+      schema.order.forEach((groupKey: string) => {
+        const groupSchema = schema.properties[groupKey];
+        if (groupSchema && groupSchema.properties) {
+          document[groupKey] = {};
+          
+          // Process properties within the group
+          Object.keys(groupSchema.properties).forEach((propKey: string) => {
+            const property = groupSchema.properties[propKey];
+            document[groupKey][propKey] = generateSampleValue(property);
+          });
+        }
+      });
+    }
+    
+    return document;
+  };
+
+  // Generate sample documents for a given schema
+  const generateSampleDocuments = (schema: any, count: number = 5) => {
+    if (!schema) return [];
+    
+    const documents = [];
+    for (let i = 1; i <= count; i++) {
+      documents.push(generateSchemaDocument(schema, i));
+    }
+    return documents;
+  };
+
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
     setViewMode('documents'); // Reset to documents view when tab changes
   };
+
+  // Show loading state while checking session
+  if (isCheckingSession) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading master schema configuration...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show message if no schemas available
+  if (!hasExistingSession || Object.keys(masterSchemas).length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Icon name="info" size="lg" className="mx-auto mb-4 text-gray-400" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Master Schema Available</h3>
+          <p className="text-gray-600">
+            No master schema session found for this project. Generate a master schema first to view schemas.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -251,10 +360,7 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <h1 className="text-2xl font-bold text-gray-900">Master Data Preview</h1>
         <p className="text-gray-600 mt-1">
-          {hasExistingSession 
-            ? "Browse master data entities and their schemas from generated master schema."
-            : "Browse master data entities and their records."
-          }
+          Browse master data entities and their schemas from generated master schema.
         </p>
       </div>
 
@@ -290,7 +396,6 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
             size="sm"
             onClick={() => setViewMode('schema')}
             iconLeft={<Icon name="settings" size="sm" />}
-            disabled={!hasExistingSession || isCheckingSession}
           >
             Schema
           </Button>
@@ -298,51 +403,179 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
 
         {viewMode === 'documents' ? (
           <div className="bg-white rounded-lg shadow">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    {headers.map((header) => (
-                      <th
-                        key={header}
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        {header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {activeData.map((row, rowIndex) => (
-                    <tr key={rowIndex}>
-                      {headers.map((header) => (
-                        <td key={`${rowIndex}-${header}`} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {typeof row[header] === 'boolean' ? (
-                            <Badge variant={row[header] ? 'success' : 'secondary'}>
-                              {row[header].toString()}
-                            </Badge>
-                          ) : (
-                            row[header]
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            {activeSchema ? (
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Sample Data for {activeSchema.title}
+                </h3>
+                
+                {/* Unified Sample Data Table - All fields from all subschemas */}
+                <div className="border border-gray-200 rounded-lg">
+                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                    <h4 className="font-medium text-gray-800">All Schema Fields</h4>
+                  </div>
+                  
+                  {(() => {
+                    // Collect all fields from all subschemas
+                    const allFields: any[] = [];
+                    
+                    if (activeSchema.order) {
+                      activeSchema.order.forEach((groupKey: string) => {
+                        const groupSchema = activeSchema.properties[groupKey];
+                        if (groupSchema && groupSchema.properties) {
+                          Object.entries(groupSchema.properties).forEach(([propKey, prop]: [string, any]) => {
+                            allFields.push({
+                              key: `${groupKey}.${propKey}`,
+                              title: prop.title || propKey,
+                              type: prop.type || 'string',
+                              description: prop.description || '',
+                              format: prop.format || '',
+                              required: prop.required || false,
+                              enum: prop.enum || null,
+                              index: prop.index || null,
+                              groupKey: groupKey,
+                              propKey: propKey
+                            });
+                          });
+                        }
+                      });
+                    }
+                    
+                    if (allFields.length > 0) {
+                      return (
+                        <EditableDataGrid
+                          columns={[
+                            {
+                              key: 'fieldName',
+                              title: 'Field Name',
+                              width: 200,
+                              render: (value, record) => (
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-gray-900">{record.title}</span>
+                                  <Badge variant="secondary" className="text-xs">{record.groupKey}</Badge>
+                                  {record.required && (
+                                    <Badge variant="error" className="text-xs">Required</Badge>
+                                  )}
+                                </div>
+                              )
+                            },
+                            {
+                              key: 'type',
+                              title: 'Type',
+                              width: 120,
+                              render: (value, record) => (
+                                <Badge variant="primary" className="text-xs">
+                                  {record.type}
+                                </Badge>
+                              )
+                            },
+                            {
+                              key: 'description',
+                              title: 'Description',
+                              width: 300,
+                              render: (value, record) => (
+                                <span className="text-gray-600 text-sm">
+                                  {record.description || 'No description available'}
+                                </span>
+                              )
+                            },
+                            {
+                              key: 'format',
+                              title: 'Format',
+                              width: 120,
+                              render: (value, record) => (
+                                record.format ? (
+                                  <Badge variant="success" className="text-xs">
+                                    {record.format}
+                                  </Badge>
+                                ) : (
+                                  <span className="text-gray-400 text-sm">-</span>
+                                )
+                              )
+                            },
+                            {
+                              key: 'options',
+                              title: 'Options',
+                              width: 200,
+                              render: (value, record) => (
+                                record.enum ? (
+                                  <div className="flex flex-wrap gap-1">
+                                    {Array.isArray(record.enum) ? 
+                                      record.enum.slice(0, 3).map((option: any, idx: number) => (
+                                        <Badge key={idx} variant="secondary" className="text-xs">
+                                          {option}
+                                        </Badge>
+                                      ))
+                                      : 
+                                      <Badge variant="secondary" className="text-xs">
+                                        {record.enum}
+                                      </Badge>
+                                    }
+                                    {Array.isArray(record.enum) && record.enum.length > 3 && (
+                                      <span className="text-xs text-gray-500">+{record.enum.length - 3} more</span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-gray-400 text-sm">-</span>
+                                )
+                              )
+                            },
+                            {
+                              key: 'index',
+                              title: 'Priority',
+                              width: 100,
+                              render: (value, record) => (
+                                <span className="text-sm text-gray-600">
+                                  {record.index !== undefined ? record.index : '-'}
+                                </span>
+                              )
+                            }
+                          ]}
+                          data={allFields}
+                          sortable={true}
+                          filterable={true}
+                          showHeader={true}
+                          showToolbar={false}
+                          showAddButton={false}
+                          showFiltersButton={false}
+                          showExportButton={false}
+                          showBulkActions={false}
+                          className="border-0"
+                        />
+                      );
+                    } else {
+                      return (
+                        <div className="p-4 text-center text-gray-500">
+                          No fields defined in this schema
+                        </div>
+                      );
+                    }
+                  })()}
+                </div>
+                
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-blue-800">
+                    <Icon name="info" size="sm" />
+                    <span className="text-sm font-medium">Schema Structure Preview</span>
+                  </div>
+                  <p className="text-sm text-blue-700 mt-1">
+                    This table shows all fields from your master schema structure. When you generate actual master data, real records will appear here.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="p-8 text-center">
+                <Icon name="info" size="lg" className="mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Schema Available</h3>
+                <p className="text-gray-600">
+                  No schema found for "{activeTab}". Please check the master schema generation.
+                </p>
+              </div>
+            )}
           </div>
         ) : (
           <div>
-            {isCheckingSession ? (
-              <div className="flex items-center justify-center p-8">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading master schema...</p>
-                </div>
-              </div>
-            ) : hasExistingSession && activeSchema ? (
+            {activeSchema ? (
               <SchemaPreview 
                 schema={activeSchema} 
                 stateName={activeTab}
@@ -352,10 +585,7 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
                 <Icon name="info" size="lg" className="mx-auto mb-4 text-gray-400" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No Schema Available</h3>
                 <p className="text-gray-600">
-                  {hasExistingSession 
-                    ? `No schema found for "${activeTab}". Please check the master schema generation.`
-                    : "No master schema session found for this project. Generate a master schema first to view schemas."
-                  }
+                  No schema found for "{activeTab}". Please check the master schema generation.
                 </p>
               </div>
             )}
