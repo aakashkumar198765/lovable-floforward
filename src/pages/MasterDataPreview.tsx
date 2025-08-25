@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Tab, Badge, Button, Icon, EditableDataGrid } from '../components';
 import SchemaPreview from './SchemaPreview';
 import { getSession } from '../services/paramai_browsersdk';
@@ -30,8 +30,6 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
 
   // Get the schema for the active tab from the dynamic master schemas
   const activeSchema = masterSchemas[activeTab];
-  const activeData = masterData[activeTab] || [];
-  const headers = activeData.length > 0 ? Object.keys(activeData[0]) : [];
 
   // Check for existing master schema session (similar to MasterSchemaConfig)
   const checkMasterSchemaSession = async () => {
@@ -94,10 +92,13 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
               console.log('📊 Parsed master schemas:', Object.keys(parsedSchemas));
               setMasterSchemas(parsedSchemas);
               
-              // Set active tab to first schema if available
-              if (Object.keys(parsedSchemas).length > 0 && !activeTab) {
+              if (Object.keys(parsedSchemas).length > 0) {
                 const firstSchemaKey = Object.keys(parsedSchemas)[0];
-                setActiveTab(firstSchemaKey);
+                
+                // Set active tab to first schema if it's not already set
+                if (!activeTab) {
+                  setActiveTab(firstSchemaKey);
+                }
               }
             }
           }
@@ -257,32 +258,53 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
   }, [projectId, mindsConfig?.masterSchemaMindId]);
 
   // Helper function to generate random sample values based on property type
-  const generateSampleValue = (property: any) => {
-    const { type, format, enum: enumValues } = property;
-    
+  const generateSampleValue = (property: any, docIndex: number) => {
+    const { type, format, enum: enumValues, title } = property;
+    const lowerTitle = title?.toLowerCase() || '';
+
+    const sampleData: Record<string, string[]> = {
+      email: ['emily.carter@gcs.com', 'john.smith@acetonesupplies.com', 'sara.jones@techcorp.io', 'mike.williams@logistics.co', 'linda.brown@web.dev'],
+      address: ['123 Industrial Way, Chemistry Park, Suite 200', '456 Production Blvd, Industrial City', '789 Innovation Drive, Tech Hub', '101 Data Center Road, Cloud Valley', '212 Algorithm Ave, AI District'],
+      city: ['Chemville', 'Industropolis', 'Techville', 'Dataville', 'AItown'],
+      postal_code: ['CV1234', 'IP5678', 'TV9101', 'DV1121', 'AT3141'],
+      payment_method: ['Credit Card', 'Bank Transfer', 'PayPal', 'Stripe', 'Wire'],
+      category: ['Electronics', 'Raw Materials', 'Finished Goods', 'Services', 'Software'],
+      special_requirements: ['Handle with care', 'Fragile', 'Refrigerate upon arrival', 'Signature required', 'Expedited shipping'],
+    };
+
     if (enumValues && Array.isArray(enumValues) && enumValues.length > 0) {
-      return enumValues[Math.floor(Math.random() * enumValues.length)];
+      return enumValues[docIndex % enumValues.length];
     }
+
+    if (lowerTitle.includes('email')) return sampleData.email[docIndex % sampleData.email.length];
+    if (lowerTitle.includes('address')) return sampleData.address[docIndex % sampleData.address.length];
+    if (lowerTitle.includes('city')) return sampleData.city[docIndex % sampleData.city.length];
+    if (lowerTitle.includes('postal code')) return sampleData.postal_code[docIndex % sampleData.postal_code.length];
+    if (lowerTitle.includes('payment method')) return sampleData.payment_method[docIndex % sampleData.payment_method.length];
+    if (lowerTitle.includes('category')) return sampleData.category[docIndex % sampleData.category.length];
+    if (lowerTitle.includes('special requirements')) return sampleData.special_requirements[docIndex % sampleData.special_requirements.length];
     
+    if (lowerTitle.includes('unit price') || lowerTitle.includes('total price')) return (Math.random() * 450 + 50).toFixed(2);
+    if (lowerTitle.includes('duration')) return `${Math.floor(Math.random() * 11) + 1} months`;
+
     switch (type) {
       case 'string':
-        if (format === 'email') return `user${Math.floor(Math.random() * 1000)}@example.com`;
-        if (format === 'date') return new Date().toISOString().split('T')[0];
-        if (property.title?.toLowerCase().includes('number') || property.title?.toLowerCase().includes('id')) {
-          return `DOC-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+        if (format === 'date') {
+          const d = new Date();
+          d.setDate(d.getDate() - docIndex);
+          return d.toISOString().split('T')[0];
         }
-        return property.title || `Sample Text ${Math.floor(Math.random() * 100)}`;
+        if (lowerTitle.includes('number') || lowerTitle.includes('id')) {
+          return `DOC-${String(1000 + docIndex).padStart(4, '0')}`;
+        }
+        return `Sample ${title} ${docIndex + 1}`;
       case 'number':
       case 'integer':
-        return Math.floor(Math.random() * 1000) + 1;
+        return Math.floor(Math.random() * 1000) + docIndex;
       case 'boolean':
-        return Math.random() > 0.5;
-      case 'array':
-        return [`Item ${Math.floor(Math.random() * 10)}`];
-      case 'object':
-        return { value: `Object ${Math.floor(Math.random() * 10)}` };
+        return (docIndex % 2 === 0);
       default:
-        return 'N/A';
+        return '-';
     }
   };
 
@@ -302,7 +324,7 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
           // Process properties within the group
           Object.keys(groupSchema.properties).forEach((propKey: string) => {
             const property = groupSchema.properties[propKey];
-            document[groupKey][propKey] = generateSampleValue(property);
+            document[groupKey][propKey] = generateSampleValue(property, docNumber - 1); // docNumber is 1-based
           });
         }
       });
@@ -326,6 +348,57 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
     setActiveTab(tabId);
     setViewMode('documents'); // Reset to documents view when tab changes
   };
+
+  // Generate sample data when active tab changes and data is not available
+  useEffect(() => {
+    if (activeTab && masterSchemas[activeTab]) {
+      setMasterData(prevMasterData => {
+        if (!prevMasterData[activeTab] || prevMasterData[activeTab].length === 0) {
+          const sampleDocs = generateSampleDocuments(masterSchemas[activeTab], 5);
+          return { ...prevMasterData, [activeTab]: sampleDocs };
+        }
+        return prevMasterData;
+      });
+    }
+  }, [activeTab, masterSchemas]);
+
+    const tableHeaders = useMemo(() => {
+    const currentSchema = masterSchemas[activeTab];
+    if (!currentSchema || !currentSchema.order) return [];
+    const headers: { key: string; title: string }[] = [];
+    currentSchema.order.forEach((groupKey: string) => {
+      const group = currentSchema.properties[groupKey];
+      if (group && group.properties && group.order) {
+        group.order.forEach((propKey: string) => {
+          headers.push({
+            key: propKey,
+            title: group.properties[propKey]?.title || propKey,
+          });
+        });
+      }
+    });
+    return headers;
+  }, [masterSchemas, activeTab]);
+
+  const tableData = useMemo(() => {
+    return (masterData[activeTab] || []).map(doc => {
+      const flatDoc: Record<string, any> = {};
+      tableHeaders.forEach(header => {
+        let value: any = 'N/A';
+        if (doc) {
+          // Search for the property in the document's groups
+          for (const groupKey of Object.keys(doc)) {
+            if (doc[groupKey] && typeof doc[groupKey] === 'object' && header.key in doc[groupKey]) {
+              value = doc[groupKey][header.key];
+              break;
+            }
+          }
+        }
+        flatDoc[header.key] = value;
+      });
+      return flatDoc;
+    });
+  }, [masterData, activeTab, tableHeaders]);
 
   // Show loading state while checking session
   if (isCheckingSession) {
@@ -402,176 +475,29 @@ const MasterDataPreview: React.FC<MasterDataPreviewProps> = ({
         </div>
 
         {viewMode === 'documents' ? (
-          <div className="bg-white rounded-lg shadow">
-            {activeSchema ? (
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Sample Data for {activeSchema.title}
-                </h3>
-                
-                {/* Unified Sample Data Table - All fields from all subschemas */}
-                <div className="border border-gray-200 rounded-lg">
-                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                    <h4 className="font-medium text-gray-800">All Schema Fields</h4>
-                  </div>
-                  
-                  {(() => {
-                    // Collect all fields from all subschemas
-                    const allFields: any[] = [];
-                    
-                    if (activeSchema.order) {
-                      activeSchema.order.forEach((groupKey: string) => {
-                        const groupSchema = activeSchema.properties[groupKey];
-                        if (groupSchema && groupSchema.properties) {
-                          Object.entries(groupSchema.properties).forEach(([propKey, prop]: [string, any]) => {
-                            allFields.push({
-                              key: `${groupKey}.${propKey}`,
-                              title: prop.title || propKey,
-                              type: prop.type || 'string',
-                              description: prop.description || '',
-                              format: prop.format || '',
-                              required: prop.required || false,
-                              enum: prop.enum || null,
-                              index: prop.index || null,
-                              groupKey: groupKey,
-                              propKey: propKey
-                            });
-                          });
-                        }
-                      });
-                    }
-                    
-                    if (allFields.length > 0) {
-                      return (
-                        <EditableDataGrid
-                          columns={[
-                            {
-                              key: 'fieldName',
-                              title: 'Field Name',
-                              width: 200,
-                              render: (value, record) => (
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-gray-900">{record.title}</span>
-                                  <Badge variant="secondary" className="text-xs">{record.groupKey}</Badge>
-                                  {record.required && (
-                                    <Badge variant="error" className="text-xs">Required</Badge>
-                                  )}
-                                </div>
-                              )
-                            },
-                            {
-                              key: 'type',
-                              title: 'Type',
-                              width: 120,
-                              render: (value, record) => (
-                                <Badge variant="primary" className="text-xs">
-                                  {record.type}
-                                </Badge>
-                              )
-                            },
-                            {
-                              key: 'description',
-                              title: 'Description',
-                              width: 300,
-                              render: (value, record) => (
-                                <span className="text-gray-600 text-sm">
-                                  {record.description || 'No description available'}
-                                </span>
-                              )
-                            },
-                            {
-                              key: 'format',
-                              title: 'Format',
-                              width: 120,
-                              render: (value, record) => (
-                                record.format ? (
-                                  <Badge variant="success" className="text-xs">
-                                    {record.format}
-                                  </Badge>
-                                ) : (
-                                  <span className="text-gray-400 text-sm">-</span>
-                                )
-                              )
-                            },
-                            {
-                              key: 'options',
-                              title: 'Options',
-                              width: 200,
-                              render: (value, record) => (
-                                record.enum ? (
-                                  <div className="flex flex-wrap gap-1">
-                                    {Array.isArray(record.enum) ? 
-                                      record.enum.slice(0, 3).map((option: any, idx: number) => (
-                                        <Badge key={idx} variant="secondary" className="text-xs">
-                                          {option}
-                                        </Badge>
-                                      ))
-                                      : 
-                                      <Badge variant="secondary" className="text-xs">
-                                        {record.enum}
-                                      </Badge>
-                                    }
-                                    {Array.isArray(record.enum) && record.enum.length > 3 && (
-                                      <span className="text-xs text-gray-500">+{record.enum.length - 3} more</span>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className="text-gray-400 text-sm">-</span>
-                                )
-                              )
-                            },
-                            {
-                              key: 'index',
-                              title: 'Priority',
-                              width: 100,
-                              render: (value, record) => (
-                                <span className="text-sm text-gray-600">
-                                  {record.index !== undefined ? record.index : '-'}
-                                </span>
-                              )
-                            }
-                          ]}
-                          data={allFields}
-                          sortable={true}
-                          filterable={true}
-                          showHeader={true}
-                          showToolbar={false}
-                          showAddButton={false}
-                          showFiltersButton={false}
-                          showExportButton={false}
-                          showBulkActions={false}
-                          className="border-0"
-                        />
-                      );
-                    } else {
-                      return (
-                        <div className="p-4 text-center text-gray-500">
-                          No fields defined in this schema
-                        </div>
-                      );
-                    }
-                  })()}
-                </div>
-                
-                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex items-center gap-2 text-blue-800">
-                    <Icon name="info" size="sm" />
-                    <span className="text-sm font-medium">Schema Structure Preview</span>
-                  </div>
-                  <p className="text-sm text-blue-700 mt-1">
-                    This table shows all fields from your master schema structure. When you generate actual master data, real records will appear here.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="p-8 text-center">
-                <Icon name="info" size="lg" className="mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Schema Available</h3>
-                <p className="text-gray-600">
-                  No schema found for "{activeTab}". Please check the master schema generation.
-                </p>
-              </div>
-            )}
+          <div key={activeTab} className="bg-white rounded-lg shadow overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  {tableHeaders.map(header => (
+                    <th key={header.key} scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {header.title}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {tableData.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {tableHeaders.map(header => (
+                      <td key={header.key} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {typeof row[header.key] === 'boolean' ? String(row[header.key]) : row[header.key]}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : (
           <div>
