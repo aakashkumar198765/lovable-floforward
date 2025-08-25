@@ -1614,7 +1614,11 @@ const ProjectPlanScreen: React.FC = () => {
                 previewData={getCurrentPreviewData()}
               />
             ) : (
-              <MasterDataPreview data={masterData} />
+              <MasterDataPreview 
+                data={masterData} 
+                projectId={projectId}
+                mindsConfig={mindsConfig}
+              />
             )}
           </div>
         );
