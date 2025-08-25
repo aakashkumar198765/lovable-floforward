@@ -8,9 +8,7 @@ import {
 } from "../services/paramai_browsersdk";
 import { useParams } from "react-router-dom";
 import masterSchemas from "./sample_data/master_schemas.json";
-import masterData from "./sample_data/sample_master_data.json";
 import JsonPreview from "./JsonPreview";
-import MasterDataPreview from './MasterDataPreview';
 import { Tab } from "../components/atoms/navigation";
 
 interface AIConfiguration {
@@ -320,7 +318,6 @@ const AIConfiguration: React.FC<AIConfigurationProps> = ({
           <div className="space-y-4 p-2">
             {/* Content based on activePreviewTab */}
             <>
-              {activePreviewTab === 'workflow' && (
                 <div className="border-l border-gray-300 bg-gray-50 flex flex-col shadow-lg">
                   {/* Add tabs here */}
                   {schemaForPreview && Object.keys(schemaForPreview).length > 0 && (
@@ -364,14 +361,6 @@ const AIConfiguration: React.FC<AIConfigurationProps> = ({
                     })()}
                   </div>
                 </div>
-              )}
-              {activePreviewTab === 'master-data' && (
-                <div className="border-l border-gray-300 bg-gray-50 flex flex-col shadow-lg">
-                  <div className="flex-1 overflow-y-auto">
-                    <MasterDataPreview data={masterData} />
-                  </div>
-                </div>
-              )}
             </>
           </div>
         </Modal>
