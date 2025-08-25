@@ -208,17 +208,9 @@ const ProjectPlanScreen: React.FC = () => {
 
   useEffect(() => {
     if (activeProjectTab === "plan") {
-      if (ValidUtils.isEmptyObj(plan)) {
-        getPlan();
-      } else {
-        refreshPlanData();
-      }
+      refreshPlanData();
     } else if (activeProjectTab === "preview") {
-      if (ValidUtils.isEmptyObj(preview)) {
-        getPreview();
-      } else {
-        refreshPreviewData();
-      }
+      refreshPreviewData();
     } else if (activeProjectTab === "brd") {
       refreshBrdData();
     }
@@ -1707,6 +1699,23 @@ const ProjectPlanScreen: React.FC = () => {
           </div>
         </FlexLayout>
       </FlexLayout>
+      <Modal
+        isOpen={showConfirmationModal}
+        onClose={handleCancelSwitch}
+        title="Stop Current Process?"
+      >
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Switching tabs will stop the current process. Are you sure you want to continue?
+        </p>
+        <div className="flex justify-end gap-4 mt-4">
+          <Button variant="secondary" onClick={handleCancelSwitch}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleConfirmSwitch}>
+            Confirm
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };
