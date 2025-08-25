@@ -173,6 +173,7 @@ const AIConfiguration: React.FC<AIConfigurationProps> = ({
           isConfigModalOpen={isConfigModalOpen}
           onPreviewModalClose={closePreviewModal}
           onConfigModalClose={closeConfigModal}
+          onConfigModalOpen={handleAddToAppClick}
         />
       </div>
     </div>

@@ -5,10 +5,7 @@ import {
   getSession,
   streamSSE,
 } from "../services/paramai_browsersdk";
-import masterSchemas from "./sample_data/master_schemas.json";
-import masterData from "./sample_data/sample_master_data.json";
 import JsonPreview from "./JsonPreview";
-import MasterDataPreview from './MasterDataPreview';
 import { Tab } from "../components/atoms/navigation";
 import Logs from "../components/logs/Logs";
 
@@ -23,6 +20,7 @@ interface MasterSchemaConfigProps {
   isConfigModalOpen?: boolean;
   onPreviewModalClose?: () => void;
   onConfigModalClose?: () => void;
+  onConfigModalOpen?: () => void;
 }
 
 const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
@@ -36,12 +34,12 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
   isConfigModalOpen = false,
   onPreviewModalClose = () => {},
   onConfigModalClose = () => {},
+  onConfigModalOpen = () => {},
 }) => {
   const [masterDataPrompt, setMasterDataPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [showSchemaPanel, setShowSchemaPanel] = useState(true);
   const [schemaForPreview, setSchemaForPreview] = useState<any | null>(null);
-  const [activePreviewTab, setActivePreviewTab] = useState("workflow");
   const [showGenerateBtn, setShowGenerateBtn] = useState(false);
   const [activeSchemaTab, setActiveSchemaTab] = useState<string | null>(null);
   const [activePreviewSchemaTab, setActivePreviewSchemaTab] = useState<string | null>(null);
@@ -55,6 +53,7 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
   const [streamedLogs, setStreamedLogs] = useState<any[]>([]);
   const [isStreamingLogs, setIsStreamingLogs] = useState(false);
   const streamAbortController = useRef<AbortController | null>(null);
+  const [masterSchemaSessionId, setMasterSchemaSessionId] = useState<string>("");
 
   // Ref for the prompt textarea
   const promptTextareaRef = useRef<HTMLTextAreaElement>(null);
@@ -104,28 +103,76 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
       setIsCheckingSession(true);
       // Get all sessions for master schema mind
       const masterSchemaSessions = await getSession(mindsConfig.masterSchemaMindId);
-      const session = masterSchemaSessions?.response?.find(
-        (el: any) => el?.name === projectId
-      );
       
-      if (session) {
+      // Find sessions matching the project ID and sort by execution time (e_at) to get most recent
+      const matchingSessions = masterSchemaSessions?.response?.filter(
+        (el: any) => el?.name === projectId
+      ) || [];
+      
+      if (matchingSessions.length > 0) {
+        // Sort by e_at timestamp (most recent first) and take the first one
+        const sortedSessions = matchingSessions.sort((a: any, b: any) => {
+          const dateA = new Date(a.e_at || 0);
+          const dateB = new Date(b.e_at || 0);
+          return dateB.getTime() - dateA.getTime(); // Descending order (most recent first)
+        });
+        
+        const mostRecentSession = sortedSessions[0];
+        console.log('🔍 Found', matchingSessions.length, 'sessions for project', projectId);
+        console.log('🔍 Most recent session:', mostRecentSession._id, 'executed at:', mostRecentSession.e_at);
+        
         // Fetch the specific session content
         const sessionDetails = await getSession(
           mindsConfig.masterSchemaMindId,
           "",
-          session._id
+          mostRecentSession._id
         );
+        console.log('🔍 Full session details:', sessionDetails);
+        console.log('🔍 Session response structure:', sessionDetails?.response);
+        console.log('🔍 Session args:', sessionDetails?.response?.args);
+        console.log('🔍 User query in args:', sessionDetails?.response?.args?.user_query);
+        
         setMasterSchemaSession(sessionDetails?.response || {});
+        setMasterSchemaSessionId(mostRecentSession._id); // Store session ID for regeneration
         setHasExistingSession(true);
         
-        // Set schema for preview if content exists
+        // Extract and set the user_query from the session args
+        if (sessionDetails?.response?.args?.user_query) {
+          console.log('📝 Setting user_query from session:', sessionDetails.response.args.user_query);
+          setMasterDataPrompt(sessionDetails.response.args.user_query);
+        } else {
+          console.log('📝 No user_query found in session args:', sessionDetails?.response?.args);
+          // Try alternative paths
+          console.log('📝 Trying alternative paths...');
+          console.log('📝 Direct response args:', sessionDetails?.response?.args);
+          console.log('📝 Response keys:', Object.keys(sessionDetails?.response || {}));
+        }
+        
+        // Parse the master schema CSV content and create individual schema tabs
         if (sessionDetails?.response?.output?.content) {
-          setSchemaForPreview(sessionDetails.response.output.content);
-          setShowSchemaPanel(true);
+          const content = sessionDetails.response.output.content;
+          // Find the first content item that contains CSV data
+          const firstContentKey = Object.keys(content)[0];
+          if (firstContentKey && content[firstContentKey] && content[firstContentKey][0]) {
+            const csvContent = content[firstContentKey][0].content;
+            if (csvContent) {
+              console.log('📊 Master Schema CSV content (session check):', csvContent.substring(0, 200));
+              const parsedSchemas = parseMasterSchemaCSV(csvContent);
+              console.log('📊 Parsed master schemas (session check):', Object.keys(parsedSchemas));
+              setSchemaForPreview(parsedSchemas);
+              setShowSchemaPanel(true);
+              // Set the first schema as active tab
+              if (Object.keys(parsedSchemas).length > 0) {
+                setActiveSchemaTab(Object.keys(parsedSchemas)[0]);
+              }
+            }
+          }
         }
       } else {
+        console.log('🔍 No sessions found for project:', projectId);
         setHasExistingSession(false);
         setMasterSchemaSession(null);
+        setMasterSchemaSessionId(""); // Clear session ID when no session exists
       }
     } catch (error) {
       console.error("Error checking master schema session:", error);
@@ -145,6 +192,200 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
   useEffect(() => {
     checkMasterSchemaSession();
   }, [projectId, mindsConfig?.masterSchemaMindId]);
+
+  // Debug useEffect to monitor masterDataPrompt changes
+  useEffect(() => {
+    console.log('📝 masterDataPrompt state changed:', masterDataPrompt);
+  }, [masterDataPrompt]);
+
+  // Ensure schema panel is shown when modal reopens if schema data exists
+  useEffect(() => {
+    console.log('🔍 Modal reopen effect triggered:', {
+      isConfigModalOpen,
+      hasSchemaData: !!schemaForPreview,
+      schemaKeys: schemaForPreview ? Object.keys(schemaForPreview) : [],
+      showSchemaPanel,
+      activeSchemaTab
+    });
+    
+    if (isConfigModalOpen && schemaForPreview && Object.keys(schemaForPreview).length > 0) {
+      console.log('🔍 Restoring schema panel display');
+      setShowSchemaPanel(true);
+      // Set active tab if none is selected
+      if (!activeSchemaTab) {
+        setActiveSchemaTab(Object.keys(schemaForPreview)[0]);
+      }
+    } else if (isConfigModalOpen && (!schemaForPreview || Object.keys(schemaForPreview).length === 0)) {
+      console.log('🔍 No schema data available, checking session again');
+      // If modal is open but no schema data, check session again
+      checkMasterSchemaSession();
+    }
+  }, [isConfigModalOpen, schemaForPreview, activeSchemaTab]);
+
+  // Ensure Preview modal loads schema data when it opens
+  useEffect(() => {
+    if (isPreviewModalOpen && (!schemaForPreview || Object.keys(schemaForPreview).length === 0)) {
+      console.log('🔍 Preview modal opened but no schema data, attempting to load...');
+      if (hasExistingSession && masterSchemaSession) {
+        // Try to extract schema from existing session
+        if (masterSchemaSession.output?.content) {
+          const content = masterSchemaSession.output.content;
+          const firstContentKey = Object.keys(content)[0];
+          if (firstContentKey && content[firstContentKey] && content[firstContentKey][0]) {
+            const csvContent = content[firstContentKey][0].content;
+            if (csvContent) {
+              console.log('🔍 Loading schema data for preview from existing session');
+              const parsedSchemas = parseMasterSchemaCSV(csvContent);
+              setSchemaForPreview(parsedSchemas);
+              setActivePreviewSchemaTab(Object.keys(parsedSchemas)[0]);
+            }
+          }
+        }
+      } else {
+        // No existing session, check if we need to create one
+        console.log('🔍 No existing session, checking if we need to create one...');
+        checkMasterSchemaSession();
+      }
+    } else if (isPreviewModalOpen && schemaForPreview && Object.keys(schemaForPreview).length > 0) {
+      // Schema data exists but no tab is selected, select the first one
+      if (!activePreviewSchemaTab) {
+        console.log('🔍 Preview modal opened with schema data but no tab selected, selecting first tab');
+        const firstTabKey = Object.keys(schemaForPreview)[0];
+        setActivePreviewSchemaTab(firstTabKey);
+      }
+    }
+  }, [isPreviewModalOpen, schemaForPreview, hasExistingSession, masterSchemaSession, activePreviewSchemaTab]);
+
+  // Parse master schema CSV content into individual schemas
+  const parseMasterSchemaCSV = (csvContent: string) => {
+    if (!csvContent) return {};
+
+    const lines = csvContent.split("\n").filter((line) => line.trim());
+    if (lines.length === 0) return {};
+
+    // Get headers
+    const headers = lines[0].split(",").map((h) => h.trim());
+    const schemaData: Record<string, any> = {};
+
+    // Process each data row
+    for (let i = 1; i < lines.length; i++) {
+      try {
+        // Better CSV parsing to handle commas within quoted fields
+        const line = lines[i];
+        const values: string[] = [];
+        let currentValue = "";
+        let inQuotes = false;
+        let j = 0;
+
+        while (j < line.length) {
+          const char = line[j];
+
+          if (char === '"') {
+            if (inQuotes && line[j + 1] === '"') {
+              // Escaped quote
+              currentValue += '"';
+              j += 2;
+            } else {
+              // Start or end of quoted field
+              inQuotes = !inQuotes;
+              j++;
+            }
+          } else if (char === "," && !inQuotes) {
+            // Field separator
+            values.push(currentValue.trim());
+            currentValue = "";
+            j++;
+          } else {
+            currentValue += char;
+            j++;
+          }
+        }
+
+        // Add the last value
+        values.push(currentValue.trim());
+
+        if (values.length < 3) continue; // Need at least 3 fields
+
+        const schema = values[0];
+        const subSchema = values[1];
+        const subSchemaType = values[2];
+        const keyProperty = values[3] || "";
+        const propertyTitle = values[4] || "";
+        const description = values[5] || "";
+        const propertyType = values[6] || "";
+        const format = values[7] || "";
+        const required = values[8] === "true";
+        const options = values[9] || "";
+
+        // Create unique schema key
+        const schemaKey = schema.toLowerCase().replace(/\s+/g, "");
+
+        if (!schemaData[schemaKey]) {
+          schemaData[schemaKey] = {
+            _id: `master:${schema}`,
+            title: schema,
+            type: "object",
+            properties: {},
+            order: [],
+            schema: schema,
+          };
+        }
+
+        // Add subSchema to properties if not exists
+        if (!schemaData[schemaKey].properties[subSchema]) {
+          schemaData[schemaKey].properties[subSchema] = {
+            type: subSchemaType,
+            title: subSchema,
+            properties: {},
+            order: [],
+          };
+          schemaData[schemaKey].order.push(subSchema);
+        }
+
+        // Add property to subSchema if keyProperty exists
+        if (keyProperty && propertyTitle) {
+          // Generate a simple index based on position
+          const currentIndex = Object.keys(
+            schemaData[schemaKey].properties[subSchema].properties
+          ).length;
+          const index = currentIndex > 3 ? 100 + currentIndex : currentIndex;
+
+          // Parse options safely
+          let enumValues = undefined;
+          if (options && options.length > 0) {
+            try {
+              if (options.startsWith("[") && options.endsWith("]")) {
+                const cleanOptions = options.replace(/\"\"/g, '"');
+                enumValues = JSON.parse(cleanOptions);
+              }
+            } catch (e) {
+              console.warn("Failed to parse options for", keyProperty, ":", options, e);
+              enumValues = undefined;
+            }
+          }
+
+          schemaData[schemaKey].properties[subSchema].properties[keyProperty] = {
+            type: propertyType,
+            title: propertyTitle,
+            description: description,
+            format: format || undefined,
+            required: required,
+            index: index,
+            enum: enumValues,
+          };
+
+          if (!schemaData[schemaKey].properties[subSchema].order.includes(keyProperty)) {
+            schemaData[schemaKey].properties[subSchema].order.push(keyProperty);
+          }
+        }
+      } catch (error) {
+        console.warn("Error parsing CSV line", i, ":", lines[i], error);
+        continue;
+      }
+    }
+
+    return schemaData;
+  };
 
   // Helper function to handle streamed events and update logs
   const handleStreamEvent = (data: any) => {
@@ -169,9 +410,28 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
   };
 
   const handlePreview = () => {
-    // Initialize activePreviewSchemaTab when masterSchemas is set
-    if (masterSchemas && Object.keys(masterSchemas).length > 0) {
-      setActivePreviewSchemaTab(Object.keys(masterSchemas)[0]);
+    // Initialize activePreviewSchemaTab when schemas are available
+    if (schemaForPreview && Object.keys(schemaForPreview).length > 0) {
+      setActivePreviewSchemaTab(Object.keys(schemaForPreview)[0]);
+    } else {
+      // If no schema data available, try to load it from existing session
+      console.log('🔍 Preview opened but no schema data, checking session...');
+      if (hasExistingSession && masterSchemaSession) {
+        // Try to extract schema from existing session
+        if (masterSchemaSession.output?.content) {
+          const content = masterSchemaSession.output.content;
+          const firstContentKey = Object.keys(content)[0];
+          if (firstContentKey && content[firstContentKey] && content[firstContentKey][0]) {
+            const csvContent = content[firstContentKey][0].content;
+            if (csvContent) {
+              console.log('🔍 Loading schema data for preview from existing session');
+              const parsedSchemas = parseMasterSchemaCSV(csvContent);
+              setSchemaForPreview(parsedSchemas);
+              setActivePreviewSchemaTab(Object.keys(parsedSchemas)[0]);
+            }
+          }
+        }
+      }
     }
   };
 
@@ -181,16 +441,9 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
 
   const closePromptModalOpen = () => {
     onConfigModalClose();
-    setShowSchemaPanel(false);
-    setActiveSchemaTab(null);
-  };
-
-  const handleAddToApp = () => {
-    setSchemaForPreview(masterSchemas);
-    // Set the first tab as active by default
-    if (masterSchemas && Object.keys(masterSchemas).length > 0) {
-      setActiveSchemaTab(Object.keys(masterSchemas)[0]);
-    }
+    // Don't clear schema panel state - let it persist for when modal reopens
+    // setShowSchemaPanel(false);
+    // setActiveSchemaTab(null);
   };
 
   // Core generation logic
@@ -200,13 +453,11 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
       setStreamedLogs([]);
 
       const args = {
-          prompts: masterDataPrompt,
-          schema: getWorkflowSchemaCsv(),
-          state_machine: getCurrentStateMachines(),
+          user_query: masterDataPrompt,
+          schema_csv: getWorkflowSchemaCsv(),
           brd: getBrdContent(),
-          n_instances: 1,
-        },
-        mindId = mindsConfig?.masterSchemaMindId;
+        };
+      const mindId = mindsConfig?.masterSchemaMindId;
       
       const responseStructure = {
         api: {},
@@ -222,7 +473,8 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
         projectId,
         args,
         responseStructure,
-        mindId
+        mindId,
+        hasExistingSession ? masterSchemaSessionId : undefined // Pass session ID if regenerating
       );
 
       const { job_id, session_id } = execution;
@@ -247,16 +499,43 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
 
       // Get the updated session after execution
       const response = await getSession(mindId, "", session_id);
+      console.log('🔍 New session response:', response);
+      console.log('🔍 New session args:', response?.response?.args);
+      console.log('🔍 New session user_query:', response?.response?.args?.user_query);
+      
       if (response?.response) {
         setMasterSchemaSession(response.response);
+        setMasterSchemaSessionId(session_id); // Update session ID with new one
         setHasExistingSession(true);
         
-        // Update schema for preview if content exists
+        // Extract and set the user_query from the new session args
+        if (response.response.args?.user_query) {
+          console.log('📝 Setting user_query from new session:', response.response.args.user_query);
+          setMasterDataPrompt(response.response.args.user_query);
+        } else {
+          console.log('📝 No user_query found in new session args:', response.response?.args);
+          // Try alternative paths
+          console.log('📝 New session response keys:', Object.keys(response.response || {}));
+        }
+        
+        // Parse the master schema CSV content and create individual schema tabs
         if (response.response.output?.content) {
-          setSchemaForPreview(response.response.output.content);
-          setShowSchemaPanel(true);
-          if (Object.keys(response.response.output.content).length > 0) {
-            setActiveSchemaTab(Object.keys(response.response.output.content)[0]);
+          const content = response.response.output.content;
+          // Find the first content item that contains CSV data
+          const firstContentKey = Object.keys(content)[0];
+          if (firstContentKey && content[firstContentKey] && content[firstContentKey][0]) {
+            const csvContent = content[firstContentKey][0].content;
+            if (csvContent) {
+              console.log('📊 Master Schema CSV content:', csvContent.substring(0, 200));
+              const parsedSchemas = parseMasterSchemaCSV(csvContent);
+              console.log('📊 Parsed master schemas:', Object.keys(parsedSchemas));
+              setSchemaForPreview(parsedSchemas);
+              setShowSchemaPanel(true);
+              // Set the first schema as active tab
+              if (Object.keys(parsedSchemas).length > 0) {
+                setActiveSchemaTab(Object.keys(parsedSchemas)[0]);
+              }
+            }
           }
         }
         
@@ -277,15 +556,14 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
   const handleSubmitToApp = async (regenerate: boolean) => {
     if (regenerate && hasExistingSession) {
       // Show regeneration options for existing session
-      onConfigModalClose();
       setShowRegenerationOptionsModal(true);
       setShowGenerateBtn(true);
-      setSchemaForPreview(masterSchemas);
-      if (masterSchemas && Object.keys(masterSchemas).length > 0) {
-        setActiveSchemaTab(Object.keys(masterSchemas)[0]);
+      // Use existing parsed schemas instead of static masterSchemas
+      if (schemaForPreview && Object.keys(schemaForPreview).length > 0) {
+        setActiveSchemaTab(Object.keys(schemaForPreview)[0]);
       }
       setShowSchemaPanel(true);
-      onPreviewModalClose();
+      // Don't close the preview modal yet - let user choose regeneration option
     } else {
       // Generate new master schema
       await generateMasterSchema();
@@ -300,10 +578,20 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
       // Regenerate with same prompt
       await generateMasterSchema();
     } else {
-      // Edit prompt - reopen the config modal
-      onConfigModalClose();
-      // The modal will reopen with the prompt input
+      // Edit prompt - close preview modal and open config modal
+      onPreviewModalClose(); // Close preview modal
+      onConfigModalClose(); // Close any open config modal
+      // Small delay to ensure modals are closed, then open config modal
+      setTimeout(() => {
+        onConfigModalOpen(); // Open the config modal
+      }, 100);
     }
+  };
+
+  const handleRegenerationCancel = () => {
+    setShowRegenerationOptionsModal(false);
+    // Don't close the preview modal - just hide the regeneration options
+    // User can continue viewing the preview
   };
 
   return (
@@ -322,89 +610,65 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
       <Modal
         isOpen={isPreviewModalOpen}
         onClose={closePreview}
-        title={"Preview"}
+        title={"Preview Master Schema"}
         size="lg"
         variant="slider"
         footer={
           <div className="flex items-center justify-end space-x-4">
-            {hasExistingSession && (
-              <Button
-                variant="outline"
-                onClick={refreshMasterSchemaData}
-                disabled={isCheckingSession}
-              >
-                Refresh
-              </Button>
-            )}
-            <Button
-              variant="primary"
-              onClick={() => handleSubmitToApp(true)}
-              loading={loading}
-            >
-              {hasExistingSession ? "Re-Generate Master Schema" : "Generate Master Schema"}
-            </Button>
           </div>
         }
       >
         <div className="space-y-4 p-2">
-          {/* Content based on activePreviewTab */}
-          <>
-            {activePreviewTab === 'workflow' && (
-              <div className="border-l border-gray-300 bg-gray-50 flex flex-col shadow-lg">
-                {/* Add tabs here */}
-                {schemaForPreview && Object.keys(schemaForPreview).length > 0 && (
-                  <div className="bg-white border-b border-gray-200 px-6 py-4">
-                    <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                      <div className="min-w-max">
-                        <Tab
-                          items={Object.keys(schemaForPreview).map(key => ({ id: key, label: key }))}
-                          activeTab={activePreviewSchemaTab as string}
-                          onChange={(tabId) => setActivePreviewSchemaTab(tabId as string)}
-                          variant="pills"
-                          size="sm"
-                          className="whitespace-nowrap"
-                        />
-                      </div>
-                    </div>
+          {/* Content - Schema preview */}
+          <div className="border-l border-gray-300 bg-gray-50 flex flex-col shadow-lg">
+            {/* Add tabs here */}
+            {schemaForPreview && Object.keys(schemaForPreview).length > 0 && (
+              <div className="bg-white border-b border-gray-200 px-6 py-4">
+                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                  <div className="min-w-max">
+                    <Tab
+                      items={Object.keys(schemaForPreview).map(key => ({ 
+                        id: key, 
+                        label: schemaForPreview[key].title || key 
+                      }))}
+                      activeTab={activePreviewSchemaTab as string}
+                      onChange={(tabId) => setActivePreviewSchemaTab(tabId as string)}
+                      variant="pills"
+                      size="sm"
+                      className="whitespace-nowrap"
+                    />
                   </div>
-                )}
+                </div>
+              </div>
+            )}
 
-                {/* Panel Content - Direct rendering without wrapper */}
-                <div className="flex-1 overflow-y-auto">
-                  {(() => {
-                    if (schemaForPreview && activePreviewSchemaTab) {
-                      const currentSchema = schemaForPreview[activePreviewSchemaTab];
-                      return (
-                        <JsonPreview
-                          schema={currentSchema}
-                          title={`${activePreviewSchemaTab} Schema Details`}
-                          onClose={() => {
-                            // This onClose is for JsonPreview, not the modal.
-                            // The modal's onClose is handled by closePreview.
-                          }}
-                        />
-                      );
+            {/* Panel Content - Direct rendering without wrapper */}
+            <div className="flex-1 overflow-y-auto">
+              {(() => {
+                if (schemaForPreview && activePreviewSchemaTab) {
+                  const currentSchema = schemaForPreview[activePreviewSchemaTab];
+                  return (
+                    <JsonPreview
+                      schema={currentSchema}
+                      title={`${currentSchema.title || activePreviewSchemaTab} Schema Details`}
+                      onClose={() => {
+                        // This onClose is for JsonPreview, not the modal.
+                        // The modal's onClose is handled by closePreview.
+                      }}
+                    />
+                  );
+                }
+                return (
+                  <div className="p-4">
+                    {hasExistingSession 
+                      ? "No master schema content found. Try refreshing or regenerating."
+                      : "Generate a master schema first to preview the content."
                     }
-                    return (
-                      <div className="p-4">
-                        {hasExistingSession 
-                          ? "No master schema content found. Try refreshing or regenerating."
-                          : "Generate a master schema first to preview the content."
-                        }
-                      </div>
-                    );
-                  })()}
-                </div>
-              </div>
-            )}
-            {activePreviewTab === 'master-data' && (
-              <div className="border-l border-gray-300 bg-gray-50 flex flex-col shadow-lg">
-                <div className="flex-1 overflow-y-auto">
-                  <MasterDataPreview data={masterData} />
-                </div>
-              </div>
-            )}
-          </>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
         </div>
       </Modal>
 
@@ -524,6 +788,7 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
                 placeholder="Enter prompt"
                 resize="vertical"
                 rows={4}
+                value={masterDataPrompt}
                 onChange={(e) => setMasterDataPrompt(e.target.value)}
                 ref={promptTextareaRef}
               />
@@ -535,7 +800,10 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
                       <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                         <div className="min-w-max">
                           <Tab
-                            items={Object.keys(schemaForPreview).map(key => ({ id: key, label: key }))}
+                            items={Object.keys(schemaForPreview).map(key => ({ 
+                              id: key, 
+                              label: schemaForPreview[key].title || key 
+                            }))}
                             activeTab={activeSchemaTab as string}
                             onChange={(tabId) => setActiveSchemaTab(tabId as string)}
                             variant="pills"
@@ -555,7 +823,7 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
                         return (
                           <JsonPreview
                             schema={currentSchema}
-                            title={`${activeSchemaTab} Schema Details`}
+                            title={`${currentSchema.title || activeSchemaTab} Schema Details`}
                             onClose={() => {
                               setShowSchemaPanel(false);
                               setSchemaForPreview(null);
@@ -582,7 +850,7 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
       {showRegenerationOptionsModal && (
         <Modal
           isOpen={showRegenerationOptionsModal}
-          onClose={() => setShowRegenerationOptionsModal(false)}
+          onClose={handleRegenerationCancel}
           title="Regenerate Master Schema"
           size="lg"
         >
@@ -617,7 +885,7 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
               </Button>
               <Button
                 variant="outline"
-                onClick={() => setShowRegenerationOptionsModal(false)}
+                onClick={handleRegenerationCancel}
                 className="px-8 py-3 rounded-lg font-semibold text-base"
               >
                 Cancel

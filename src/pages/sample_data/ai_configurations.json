@@ -3,36 +3,34 @@
   "subtitle": "Select and configure the AI features to include in your application.",
   "configurations": [
     {
-      "id": "configure-master-data/schema",
-      "title": "Configure Master Data/Schema",
+      "id": "configure-master-schema",
+      "title": "Configure Master Schema",
       "icon": "💬",
-      "description": "Adds a chat panel where end-users can ask natural language questions about their data and workflows.",
+      "description": "Adds a master schema to the workflow to ensure data integrity and accuracy.",
       "exampleQuery": {
         "label": "EXAMPLE END-USER QUERY",
         "text": "\"What's the status of invoice #SI-12345?\""
       },
       "features": [
-        "Natural language processing",
-        "Data query capabilities",
-        "Workflow insights",
-        "Real-time responses"
+        "Master schema",
+        "Workflow data support"
       ],
       "enabled": false
     },
     {
-      "id": "verification-run-engine",
-      "title": "Verification/Run Engine",
+      "id": "add-validation-rules",
+      "title": "Add Validation Rules",
       "icon": "⚠️",
-      "description": "The AI automatically monitors workflows and alerts users to significant deviations from the norm.",
+      "description": "Adds validation rules to the workflow across all states to ensure data integrity and accuracy.",
       "exampleAlert": {
-        "label": "EXAMPLE AI ALERT",
+        "label": "EXAMPLE VALIDATION RULE",
         "text": "\"Shipment #SH-9876 has been in Customs for 7 days, which is longer than average.\""
       },
       "features": [
-        "Automatic monitoring",
-        "Pattern recognition",
-        "Smart alerts",
-        "Deviation analysis"
+        "Data validation",
+        "Workflow rules",
+        "State-based rules",
+        "Data integrity"
       ],
       "enabled": false
     }
