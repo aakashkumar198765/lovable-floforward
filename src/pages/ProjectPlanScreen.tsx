@@ -93,13 +93,12 @@ const ProjectPlanScreen: React.FC = () => {
   const [preview, setPreview]: any = useState({});
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [showSchemaPanel, setShowSchemaPanel] = useState(false);
+  const streamAbortController = useRef<AbortController | null>(null);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [nextTab, setNextTab] = useState<string | null>(null);
-  const [hasConfirmedSwitch, setHasConfirmedSwitch] = useState(false);
-  const [loggingTab, setLoggingTab] = useState<string | null>(null);
 
   const handleTabChange = (newTab: string) => {
-    if (isStreamingLogs && newTab !== activeProjectTab && !hasConfirmedSwitch) {
+    if (isStreamingLogs) {
       setNextTab(newTab);
       setShowConfirmationModal(true);
     } else {
@@ -108,13 +107,17 @@ const ProjectPlanScreen: React.FC = () => {
   };
 
   const handleConfirmSwitch = () => {
+    if (streamAbortController.current) {
+      streamAbortController.current.abort();
+    }
+    setIsStreamingLogs(false);
+    setStreamedLogs([]);
+
     if (nextTab) {
       setActiveProjectTab(nextTab);
-      setStreamedLogs([]); // Clear logs from view
     }
     setShowConfirmationModal(false);
     setNextTab(null);
-    setHasConfirmedSwitch(true);
   };
 
   const handleCancelSwitch = () => {
@@ -122,237 +125,253 @@ const ProjectPlanScreen: React.FC = () => {
     setNextTab(null);
   };
 
-  useEffect(() => {
-    const fetchDetails = async () => {
-      setLoading(true);
-      try {
-        const mindSessions = await getSession();
-        const session = mindSessions?.response?.find(
-          (el: any) => el?.name === projectId
-        );
+  const refreshBrdData = async () => {
+    setLoading(true);
+    try {
+      const mindSessions = await getSession();
+      const session = mindSessions?.response?.find(
+        (el: any) => el?.name === projectId
+      );
+      if (session) {
         const brdResponse = await getSession("", "", session?._id);
-        console.log(brdResponse);
-
         setBrd(brdResponse?.response || {});
-      } catch (error) {
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Error refreshing BRD data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchDetails();
+  const refreshPlanData = async () => {
+    setLoading(true);
+    try {
+      const stateMachineSessions = await getSession(mindsConfig?.jsonOutput);
+      const stateMachineSession = stateMachineSessions?.response?.find(
+        (el: any) => el?.name === projectId
+      );
+      if (stateMachineSession) {
+        const stateMachineDetails = await getSession(
+          mindsConfig?.jsonOutput,
+          "",
+          stateMachineSession?._id
+        );
+        setPlan(stateMachineDetails?.response);
+      }
+      const schemaSessions = await getSession(mindsConfig?.schemaAnalysis);
+      const schemaSession = schemaSessions?.response?.find(
+        (el: any) => el?.name === projectId
+      );
+      if (schemaSession) {
+        const schemaSessionDetails = await getSession(
+          mindsConfig?.schemaAnalysis,
+          "",
+          schemaSession?._id
+        );
+        setSchemaWorkflow(schemaSessionDetails?.response);
+      }
+    } catch (error) {
+      console.error("Error refreshing Plan data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refreshPreviewData = async () => {
+    setLoading(true);
+    try {
+      const previewSessions = await getSession(mindsConfig?.syntheticData);
+      const previewSession = previewSessions?.response?.find(
+        (el: any) => el?.name === projectId
+      );
+      if (previewSession) {
+        const previewSessionDetails = await getSession(
+          mindsConfig?.syntheticData,
+          "",
+          previewSession?._id
+        );
+        setPreview(previewSessionDetails?.response);
+      }
+    } catch (error) {
+      console.error("Error refreshing Preview data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshBrdData();
   }, [projectId]);
 
   useEffect(() => {
-    const getPlan = async () => {
-      try {
-        setLoading(true);
-        const mindName = projectId;
-
-        // check sessions already exists for schema and minds
-        const stateMachineSessions = await getSession(mindsConfig?.jsonOutput);
-        const stateMachineSession = stateMachineSessions?.response?.find(
-          (el: any) => el?.name === projectId
-        );
-        if (stateMachineSession) {
-          // fetch with session id
-          const stateMachineDetails = await getSession(
-            mindsConfig?.jsonOutput,
-            "",
-            stateMachineSession?._id
-          );
-          setPlan(stateMachineDetails?.response);
-        }
-
-        const schemaSessions = await getSession(mindsConfig?.schemaAnalysis);
-        const schemaSession = schemaSessions?.response?.find(
-          (el: any) => el?.name === projectId
-        );
-        if (schemaSession) {
-          // fetch with session id
-          const schemaSessionDetails = await getSession(
-            mindsConfig?.schemaAnalysis,
-            "",
-            schemaSession?._id
-          );
-          setSchemaWorkflow(schemaSessionDetails?.response);
-        }
-
-        if (stateMachineSession && schemaSession) return;
-
-        // If sessions don't exist
-        const responseStructure = {
-          api: {},
-          ui: {
-            type: "tabs",
-            tabs: [],
-            content: {},
-          },
-        };
-        const args: any = {
-          workflow_tree: getBrdContent(),
-          files: [],
-        };
-        // Add codegen_id to args
-        args.codegen_id = mindName?.replace(/^(US|P|A)/, 'P') || mindName;
-        
-        const schemaWorkflowExecute = await executeMind(
-          mindName,
-          args,
-          responseStructure,
-          mindsConfig?.schemaAnalysis
-        );
-        const { job_id, session_id } = schemaWorkflowExecute;
-        // show logs using job_id
-        setLoading(false); // Hide main loader
-        setHasConfirmedSwitch(false);
-        setLoggingTab("plan");
-        setIsStreamingLogs(true);
-        setStreamedLogs([]); // Clear previous logs
-        await streamSSE(job_id, {
-          onEvent: handleStreamEvent,
-          onComplete: () => setIsStreamingLogs(false),
-          onError: (err: any) => {
-            console.error("SSE error during schema workflow:", err);
-            setIsStreamingLogs(false);
-          }
-        });
-        // once logs are completed then fetch and save schemaWorkflow details using session_id
-        const schemaWorkflowResponse = await getSession(
-          mindsConfig?.schemaAnalysis,
-          "",
-          session_id
-        );
-        setSchemaWorkflow(schemaWorkflowResponse?.response);
-
-        // next just take schemaWorkflow details and brd details to run plans
-        const planArgs: any = {
-          csv_input: getWorkflowSchemaCsv(schemaWorkflowResponse?.response),
-          workflow_tree: getBrdContent(),
-          files: [],
-        };
-
-        // Add codegen_id to planArgs
-        planArgs.codegen_id = mindName?.replace(/^(US|P|A)/, 'P') || mindName;
-        
-        const planExecution = await executeMind(
-          mindName,
-          planArgs,
-          responseStructure,
-          mindsConfig?.jsonOutput
-        );
-
-        const planJobId = planExecution?.job_id;
-        const planSessionId = planExecution?.session_id;
-
-        // show logs for plans using session id and then fetch plan details
-        setLoading(false); // Hide main loader
-        setHasConfirmedSwitch(false);
-        setLoggingTab("plan");
-        setIsStreamingLogs(true);
-        setStreamedLogs([]); // Clear previous logs
-        await streamSSE(planJobId, {
-          onEvent: handleStreamEvent,
-          onComplete: () => setIsStreamingLogs(false),
-          onError: (err: any) => {
-            console.error("SSE error during plan generation:", err);
-            setIsStreamingLogs(false);
-          }
-        });
-        const planDetails = await getSession(
-          mindsConfig?.jsonOutput,
-          "",
-          planSessionId
-        );
-        setPlan(planDetails);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const getPreview = async () => {
-      try {
-        setLoading(true);
-
-        const previewSessions = await getSession(mindsConfig?.syntheticData);
-        const previewSession = previewSessions?.response?.find(
-          (el: any) => el?.name === projectId
-        );
-        if (previewSession) {
-          // fetch with session id
-          const previewSessionDetails = await getSession(
-            mindsConfig?.syntheticData,
-            "",
-            previewSession?._id
-          );
-          setPreview(previewSessionDetails?.response);
-          return;
-        }
-
-        const mindName = projectId;
-        const responseStructure = {
-          api: {},
-          ui: {
-            type: "tabs",
-            tabs: [],
-            content: {},
-          },
-        };
-        const args: any = {
-          prompts: getBrdContent(),
-          csv_file: getWorkflowSchemaCsv(schemaWorkflow),
-          n_instances: 1,
-        };
-        // Add codegen_id to args
-        args.codegen_id = mindName?.replace(/^(US|P|A)/, 'P') || mindName;
-        
-        const previewExecute = await executeMind(
-          mindName,
-          args,
-          responseStructure,
-          mindsConfig?.syntheticData
-        );
-        console.log(previewExecute);
-        const { job_id, session_id } = previewExecute;
-        setLoading(false); // Hide main loader
-        setHasConfirmedSwitch(false);
-        setLoggingTab("preview");
-        setIsStreamingLogs(true);
-        setStreamedLogs([]); // Clear previous logs
-        await streamSSE(job_id, {
-          onEvent: handleStreamEvent,
-          onComplete: () => setIsStreamingLogs(false),
-          onError: (err: any) => {
-            console.error("SSE error during preview generation:", err);
-            setIsStreamingLogs(false);
-          }
-        });
-        const previewResponse = await getSession(
-          mindsConfig?.syntheticData,
-          "",
-          session_id
-        );
-        console.log(previewResponse);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (activeProjectTab !== "brd") {
-      if (activeProjectTab === "plan" && ValidUtils.isEmptyObj(plan)) {
+    if (activeProjectTab === "plan") {
+      if (ValidUtils.isEmptyObj(plan)) {
         getPlan();
-      } else if (
-        activeProjectTab === "preview" &&
-        ValidUtils.isEmptyObj(preview)
-      ) {
-        getPreview();
+      } else {
+        refreshPlanData();
       }
+    } else if (activeProjectTab === "preview") {
+      if (ValidUtils.isEmptyObj(preview)) {
+        getPreview();
+      } else {
+        refreshPreviewData();
+      }
+    } else if (activeProjectTab === "brd") {
+      refreshBrdData();
     }
   }, [activeProjectTab]);
+
+  const getPlan = async () => {
+    try {
+      setLoading(true);
+      const mindName = projectId;
+
+      const responseStructure = {
+        api: {},
+        ui: {
+          type: "tabs",
+          tabs: [],
+          content: {},
+        },
+      };
+      const args: any = {
+        workflow_tree: getBrdContent(),
+        files: [],
+      };
+      args.codegen_id = mindName?.replace(/^(US|P|A)/, 'P') || mindName;
+      
+      const schemaWorkflowExecute = await executeMind(
+        mindName,
+        args,
+        responseStructure,
+        mindsConfig?.schemaAnalysis
+      );
+      const { job_id, session_id } = schemaWorkflowExecute;
+      
+      streamAbortController.current = new AbortController();
+      setLoading(false);
+      setIsStreamingLogs(true);
+      setStreamedLogs([]);
+      await streamSSE(job_id, {
+        onEvent: handleStreamEvent,
+        onComplete: () => setIsStreamingLogs(false),
+        onError: (err: any) => {
+          if (err.name !== 'AbortError') {
+            console.error("SSE error during schema workflow:", err);
+          }
+          setIsStreamingLogs(false);
+        },
+        signal: streamAbortController.current.signal,
+      });
+
+      const schemaWorkflowResponse = await getSession(
+        mindsConfig?.schemaAnalysis,
+        "",
+        session_id
+      );
+      setSchemaWorkflow(schemaWorkflowResponse?.response);
+
+      const planArgs: any = {
+        csv_input: getWorkflowSchemaCsv(schemaWorkflowResponse?.response),
+        workflow_tree: getBrdContent(),
+        files: [],
+      };
+      planArgs.codegen_id = mindName?.replace(/^(US|P|A)/, 'P') || mindName;
+      
+      const planExecution = await executeMind(
+        mindName,
+        planArgs,
+        responseStructure,
+        mindsConfig?.jsonOutput
+      );
+
+      const planJobId = planExecution?.job_id;
+      const planSessionId = planExecution?.session_id;
+
+      streamAbortController.current = new AbortController();
+      setLoading(false);
+      setIsStreamingLogs(true);
+      setStreamedLogs([]);
+      await streamSSE(planJobId, {
+        onEvent: handleStreamEvent,
+        onComplete: () => setIsStreamingLogs(false),
+        onError: (err: any) => {
+          if (err.name !== 'AbortError') {
+            console.error("SSE error during plan generation:", err);
+          }
+          setIsStreamingLogs(false);
+        },
+        signal: streamAbortController.current.signal,
+      });
+
+      const planDetails = await getSession(
+        mindsConfig?.jsonOutput,
+        "",
+        planSessionId
+      );
+      setPlan(planDetails);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getPreview = async () => {
+    try {
+      setLoading(true);
+      const mindName = projectId;
+      const responseStructure = {
+        api: {},
+        ui: {
+          type: "tabs",
+          tabs: [],
+          content: {},
+        },
+      };
+      const args: any = {
+        prompts: getBrdContent(),
+        csv_file: getWorkflowSchemaCsv(schemaWorkflow),
+        n_instances: 1,
+      };
+      args.codegen_id = mindName?.replace(/^(US|P|A)/, 'P') || mindName;
+      
+      const previewExecute = await executeMind(
+        mindName,
+        args,
+        responseStructure,
+        mindsConfig?.syntheticData
+      );
+      const { job_id, session_id } = previewExecute;
+
+      streamAbortController.current = new AbortController();
+      setLoading(false);
+      setIsStreamingLogs(true);
+      setStreamedLogs([]);
+      await streamSSE(job_id, {
+        onEvent: handleStreamEvent,
+        onComplete: () => setIsStreamingLogs(false),
+        onError: (err: any) => {
+          if (err.name !== 'AbortError') {
+            console.error("SSE error during preview generation:", err);
+          }
+          setIsStreamingLogs(false);
+        },
+        signal: streamAbortController.current.signal,
+      });
+
+      const previewResponse = await getSession(
+        mindsConfig?.syntheticData,
+        "",
+        session_id
+      );
+      setPreview(previewResponse?.response);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const projectTabItems = [
     {
@@ -1334,18 +1353,20 @@ const ProjectPlanScreen: React.FC = () => {
       const { job_id, session_id } = execution;
 
       // Wait for the SSE stream to complete
-      setLoading(false); // Hide main loader
-      setHasConfirmedSwitch(false);
-      setLoggingTab(activeProjectTab);
+      streamAbortController.current = new AbortController();
+      setLoading(false);
       setIsStreamingLogs(true);
       setStreamedLogs([]); // Clear previous logs
       await streamSSE(job_id, {
         onEvent: handleStreamEvent,
         onComplete: () => setIsStreamingLogs(false),
         onError: (err: any) => {
-          console.error("SSE error during re-run:", err);
+          if (err.name !== 'AbortError') {
+            console.error("SSE error during re-run:", err);
+          }
           setIsStreamingLogs(false);
-        }
+        },
+        signal: streamAbortController.current.signal,
       });
 
       // Fetch the updated response
@@ -1374,51 +1395,30 @@ const ProjectPlanScreen: React.FC = () => {
   };
 
   const renderContent = () => {
-    const showLogs =
-      (isStreamingLogs || streamedLogs.length > 0) &&
-      activeProjectTab === loggingTab &&
-      !hasConfirmedSwitch;
+    if (isStreamingLogs) {
+      return (
+        <Logs
+          logs={streamedLogs}
+          onBackToPrompt={() => {
+            setIsStreamingLogs(false);
+            setStreamedLogs([]);
+          }}
+          onViewOutput={() => setStreamedLogs([])}
+          streamCompleted={!isStreamingLogs && streamedLogs.length > 0}
+          title="Logs"
+          backButtonText=""
+          viewOutputButtonText="View Output"
+          bgStyling={false}
+        />
+      );
+    }
 
     switch (activeProjectTab) {
       case "brd":
-        if (showLogs) {
-          return (
-            <Logs
-              logs={streamedLogs}
-              onBackToPrompt={() => {
-                setIsStreamingLogs(false);
-                setStreamedLogs([]);
-              }}
-              onViewOutput={() => setStreamedLogs([])}
-              streamCompleted={!isStreamingLogs && streamedLogs.length > 0}
-              title="Logs"
-              backButtonText=""
-              viewOutputButtonText="View BRD"
-              bgStyling={false}
-            />
-          );
-        }
         return (
           <MarkdownRenderer content={getBrdContent()} className="w-full p-4" />
         );
       case "plan":
-        if (showLogs) {
-          return (
-            <Logs
-              logs={streamedLogs}
-              onBackToPrompt={() => {
-                setIsStreamingLogs(false);
-                setStreamedLogs([]);
-              }}
-              onViewOutput={() => setStreamedLogs([])}
-              streamCompleted={!isStreamingLogs && streamedLogs.length > 0}
-              title="Logs"
-              backButtonText=""
-              viewOutputButtonText="View workflow"
-              bgStyling={false}
-            />
-          );
-        }
         return (
           <ReactFlowProvider>
             <div className="h-full w-full flex relative">
@@ -1584,23 +1584,6 @@ const ProjectPlanScreen: React.FC = () => {
       case "smart-ai":
         return <AIConfiguration />;
       case "preview":
-        if (showLogs) {
-          return (
-            <Logs
-              logs={streamedLogs}
-              onBackToPrompt={() => {
-                setIsStreamingLogs(false);
-                setStreamedLogs([]);
-              }}
-              onViewOutput={() => setStreamedLogs([])}
-              streamCompleted={!isStreamingLogs && streamedLogs.length > 0}
-              title="Logs"
-              backButtonText=""
-              viewOutputButtonText="View Preview"
-              bgStyling={false}
-            />
-          );
-        }
         return (
           <WorkflowPreview
             stateMachines={getCurrentStateMachines()}
@@ -1688,27 +1671,6 @@ const ProjectPlanScreen: React.FC = () => {
           </div>
         </FlexLayout>
       </FlexLayout>
-      <Modal
-        isOpen={showConfirmationModal}
-        onClose={handleCancelSwitch}
-        title="Confirm Tab Switch"
-        size="sm"
-      >
-        <div>
-          <p className="text-sm text-gray-600">
-            Switching tabs will move the logging process to the background. To
-            see the results after completion, you may need to refresh the page.
-          </p>
-          <div className="flex justify-end gap-4 mt-6">
-            <Button onClick={handleCancelSwitch} variant="secondary">
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmSwitch} variant="primary">
-              Okay
-            </Button>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 };

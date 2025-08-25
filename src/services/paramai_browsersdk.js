@@ -89,56 +89,64 @@ async function getSession(mindId, shareKey , sessionId) {
  * Note: This is a simplified version since full SSE implementation requires more complex setup
  */
 async function streamSSE(jobID, options = {}) {
-  const { onEvent, onError, onComplete, maxRetries = 5, retryDelay = 5000 } = options;
+  const { onEvent, onError, onComplete, maxRetries = 5, retryDelay = 5000, signal } = options;
   let attempts = 0;
 
   const connect = () => {
     return new Promise((resolve, reject) => {
-      try {
-        // Note: EventSource has CORS limitations, so this might not work for all URLs
-        // For production, you might need a proxy or server-side implementation
-        const eventSource = new EventSource(`${config.paramAiSdk.url.replace(':5012', ':5013')}/events/${jobID}?check=1`);
-        
-        eventSource.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            
-            // Check if the status is completed and close the stream
-            if (data && data.status === 'completed') {
-              eventSource.close();
-              onComplete && onComplete(data);
-              resolve();
-              return;
-            }
-            
-            onEvent && onEvent(data);
-          } catch (err) {
-            onEvent && onEvent(event.data);
-          }
-        };
+      const eventSource = new EventSource(`${config.paramAiSdk.url.replace(':5012', ':5013')}/events/${jobID}?check=1`);
+      
+      const handleAbort = () => {
+        eventSource.close();
+        reject(new DOMException('Aborted', 'AbortError'));
+      };
 
-        eventSource.onerror = (error) => {
-          eventSource.close();
-          if (attempts < maxRetries) {
-            attempts++;
-            setTimeout(() => {
-              connect().then(resolve).catch(reject);
-            }, retryDelay);
-          } else {
-            onError && onError(error);
-            reject(error);
-          }
-        };
-
-        eventSource.addEventListener('end', () => {
-          eventSource.close();
-          resolve();
-        });
-
-      } catch (error) {
-        onError && onError(error);
-        reject(error);
+      if (signal) {
+        if (signal.aborted) {
+          return handleAbort();
+        }
+        signal.addEventListener('abort', handleAbort);
       }
+
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          
+          // Check if the status is completed and close the stream
+          if (data && data.status === 'completed') {
+            eventSource.close();
+            signal?.removeEventListener('abort', handleAbort);
+            onComplete && onComplete(data);
+            resolve();
+            return;
+          }
+          
+          onEvent && onEvent(data);
+        } catch (err) {
+          onEvent && onEvent(event.data);
+        }
+      };
+
+      eventSource.onerror = (error) => {
+        eventSource.close();
+        signal?.removeEventListener('abort', handleAbort);
+        if (attempts < maxRetries) {
+          attempts++;
+          setTimeout(() => {
+            connect().then(resolve).catch(reject);
+          }, retryDelay);
+        } else {
+          onError && onError(error);
+          reject(error);
+        }
+      };
+
+      eventSource.addEventListener('end', () => {
+        eventSource.close();
+        signal?.removeEventListener('abort', handleAbort);
+        resolve();
+      });
+
     });
   };
 
