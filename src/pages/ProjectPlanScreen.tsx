@@ -32,6 +32,7 @@ import ValidUtils from "../utils/ValidUtils";
 import { LoadingState, Spinner, Icon } from "../components";
 import config from "../config.json";
 import Logs from "../components/logs/Logs";
+import Modal from "../components/atoms/feedback/Modal";
 
 const nodeColor = (node: any) => {
   // First check if node has style with backgroundColor
@@ -77,7 +78,7 @@ type LogEntry = {
 
 const ProjectPlanScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { projectId, projectName } = useParams<{
+  const { projectId, projectName } = useParams<{ 
     projectId: string;
     projectName: string;
   }>();
@@ -92,6 +93,34 @@ const ProjectPlanScreen: React.FC = () => {
   const [preview, setPreview]: any = useState({});
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [showSchemaPanel, setShowSchemaPanel] = useState(false);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [nextTab, setNextTab] = useState<string | null>(null);
+  const [hasConfirmedSwitch, setHasConfirmedSwitch] = useState(false);
+  const [loggingTab, setLoggingTab] = useState<string | null>(null);
+
+  const handleTabChange = (newTab: string) => {
+    if (isStreamingLogs && newTab !== activeProjectTab && !hasConfirmedSwitch) {
+      setNextTab(newTab);
+      setShowConfirmationModal(true);
+    } else {
+      setActiveProjectTab(newTab);
+    }
+  };
+
+  const handleConfirmSwitch = () => {
+    if (nextTab) {
+      setActiveProjectTab(nextTab);
+      setStreamedLogs([]); // Clear logs from view
+    }
+    setShowConfirmationModal(false);
+    setNextTab(null);
+    setHasConfirmedSwitch(true);
+  };
+
+  const handleCancelSwitch = () => {
+    setShowConfirmationModal(false);
+    setNextTab(null);
+  };
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -176,6 +205,8 @@ const ProjectPlanScreen: React.FC = () => {
         const { job_id, session_id } = schemaWorkflowExecute;
         // show logs using job_id
         setLoading(false); // Hide main loader
+        setHasConfirmedSwitch(false);
+        setLoggingTab("plan");
         setIsStreamingLogs(true);
         setStreamedLogs([]); // Clear previous logs
         await streamSSE(job_id, {
@@ -216,6 +247,8 @@ const ProjectPlanScreen: React.FC = () => {
 
         // show logs for plans using session id and then fetch plan details
         setLoading(false); // Hide main loader
+        setHasConfirmedSwitch(false);
+        setLoggingTab("plan");
         setIsStreamingLogs(true);
         setStreamedLogs([]); // Clear previous logs
         await streamSSE(planJobId, {
@@ -284,6 +317,8 @@ const ProjectPlanScreen: React.FC = () => {
         console.log(previewExecute);
         const { job_id, session_id } = previewExecute;
         setLoading(false); // Hide main loader
+        setHasConfirmedSwitch(false);
+        setLoggingTab("preview");
         setIsStreamingLogs(true);
         setStreamedLogs([]); // Clear previous logs
         await streamSSE(job_id, {
@@ -395,7 +430,7 @@ const ProjectPlanScreen: React.FC = () => {
   const getStateMachines = (param: any) => {
     if (param) {
       if (ValidUtils.isEmptyObj(param)) return "";
-      const stateMachineResponse =
+      const stateMachineResponse = 
         param?.output?.content?.["WorkflowResponse"][0];
       if (stateMachineResponse?.type === "markdown") {
         const workflowResponse = parseJsonString(stateMachineResponse?.content);
@@ -608,7 +643,7 @@ const ProjectPlanScreen: React.FC = () => {
       return [];
     }
     if (ValidUtils.isEmptyObj(preview)) return [];
-    const previewResponse = (preview as any)?.output?.content?.[
+    const previewResponse = (preview as any)?.output?.content?.[ 
       "response"
     ]?.[0];
     if (previewResponse?.type === "markdown") {
@@ -1300,6 +1335,8 @@ const ProjectPlanScreen: React.FC = () => {
 
       // Wait for the SSE stream to complete
       setLoading(false); // Hide main loader
+      setHasConfirmedSwitch(false);
+      setLoggingTab(activeProjectTab);
       setIsStreamingLogs(true);
       setStreamedLogs([]); // Clear previous logs
       await streamSSE(job_id, {
@@ -1337,13 +1374,18 @@ const ProjectPlanScreen: React.FC = () => {
   };
 
   const renderContent = () => {
+    const showLogs =
+      (isStreamingLogs || streamedLogs.length > 0) &&
+      activeProjectTab === loggingTab &&
+      !hasConfirmedSwitch;
+
     switch (activeProjectTab) {
       case "brd":
         return (
           <MarkdownRenderer content={getBrdContent()} className="w-full p-4" />
         );
       case "plan":
-        if (isStreamingLogs || streamedLogs.length > 0) {
+        if (showLogs) {
           return (
             <Logs
               logs={streamedLogs}
@@ -1365,7 +1407,7 @@ const ProjectPlanScreen: React.FC = () => {
             <div className="h-full w-full flex relative">
               {/* ReactFlow Container */}
               <div
-                className={`transition-all duration-300 ${
+                className={`transition-all duration-300 ${ 
                   showSchemaPanel ? "w-2/3" : "w-full"
                 } relative`}
               >
@@ -1525,6 +1567,23 @@ const ProjectPlanScreen: React.FC = () => {
       case "smart-ai":
         return <AIConfiguration />;
       case "preview":
+        if (showLogs) {
+          return (
+            <Logs
+              logs={streamedLogs}
+              onBackToPrompt={() => {
+                setIsStreamingLogs(false);
+                setStreamedLogs([]);
+              }}
+              onViewOutput={() => setStreamedLogs([])}
+              streamCompleted={!isStreamingLogs && streamedLogs.length > 0}
+              title="Logs"
+              backButtonText=""
+              viewOutputButtonText="View Preview"
+              bgStyling={false}
+            />
+          );
+        }
         return (
           <WorkflowPreview
             stateMachines={getCurrentStateMachines()}
@@ -1573,7 +1632,7 @@ const ProjectPlanScreen: React.FC = () => {
             <Tab
               items={projectTabItems}
               activeTab={activeProjectTab}
-              onChange={setActiveProjectTab}
+              onChange={handleTabChange}
               variant="bordered"
               size="sm"
               className="w-fit"
@@ -1595,7 +1654,7 @@ const ProjectPlanScreen: React.FC = () => {
                 className=""
                 onClick={() =>
                   navigate(
-                    `/create-deploy/${projectId || "default-id"}/${
+                    `/create-deploy/${projectId || "default-id"}/${ 
                       projectName || "default-project"
                     }`
                   )
@@ -1612,6 +1671,27 @@ const ProjectPlanScreen: React.FC = () => {
           </div>
         </FlexLayout>
       </FlexLayout>
+      <Modal
+        isOpen={showConfirmationModal}
+        onClose={handleCancelSwitch}
+        title="Confirm Tab Switch"
+        size="sm"
+      >
+        <div>
+          <p className="text-sm text-gray-600">
+            Switching tabs will move the logging process to the background. To
+            see the results after completion, you may need to refresh the page.
+          </p>
+          <div className="flex justify-end gap-4 mt-6">
+            <Button onClick={handleCancelSwitch} variant="secondary">
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmSwitch} variant="primary">
+              Okay
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
