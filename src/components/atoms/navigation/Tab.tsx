@@ -1,4 +1,4 @@
-import React, { forwardRef, useState, useEffect, useRef } from "react";
+import React, { forwardRef, useRef } from "react";
 import { X, Plus } from "lucide-react";
 import { TabProps } from "../../../types";
 import { cn } from "../../../utils/utils";
@@ -13,7 +13,6 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(
     {
       items,
       activeTab,
-      defaultActiveTab,
       variant = "default",
       size = "md",
       orientation = "horizontal",
@@ -31,23 +30,11 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(
     },
     ref
   ) => {
-    const [currentTab, setCurrentTab] = useState(
-      activeTab || defaultActiveTab || items?.[0]?.id
-    );
     const tabsRef = useRef<HTMLDivElement>(null);
-
-    // Update active tab when controlled
-    useEffect(() => {
-      if (activeTab !== undefined) {
-        setCurrentTab(activeTab);
-      }
-    }, [activeTab]);
 
     // Handle tab change
     const handleTabChange = (tabId: string) => {
       if (!items?.find((item) => item.id === tabId)?.disabled) {
-        setCurrentTab(tabId);
-
         if (onChange && typeof onChange === "function") {
           onChange(tabId);
         }
@@ -108,7 +95,7 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(
 
     // Get current tab content
     const getCurrentTabContent = () => {
-      const currentTabData = items?.find((item) => item.id === currentTab);
+      const currentTabData = items?.find((item) => item.id === activeTab);
       return currentTabData?.content || null;
     };
 
@@ -123,7 +110,7 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(
         >
           {items &&
             items.map((item) => {
-              const isActive = item.id === currentTab;
+              const isActive = item.id === activeTab;
 
               return (
                 <Button
@@ -244,14 +231,14 @@ const Tab = forwardRef<HTMLDivElement, TabProps>(
                   id={`tabpanel-${item?.id}`}
                   role="tabpanel"
                   aria-labelledby={`tab-${item?.id}`}
-                  hidden={item?.id !== currentTab}
+                  hidden={item?.id !== activeTab}
                   tabIndex={0}
                   className={cn(
                     "h-full focus:outline-none transition-opacity duration-300",
-                    item?.id === currentTab ? "opacity-100" : "opacity-0"
+                    item?.id === activeTab ? "opacity-100" : "opacity-0"
                   )}
                 >
-                  {item?.id === currentTab && (
+                  {item?.id === activeTab && (
                     <div className="h-full animate-in fade-in slide-in-from-bottom-2 duration-300">
                       {item?.content}
                     </div>
