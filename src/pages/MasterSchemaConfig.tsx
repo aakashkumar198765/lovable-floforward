@@ -10,12 +10,12 @@ import masterData from "./sample_data/sample_master_data.json";
 import JsonPreview from "./JsonPreview";
 import MasterDataPreview from './MasterDataPreview';
 import { Tab } from "../components/atoms/navigation";
+import Logs from "../components/logs/Logs";
 
 interface MasterSchemaConfigProps {
-  getWorkflowSchemaCsv?: (schemaWorkflow: any) => any;
+  getWorkflowSchemaCsv?: () => any;
   getBrdContent?: () => any;
   getCurrentStateMachines?: () => any;
-  schemaWorkflow?: any;
   mindsConfig?: any;
   projectId: string;
   // Modal control props
@@ -29,7 +29,6 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
   getWorkflowSchemaCsv = () => {},
   getBrdContent = () => {},
   getCurrentStateMachines = () => {},
-  schemaWorkflow,
   mindsConfig = {},
   projectId,
   // Modal control props
@@ -48,6 +47,14 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
   const [activePreviewSchemaTab, setActivePreviewSchemaTab] = useState<string | null>(null);
   const [showRegenerationOptionsModal, setShowRegenerationOptionsModal] = useState(false);
   const [masterSchemaRegenerationType, setMasterSchemaRegenerationType] = useState<"same" | "edit" | null>(null);
+
+  // New state for master schema session management
+  const [masterSchemaSession, setMasterSchemaSession] = useState<any>(null);
+  const [hasExistingSession, setHasExistingSession] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [streamedLogs, setStreamedLogs] = useState<any[]>([]);
+  const [isStreamingLogs, setIsStreamingLogs] = useState(false);
+  const streamAbortController = useRef<AbortController | null>(null);
 
   // Ref for the prompt textarea
   const promptTextareaRef = useRef<HTMLTextAreaElement>(null);
@@ -71,6 +78,95 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
       }, 150);
     }
   }, [masterSchemaRegenerationType]);
+
+  // Debug useEffect to check props
+  useEffect(() => {
+    console.log('MasterSchemaConfig props:', {
+      getWorkflowSchemaCsv: typeof getWorkflowSchemaCsv,
+      getBrdContent: typeof getBrdContent,
+      getCurrentStateMachines: typeof getCurrentStateMachines,
+      mindsConfig,
+      projectId
+    });
+    
+    // Test the functions
+    console.log('getWorkflowSchemaCsv result:', getWorkflowSchemaCsv());
+  }, [getWorkflowSchemaCsv, getBrdContent, getCurrentStateMachines, mindsConfig, projectId]);
+
+  // Check for existing master schema session
+  const checkMasterSchemaSession = async () => {
+    if (!projectId || !mindsConfig?.masterSchemaMindId) {
+      setIsCheckingSession(false);
+      return;
+    }
+
+    try {
+      setIsCheckingSession(true);
+      // Get all sessions for master schema mind
+      const masterSchemaSessions = await getSession(mindsConfig.masterSchemaMindId);
+      const session = masterSchemaSessions?.response?.find(
+        (el: any) => el?.name === projectId
+      );
+      
+      if (session) {
+        // Fetch the specific session content
+        const sessionDetails = await getSession(
+          mindsConfig.masterSchemaMindId,
+          "",
+          session._id
+        );
+        setMasterSchemaSession(sessionDetails?.response || {});
+        setHasExistingSession(true);
+        
+        // Set schema for preview if content exists
+        if (sessionDetails?.response?.output?.content) {
+          setSchemaForPreview(sessionDetails.response.output.content);
+          setShowSchemaPanel(true);
+        }
+      } else {
+        setHasExistingSession(false);
+        setMasterSchemaSession(null);
+      }
+    } catch (error) {
+      console.error("Error checking master schema session:", error);
+      setHasExistingSession(false);
+      setMasterSchemaSession(null);
+    } finally {
+      setIsCheckingSession(false);
+    }
+  };
+
+  // Refresh master schema data
+  const refreshMasterSchemaData = async () => {
+    await checkMasterSchemaSession();
+  };
+
+  // Check session on component mount
+  useEffect(() => {
+    checkMasterSchemaSession();
+  }, [projectId, mindsConfig?.masterSchemaMindId]);
+
+  // Helper function to handle streamed events and update logs
+  const handleStreamEvent = (data: any) => {
+    let logMessage = '';
+    if (typeof data === 'object' && data !== null && data.message) {
+      logMessage = data.message;
+    } else if (typeof data === 'string') {
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed && parsed.message) {
+          logMessage = parsed.message;
+        } else {
+          logMessage = data;
+        }
+      } catch(e) {
+        logMessage = data;
+      }
+    } else {
+      logMessage = String(data);
+    }
+    setStreamedLogs((prev) => [...prev, { message: logMessage, status: "info", format: "text" }]);
+  };
 
   const handlePreview = () => {
     // Initialize activePreviewSchemaTab when masterSchemas is set
@@ -101,15 +197,17 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
   const generateMasterSchema = async () => {
     try {
       setLoading(true);
+      setStreamedLogs([]);
 
       const args = {
           prompts: masterDataPrompt,
-          schema: getWorkflowSchemaCsv(schemaWorkflow),
+          schema: getWorkflowSchemaCsv(),
           state_machine: getCurrentStateMachines(),
           brd: getBrdContent(),
           n_instances: 1,
         },
-        mindId = mindsConfig?.syntheticData;
+        mindId = mindsConfig?.masterSchemaMindId;
+      
       const responseStructure = {
         api: {},
         ui: {
@@ -118,6 +216,8 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
           content: {},
         },
       };
+
+      // Execute the mind
       const execution = await executeMind(
         projectId,
         args,
@@ -126,29 +226,57 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
       );
 
       const { job_id, session_id } = execution;
-      await streamSSE(job_id);
+
+      // Stream the execution logs
+      streamAbortController.current = new AbortController();
+      setLoading(false);
+      setIsStreamingLogs(true);
+      setStreamedLogs([]);
+      
+      await streamSSE(job_id, {
+        onEvent: handleStreamEvent,
+        onComplete: () => setIsStreamingLogs(false),
+        onError: (err: any) => {
+          if (err.name !== 'AbortError') {
+            console.error("SSE error during master schema generation:", err);
+          }
+          setIsStreamingLogs(false);
+        },
+        signal: streamAbortController.current.signal,
+      });
+
+      // Get the updated session after execution
       const response = await getSession(mindId, "", session_id);
       if (response?.response) {
-        setLoading(false);
-        setSchemaForPreview(masterSchemas);
-        setShowSchemaPanel(true);
-        if (masterSchemas && Object.keys(masterSchemas).length > 0) {
-          setActiveSchemaTab(Object.keys(masterSchemas)[0]);
+        setMasterSchemaSession(response.response);
+        setHasExistingSession(true);
+        
+        // Update schema for preview if content exists
+        if (response.response.output?.content) {
+          setSchemaForPreview(response.response.output.content);
+          setShowSchemaPanel(true);
+          if (Object.keys(response.response.output.content).length > 0) {
+            setActiveSchemaTab(Object.keys(response.response.output.content)[0]);
+          }
         }
+        
         setShowGenerateBtn(false);
       }
     } catch (e) {
+      console.error("Error generating master schema:", e);
       setLoading(false);
       setShowSchemaPanel(false);
       setShowGenerateBtn(false);
     } finally {
       setMasterSchemaRegenerationType(null);
+      setIsStreamingLogs(false);
     }
   };
 
   // Handle submit to app
   const handleSubmitToApp = async (regenerate: boolean) => {
-    if (regenerate) {
+    if (regenerate && hasExistingSession) {
+      // Show regeneration options for existing session
       onConfigModalClose();
       setShowRegenerationOptionsModal(true);
       setShowGenerateBtn(true);
@@ -159,6 +287,7 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
       setShowSchemaPanel(true);
       onPreviewModalClose();
     } else {
+      // Generate new master schema
       await generateMasterSchema();
     }
   };
@@ -166,15 +295,29 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
   const handleRegenerationOption = async (type: "same" | "edit") => {
     setShowRegenerationOptionsModal(false);
     setMasterSchemaRegenerationType(type);
-    onConfigModalClose();
-
+    
     if (type === "same") {
+      // Regenerate with same prompt
       await generateMasterSchema();
+    } else {
+      // Edit prompt - reopen the config modal
+      onConfigModalClose();
+      // The modal will reopen with the prompt input
     }
   };
 
   return (
     <>
+      {/* Show loading state while checking session */}
+      {isCheckingSession && (
+        <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Initializing master schema configuration...</p>
+          </div>
+        </div>
+      )}
+
       {/* Preview Modal */}
       <Modal
         isOpen={isPreviewModalOpen}
@@ -184,12 +327,21 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
         variant="slider"
         footer={
           <div className="flex items-center justify-end space-x-4">
+            {hasExistingSession && (
+              <Button
+                variant="outline"
+                onClick={refreshMasterSchemaData}
+                disabled={isCheckingSession}
+              >
+                Refresh
+              </Button>
+            )}
             <Button
               variant="primary"
               onClick={() => handleSubmitToApp(true)}
               loading={loading}
             >
-              Re-Generate Master Schema
+              {hasExistingSession ? "Re-Generate Master Schema" : "Generate Master Schema"}
             </Button>
           </div>
         }
@@ -235,7 +387,10 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
                     }
                     return (
                       <div className="p-4">
-                        Could not determine schema for the generated data.
+                        {hasExistingSession 
+                          ? "No master schema content found. Try refreshing or regenerating."
+                          : "Generate a master schema first to preview the content."
+                        }
                       </div>
                     );
                   })()}
@@ -267,12 +422,12 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
             </Button>
             <Button
               variant="primary"
-              onClick={() => handleSubmitToApp(!showGenerateBtn && showSchemaPanel ? true : false)}
+              onClick={() => handleSubmitToApp(!hasExistingSession)}
               loading={loading}
             >
               {loading
                 ? "Generating Master Schema"
-                : !showGenerateBtn && showSchemaPanel
+                : hasExistingSession
                 ? "Re-Generate Master Schema"
                 : "Generate Master Schema"}
             </Button>
@@ -280,93 +435,145 @@ const MasterSchemaConfig: React.FC<MasterSchemaConfigProps> = ({
         }
       >
         <div className="space-y-4 p-2">
-          <div>
-            <h3 className="text-base font-semibold text-gray-700">
-              The following items have been processed:
-            </h3>
-          </div>
+          {isCheckingSession ? (
+            <div className="flex items-center justify-center p-8">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Checking for existing master schema...</p>
+              </div>
+            </div>
+          ) : isStreamingLogs ? (
+            <Logs
+              logs={streamedLogs}
+              onBackToPrompt={() => {
+                setIsStreamingLogs(false);
+                setStreamedLogs([]);
+              }}
+              onViewOutput={() => setStreamedLogs([])}
+              streamCompleted={!isStreamingLogs && streamedLogs.length > 0}
+              title="Master Schema Generation Logs"
+              backButtonText="Back to Prompt"
+              viewOutputButtonText="View Output"
+              bgStyling={false}
+            />
+          ) : (
+            <>
+              <div>
+                <h3 className="text-base font-semibold text-gray-700">
+                  The following items have been processed:
+                </h3>
+              </div>
 
-          <ul>
-            <li className="flex items-center gap-3 rounded-lg p-3">
-              {getBrdContent() ? <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100">
-                <Icon name="check" size="sm" className="text-green-600" />
-              </div> : <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100">
-                <Icon name="error" size="sm" className="text-red-600" />
-              </div>}
-              <span className="font-medium text-gray-800">BRD</span>
-            </li>
-            <li className="flex items-center gap-3 rounded-lg p-3">
-              {getCurrentStateMachines() ? <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100">
-                <Icon name="check" size="sm" className="text-green-600" />
-              </div> : <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100">
-                <Icon name="error" size="sm" className="text-red-600" />
-              </div>}
-              <span className="font-medium text-gray-800">State Machine</span>
-            </li>
-            <li className="flex items-center gap-3 rounded-lg p-3">
-              {getWorkflowSchemaCsv(schemaWorkflow) ? <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100">
-                <Icon name="check" size="sm" className="text-green-600" />
-              </div> : <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100">
-                <Icon name="error" size="sm" className="text-red-600" />
-              </div>}
-              <span className="font-medium text-gray-800">Schema</span>
-            </li>
-          </ul>
+              <ul>
+                <li className="flex items-center gap-3 rounded-lg p-3">
+                  {(() => {
+                    const brdResult = getBrdContent();
+                    console.log('BRD check:', { brdResult });
+                    // Check if the function actually returns meaningful data
+                    const hasBrd = brdResult && 
+                      (typeof brdResult === 'string' ? brdResult.trim().length > 0 : 
+                       Array.isArray(brdResult) ? brdResult.length > 0 : 
+                       Object.keys(brdResult || {}).length > 0);
+                    return hasBrd ? <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100">
+                      <Icon name="check" size="sm" className="text-green-600" />
+                    </div> : <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100">
+                      <Icon name="error" size="sm" className="text-red-600" />
+                    </div>;
+                  })()}
+                  <span className="font-medium text-gray-800">BRD</span>
+                </li>
+                <li className="flex items-center gap-3 rounded-lg p-3">
+                  {(() => {
+                    const stateMachineResult = getCurrentStateMachines();
+                    console.log('State Machine check:', { stateMachineResult });
+                    // Check if the function actually returns meaningful data
+                    const hasStateMachine = stateMachineResult && 
+                      (typeof stateMachineResult === 'string' ? stateMachineResult.trim().length > 0 : 
+                       Array.isArray(stateMachineResult) ? stateMachineResult.length > 0 : 
+                       Object.keys(stateMachineResult || {}).length > 0);
+                    return hasStateMachine ? <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100">
+                      <Icon name="check" size="sm" className="text-green-600" />
+                    </div> : <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100">
+                      <Icon name="error" size="sm" className="text-red-600" />
+                    </div>;
+                  })()}
+                  <span className="font-medium text-gray-800">State Machine</span>
+                </li>
+                <li className="flex items-center gap-3 rounded-lg p-3">
+                  {(() => {
+                    const schemaResult = getWorkflowSchemaCsv();
+                    console.log('Schema check:', { schemaResult });
+                    // Check if the function actually returns meaningful data
+                    const hasSchema = schemaResult && 
+                      (typeof schemaResult === 'string' ? schemaResult.trim().length > 0 : 
+                       Array.isArray(schemaResult) ? schemaResult.length > 0 : 
+                       Object.keys(schemaResult || {}).length > 0);
+                    return hasSchema ? <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100">
+                      <Icon name="check" size="sm" className="text-green-600" />
+                    </div> : <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100">
+                      <Icon name="error" size="sm" className="text-red-600" />
+                    </div>;
+                  })()}
+                  <span className="font-medium text-gray-800">Schema</span>
+                </li>
+              </ul>
 
-          <Textarea
-            id="resize-vertical"
-            label="Prompt for generating master schema"
-            placeholder="Enter prompt"
-            resize="vertical"
-            rows={4}
-            onChange={(e) => setMasterDataPrompt(e.target.value)}
-            ref={promptTextareaRef}
-          />
-          {showSchemaPanel && (
-            <div className="border-l border-gray-300 bg-gray-50 flex flex-col shadow-lg">
-              {/* Add tabs here */}
-              {schemaForPreview && Object.keys(schemaForPreview).length > 0 && (
-                <div className="bg-white border-b border-gray-200 px-6 py-4">
-                  <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                    <div className="min-w-max">
-                      <Tab
-                        items={Object.keys(schemaForPreview).map(key => ({ id: key, label: key }))}
-                        activeTab={activeSchemaTab as string}
-                        onChange={(tabId) => setActiveSchemaTab(tabId as string)}
-                        variant="pills"
-                        size="sm"
-                        className="whitespace-nowrap"
-                      />
+              <Textarea
+                id="resize-vertical"
+                label="Prompt for generating master schema"
+                placeholder="Enter prompt"
+                resize="vertical"
+                rows={4}
+                onChange={(e) => setMasterDataPrompt(e.target.value)}
+                ref={promptTextareaRef}
+              />
+              {showSchemaPanel && (
+                <div className="border-l border-gray-300 bg-gray-50 flex flex-col shadow-lg">
+                  {/* Add tabs here */}
+                  {schemaForPreview && Object.keys(schemaForPreview).length > 0 && (
+                    <div className="bg-white border-b border-gray-200 px-6 py-4">
+                      <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                        <div className="min-w-max">
+                          <Tab
+                            items={Object.keys(schemaForPreview).map(key => ({ id: key, label: key }))}
+                            activeTab={activeSchemaTab as string}
+                            onChange={(tabId) => setActiveSchemaTab(tabId as string)}
+                            variant="pills"
+                            size="sm"
+                            className="whitespace-nowrap"
+                          />
+                        </div>
+                      </div>
                     </div>
+                  )}
+
+                  {/* Panel Content - Direct rendering without wrapper */}
+                  <div className="flex-1 overflow-y-auto">
+                    {(() => {
+                      if (schemaForPreview && activeSchemaTab) {
+                        const currentSchema = schemaForPreview[activeSchemaTab];
+                        return (
+                          <JsonPreview
+                            schema={currentSchema}
+                            title={`${activeSchemaTab} Schema Details`}
+                            onClose={() => {
+                              setShowSchemaPanel(false);
+                              setSchemaForPreview(null);
+                              setActiveSchemaTab(null);
+                            }}
+                          />
+                        );
+                      }
+                      return (
+                        <div className="p-4">
+                          Could not determine schema for the generated data.
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               )}
-
-              {/* Panel Content - Direct rendering without wrapper */}
-              <div className="flex-1 overflow-y-auto">
-                {(() => {
-                  if (schemaForPreview && activeSchemaTab) {
-                    const currentSchema = schemaForPreview[activeSchemaTab];
-                    return (
-                      <JsonPreview
-                        schema={currentSchema}
-                        title={`${activeSchemaTab} Schema Details`}
-                        onClose={() => {
-                          setShowSchemaPanel(false);
-                          setSchemaForPreview(null);
-                          setActiveSchemaTab(null);
-                        }}
-                      />
-                    );
-                  }
-                  return (
-                    <div className="p-4">
-                      Could not determine schema for the generated data.
-                    </div>
-                  );
-                })()}
-              </div>
-            </div>
+            </>
           )}
         </div>
       </Modal>

@@ -26,10 +26,9 @@ interface AIConfiguration {
 }
 
 interface AIConfigurationProps {
-  getWorkflowSchemaCsv?: (schemaWorkflow: any) => any;
+  getWorkflowSchemaCsv?: () => any;
   getBrdContent?: () => any;
   getCurrentStateMachines?: () => any;
-  schemaWorkflow?: any;
   mindsConfig?: any;
 }
 
@@ -43,7 +42,6 @@ const AIConfiguration: React.FC<AIConfigurationProps> = ({
   getWorkflowSchemaCsv = () => {},
   getBrdContent = () => {},
   getCurrentStateMachines = () => {},
-  schemaWorkflow,
   mindsConfig = {},
 }) => {
   const [configs, setConfigs] = useState<AIConfiguration[]>(
@@ -169,7 +167,6 @@ const AIConfiguration: React.FC<AIConfigurationProps> = ({
           getWorkflowSchemaCsv={getWorkflowSchemaCsv}
           getBrdContent={getBrdContent}
           getCurrentStateMachines={getCurrentStateMachines}
-          schemaWorkflow={schemaWorkflow}
           mindsConfig={mindsConfig}
           projectId={projectId || ""}
           isPreviewModalOpen={isPreviewModalOpen}

@@ -70,6 +70,7 @@ const mindsConfig = {
   schemaAnalysis: config.paramAiSdk.schemaMindId,
   jsonOutput: config.paramAiSdk.stateMachineMindId,
   syntheticData: config.paramAiSdk.syntheticDataMindId,
+  masterSchemaMindId: config.paramAiSdk.masterSchemaMindId,
 };
 
 type LogEntry = {
@@ -267,7 +268,7 @@ const ProjectPlanScreen: React.FC = () => {
       setSchemaWorkflow(schemaWorkflowResponse?.response);
 
       const planArgs: any = {
-        csv_input: getWorkflowSchemaCsv(schemaWorkflowResponse?.response),
+        csv_input: getWorkflowSchemaCsv(),
         workflow_tree: getBrdContent(),
         files: [],
       };
@@ -326,7 +327,7 @@ const ProjectPlanScreen: React.FC = () => {
       };
       const args: any = {
         prompts: getBrdContent(),
-        csv_file: getWorkflowSchemaCsv(schemaWorkflow),
+        csv_file: getWorkflowSchemaCsv(),
         n_instances: 1,
       };
       args.codegen_id = mindName?.replace(/^(US|P|A)/, 'P') || mindName;
@@ -1213,18 +1214,11 @@ const ProjectPlanScreen: React.FC = () => {
 
   const schemas = getCurrentSchemas();
 
-  const getWorkflowSchemaCsv = (paramSchema: any) => {
-    if (paramSchema) {
-      if (ValidUtils.isEmptyObj(paramSchema)) return "";
-      const schema = paramSchema?.output?.content?.["SchemaAnalyst__001"][0];
-      if (schema?.type === "markdown") return schema?.content;
-      return "";
-    } else {
-      if (ValidUtils.isEmptyObj(schemaWorkflow)) return "";
-      const schema = schemaWorkflow?.output?.content?.["SchemaAnalyst__001"][0];
-      if (schema?.type === "markdown") return schema?.content;
-      return "";
-    }
+  const getWorkflowSchemaCsv = () => {
+    if (ValidUtils.isEmptyObj(schemaWorkflow)) return "";
+    const schema = schemaWorkflow?.output?.content?.["SchemaAnalyst__001"][0];
+    if (schema?.type === "markdown") return schema?.content;
+    return "";
   };
 
   const formatMessage = (message: string) => {
@@ -1303,7 +1297,7 @@ const ProjectPlanScreen: React.FC = () => {
         case "plan":
           sessionId = plan?._id;
           args = {
-            csv_input: getWorkflowSchemaCsv(schemaWorkflow),
+            csv_input: getWorkflowSchemaCsv(),
             workflow_tree: getBrdContent(),
             files: [],
           };
@@ -1314,7 +1308,7 @@ const ProjectPlanScreen: React.FC = () => {
           sessionId = preview?._id;
           args = {
             prompts: getBrdContent(),
-            csv_file: getWorkflowSchemaCsv(schemaWorkflow),
+            csv_file: getWorkflowSchemaCsv(),
             n_instances: 1,
           };
           mindId = mindsConfig?.syntheticData;
@@ -1581,7 +1575,6 @@ const ProjectPlanScreen: React.FC = () => {
                   getWorkflowSchemaCsv={getWorkflowSchemaCsv}
                   getBrdContent={getBrdContent}
                   getCurrentStateMachines={getCurrentStateMachines}
-                  schemaWorkflow={schemaWorkflow}
                   mindsConfig={mindsConfig}
                />;
       case "preview":
