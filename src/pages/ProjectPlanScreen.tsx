@@ -311,7 +311,8 @@ const ProjectPlanScreen: React.FC = () => {
         "",
         planSessionId
       );
-      setPlan(planDetails);
+      setPlan(planDetails?.response);
+      refreshPlanData();
     } catch (error) {
       console.log(error);
     } finally {
