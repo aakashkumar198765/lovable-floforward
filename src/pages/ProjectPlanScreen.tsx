@@ -20,9 +20,11 @@ import { testMarkdown } from "./sample_data/brd";
 import AIConfiguration from "./AIConfiguration";
 import WorkflowPreview from "./WorkflowPreview";
 import JsonPreview from "./JsonPreview";
+import MasterDataPreview from './MasterDataPreview';
 import { FlowEdge, FlowNode, StateMachine, SubState } from "../types";
 import { stateMachineExampleDummyData } from "../utils/stateMachine";
 import stateMachinesJson from "../pages/sample_data/statemachines.json";
+import masterData from "./sample_data/sample_master_data.json";
 import {
   executeMind,
   getSession,
@@ -83,6 +85,7 @@ const ProjectPlanScreen: React.FC = () => {
     projectName: string;
   }>();
   const [activeProjectTab, setActiveProjectTab] = useState("brd");
+  const [activePreviewTab, setActivePreviewTab] = useState("workflow");
   const [selectedVersion, setSelectedVersion] = useState("1.0");
   const [loading, setLoading] = useState(false);
   const [streamedLogs, setStreamedLogs] = useState<LogEntry[]>([]);
@@ -1582,14 +1585,47 @@ const ProjectPlanScreen: React.FC = () => {
           </ReactFlowProvider>
         );
       case "smart-ai":
-        return <AIConfiguration />;
+        return <AIConfiguration 
+                  getWorkflowSchemaCsv={getWorkflowSchemaCsv}
+                  getBrdContent={getBrdContent}
+                  getCurrentStateMachines={getCurrentStateMachines}
+                  schemaWorkflow={schemaWorkflow}
+                  mindsConfig={mindsConfig}
+               />;
       case "preview":
         return (
-          <WorkflowPreview
-            stateMachines={getCurrentStateMachines()}
-            schemas={getCurrentSchemas()}
-            previewData={getCurrentPreviewData()}
-          />
+          <div>
+            {/* New container for header and tabs */}
+            <div className="flex items-center justify-between mb-4 absolute right-[2%] mt-4">
+              <div className="flex border border-gray-200 rounded-md p-1" role="tablist">
+                <button
+                  className={`px-3 py-1 text-sm rounded-md ${activePreviewTab === 'workflow' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
+                  onClick={() => setActivePreviewTab('workflow')}
+                  role="tab"
+                  aria-selected={activePreviewTab === 'workflow'}
+                >
+                  Workflow
+                </button>
+                <button
+                  className={`px-3 py-1 text-sm rounded-md ${activePreviewTab === 'master-data' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
+                  onClick={() => setActivePreviewTab('master-data')}
+                  role="tab"
+                  aria-selected={activePreviewTab === 'master-data'}
+                >
+                  Master
+                </button>
+              </div>
+            </div>
+            {activePreviewTab === 'workflow' ? (
+              <WorkflowPreview
+                stateMachines={getCurrentStateMachines()}
+                schemas={getCurrentSchemas()}
+                previewData={getCurrentPreviewData()}
+              />
+            ) : (
+              <MasterDataPreview data={masterData} />
+            )}
+          </div>
         );
       default:
         return <MarkdownRenderer content={testMarkdown} className="w-full" />;

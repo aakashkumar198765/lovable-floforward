@@ -3,8 +3,8 @@
   "subtitle": "Select and configure the AI features to include in your application.",
   "configurations": [
     {
-      "id": "conversational-assistant",
-      "title": "Conversational Assistant",
+      "id": "configure-master-data/schema",
+      "title": "Configure Master Data/Schema",
       "icon": "💬",
       "description": "Adds a chat panel where end-users can ask natural language questions about their data and workflows.",
       "exampleQuery": {
@@ -20,8 +20,8 @@
       "enabled": false
     },
     {
-      "id": "anomaly-detection",
-      "title": "Anomaly Detection",
+      "id": "verification-run-engine",
+      "title": "Verification/Run Engine",
       "icon": "⚠️",
       "description": "The AI automatically monitors workflows and alerts users to significant deviations from the norm.",
       "exampleAlert": {
@@ -33,23 +33,6 @@
         "Pattern recognition",
         "Smart alerts",
         "Deviation analysis"
-      ],
-      "enabled": false
-    },
-    {
-      "id": "predictive-insights",
-      "title": "Predictive Insights",
-      "icon": "📈",
-      "description": "Uses historical data to forecast potential issues, such as late payments or shipment delays.",
-      "exampleForecast": {
-        "label": "EXAMPLE AI FORECAST",
-        "text": "\"Invoice #SI-54321 is at high risk of late payment based on customer history.\""
-      },
-      "features": [
-        "Historical data analysis",
-        "Risk assessment",
-        "Predictive modeling",
-        "Early warning system"
       ],
       "enabled": false
     }
