@@ -1381,6 +1381,23 @@ const ProjectPlanScreen: React.FC = () => {
 
     switch (activeProjectTab) {
       case "brd":
+        if (showLogs) {
+          return (
+            <Logs
+              logs={streamedLogs}
+              onBackToPrompt={() => {
+                setIsStreamingLogs(false);
+                setStreamedLogs([]);
+              }}
+              onViewOutput={() => setStreamedLogs([])}
+              streamCompleted={!isStreamingLogs && streamedLogs.length > 0}
+              title="Logs"
+              backButtonText=""
+              viewOutputButtonText="View BRD"
+              bgStyling={false}
+            />
+          );
+        }
         return (
           <MarkdownRenderer content={getBrdContent()} className="w-full p-4" />
         );
