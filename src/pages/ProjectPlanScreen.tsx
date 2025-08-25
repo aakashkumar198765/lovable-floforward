@@ -154,25 +154,28 @@ const ProjectPlanScreen: React.FC = () => {
       const stateMachineSession = stateMachineSessions?.response?.find(
         (el: any) => el?.name === projectId
       );
-      if (stateMachineSession) {
+      const schemaSessions = await getSession(mindsConfig?.schemaAnalysis);
+      const schemaSession = schemaSessions?.response?.find(
+        (el: any) => el?.name === projectId
+      );
+
+      if (stateMachineSession && schemaSession) {
         const stateMachineDetails = await getSession(
           mindsConfig?.jsonOutput,
           "",
           stateMachineSession?._id
         );
         setPlan(stateMachineDetails?.response);
-      }
-      const schemaSessions = await getSession(mindsConfig?.schemaAnalysis);
-      const schemaSession = schemaSessions?.response?.find(
-        (el: any) => el?.name === projectId
-      );
-      if (schemaSession) {
+        
         const schemaSessionDetails = await getSession(
           mindsConfig?.schemaAnalysis,
           "",
           schemaSession?._id
         );
         setSchemaWorkflow(schemaSessionDetails?.response);
+      } else {
+        await getPlan();
+        return;
       }
     } catch (error) {
       console.error("Error refreshing Plan data:", error);
@@ -195,6 +198,9 @@ const ProjectPlanScreen: React.FC = () => {
           previewSession?._id
         );
         setPreview(previewSessionDetails?.response);
+      } else {
+        await getPreview();
+        return;
       }
     } catch (error) {
       console.error("Error refreshing Preview data:", error);
